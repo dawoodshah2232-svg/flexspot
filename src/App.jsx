@@ -5,41 +5,41 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 const DOGE = 'https://upload.wikimedia.org/wikipedia/en/5/5f/Original_Doge_meme.jpg';
 
 const demo = [
-  { id:'1', name:'Nike', tagline:'Just Do It.', amount:1250, clicks:1200, logo:'NI', url:'https://nike.com' },
-  { id:'2', name:'Red Bull', tagline:'Gives You Wings.', amount:980, clicks:842, logo:'RB', url:'https://redbull.com' },
-  { id:'3', name:'Apple', tagline:'Think Different.', amount:760, clicks:620, logo:'●', url:'https://apple.com' },
-  { id:'4', name:"McDonald’s", tagline:"I’m Lovin’ It.", amount:540, clicks:540, logo:'M', url:'https://mcdonalds.com' },
-  { id:'5', name:'Samsung', tagline:"Do What You Can’t.", amount:430, clicks:430, logo:'S', url:'https://samsung.com' },
-  { id:'6', name:'Coca-Cola', tagline:'Real Magic.', amount:420, clicks:420, logo:'CC', url:'https://coca-cola.com' },
-  { id:'7', name:'BMW', tagline:'The Ultimate Driving Machine.', amount:380, clicks:380, logo:'B', url:'https://bmw.com' },
+  { id:'1', name:'Nike', tagline:'Just Do It.', amount:1250, clicks:1200, url:'https://nike.com', logoImage:'https://cdn.simpleicons.org/nike/000000' },
+  { id:'2', name:'Red Bull', tagline:'Gives You Wings.', amount:980, clicks:842, url:'https://redbull.com', logoImage:'https://cdn.simpleicons.org/redbull/DB0A40' },
+  { id:'3', name:'Apple', tagline:'Think Different.', amount:760, clicks:620, url:'https://apple.com', logoImage:'https://cdn.simpleicons.org/apple/000000' },
+  { id:'4', name:"McDonald’s", tagline:"I’m Lovin’ It.", amount:540, clicks:540, url:'https://mcdonalds.com', logoImage:'https://cdn.simpleicons.org/mcdonalds/FFC72C' },
+  { id:'5', name:'Samsung', tagline:"Do What You Can’t.", amount:430, clicks:430, url:'https://samsung.com', logoImage:'https://cdn.simpleicons.org/samsung/1428A0' },
+  { id:'6', name:'Coca-Cola', tagline:'Real Magic.', amount:420, clicks:420, url:'https://coca-cola.com', logoImage:'https://cdn.simpleicons.org/cocacola/F40009' },
+  { id:'7', name:'BMW', tagline:'The Ultimate Driving Machine.', amount:380, clicks:380, url:'https://bmw.com', logoImage:'https://cdn.simpleicons.org/bmw/0066B1' },
 ];
 
-const money = n => new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', maximumFractionDigits:0 }).format(n || 0);
-const compact = n => new Intl.NumberFormat('en-US', { notation:'compact', maximumFractionDigits:1 }).format(n || 0);
+const money = n => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n||0);
+const compact = n => new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:1}).format(n||0);
 
-function CrownLogo(){ return <span className="crown-logo" aria-hidden="true"><span>♛</span></span>; }
-function BrandLogo({item,small=false}){ return <span className={`brand-logo ${small?'small':''} logo-${item.rank||0}`}>{item.logo}</span>; }
-function QrMock(){ return <div className="qr-code" aria-hidden="true"><div className="qr-grid">{Array.from({length:121},(_,i)=><i key={i} className={(i%3===0||i%7===0||i%11===0)?'on':''}/>)}</div><span>₮</span></div>; }
+function CrownLogo(){return <span className="crown-logo"><span>♛</span></span>}
+function BrandLogo({item,small=false}){return <span className={`brand-logo ${small?'small':''}`}>{item.logoImage?<img src={item.logoImage} alt=""/>:<b>{item.name.slice(0,2).toUpperCase()}</b>}</span>}
+function QrMock(){return <div className="qr-code"><div className="qr-grid">{Array.from({length:169},(_,i)=><i key={i} className={((i*7)%11<5||(i%13===0))?'on':''}/>)}</div><span>₮</span></div>}
 
 export default function App(){
-  const [modal,setModal] = useState(false);
-  const [form,setForm] = useState({name:'',tagline:'',url:'',amount:'1'});
-  const [state,setState] = useState({loading:false,msg:''});
-  const ranked = useMemo(()=>demo.map((x,i)=>({...x,rank:i+1})),[]);
-  const leader = ranked[0];
-  const podium = [ranked[1],ranked[0],ranked[2]];
-  const topRows = ranked.slice(3,7);
+  const [modal,setModal]=useState(false);
+  const [form,setForm]=useState({name:'',tagline:'',url:'',amount:'1'});
+  const [state,setState]=useState({loading:false,msg:''});
+  const ranked=useMemo(()=>demo.map((x,i)=>({...x,rank:i+1})),[]);
+  const leader=ranked[0];
+  const podium=[ranked[1],ranked[0],ranked[2]];
+  const topRows=ranked.slice(3,7);
   const set=(k,v)=>setForm(f=>({...f,[k]:v}));
 
   async function submit(e){
     e.preventDefault();
-    if(!SUPABASE_URL||!SUPABASE_ANON_KEY){ setState({loading:false,msg:'Saved for preview. Payment setup is the next step.'}); return; }
+    if(!SUPABASE_URL||!SUPABASE_ANON_KEY){setState({loading:false,msg:'Saved for preview. Payment setup is the next step.'});return}
     setState({loading:true,msg:''});
     try{
       const r=await fetch(`${SUPABASE_URL}/functions/v1/create-submission`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SUPABASE_ANON_KEY,Authorization:`Bearer ${SUPABASE_ANON_KEY}`},body:JSON.stringify({name:form.name.trim(),tagline:form.tagline.trim(),url:form.url.trim(),amount:Number(form.amount||1)})});
       const p=await r.json(); if(!r.ok) throw new Error(p.error||'Submission failed');
       setState({loading:false,msg:'Saved. Crypto payment is the next step.'});
-    }catch(err){ setState({loading:false,msg:err.message||'Submission failed'}); }
+    }catch(err){setState({loading:false,msg:err.message||'Submission failed'})}
   }
 
   return <div className="screen-bg">
@@ -88,5 +88,5 @@ export default function App(){
     <button className="mobile-bottom" onClick={()=>setModal(true)}>⚡ Dethrone #1</button>
 
     {modal&&<div className="modal-backdrop"><div className="modal-card"><button className="modal-x" onClick={()=>setModal(false)}>×</button><div className="modal-step">STEP 1 OF 2</div><h2>Claim your FlexSpot.</h2><p>Submit your public profile first. Crypto payment comes next.</p><form onSubmit={submit}><label>Company / profile name<input required value={form.name} onChange={e=>set('name',e.target.value)} placeholder="Your brand name"/></label><label>Short tagline<input value={form.tagline} onChange={e=>set('tagline',e.target.value)} placeholder="One short line"/></label><label>Website or social profile<input required value={form.url} onChange={e=>set('url',e.target.value)} placeholder="https://yourwebsite.com"/></label><label>Donation amount<div className="amount-line"><span>$</span><input type="number" min="1" step="1" value={form.amount} onChange={e=>set('amount',e.target.value)}/></div></label>{state.msg&&<div className="form-message">{state.msg}</div>}<button className="purple-btn submit-btn" disabled={state.loading}>{state.loading?'Saving…':'Continue to payment →'}</button></form></div></div>}
-  </div>;
+  </div>
 }

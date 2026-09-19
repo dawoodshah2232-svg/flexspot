@@ -1,15 +1,44 @@
 import React, { useState } from 'react';
 
-export default function RankRushApp() {
-  const [activeTab, setActiveTab] = useState('all');
+export default function FlexSpotApp() {
+  const [leaderboard, setLeaderboard] = useState([
+    { id: 1, rank: 1, name: "Nike", tagline: "Just Do It.", url: "https://nike.com", logo: "⚡", amount: 1250, clicks: 1200 },
+    { id: 2, rank: 2, name: "Red Bull", tagline: "Gives You Wings.", url: "https://redbull.com", logo: "🐂", amount: 980, clicks: 842 },
+    { id: 3, rank: 3, name: "Apple", tagline: "Think Different.", url: "https://apple.com", logo: "🍎", amount: 760, clicks: 620 },
+    { id: 4, rank: 4, name: "McDonald's", tagline: "I'm Lovin' It.", url: "https://mcdonalds.com", logo: "🍟", amount: 540, clicks: 540 },
+    { id: 5, rank: 5, name: "Samsung", tagline: "Do What You Can't.", url: "https://samsung.com", logo: "📱", amount: 430, clicks: 430 },
+  ]);
 
-  const leaderboard = [
-    { rank: 1, name: "Nike", tagline: "Just Do It.", url: "https://nike.com", logo: "⚡", amount: 1250, clicks: 1200, isPodium: true },
-    { rank: 2, name: "Red Bull", tagline: "Gives You Wings.", url: "https://redbull.com", logo: "🐂", amount: 980, clicks: 842, isPodium: true },
-    { rank: 3, name: "Apple", tagline: "Think Different.", url: "https://apple.com", logo: "🍎", amount: 760, clicks: 620, isPodium: true },
-    { rank: 4, name: "McDonald's", tagline: "I'm Lovin' It.", url: "https://mcdonalds.com", logo: "🍟", amount: 540, clicks: 540, isPodium: false },
-    { rank: 5, name: "Samsung", tagline: "Do What You Can't.", url: "https://samsung.com", logo: "📱", amount: 430, clicks: 430, isPodium: false },
-  ];
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formName, setFormName] = useState('');
+  const [formTagline, setFormTagline] = useState('');
+  const [formUrl, setFormUrl] = useState('');
+  const [formAmount, setFormAmount] = useState('1');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formName || !formUrl) return;
+
+    const newEntry = {
+      id: Date.now(),
+      name: formName,
+      tagline: formTagline || "New Challenger",
+      url: formUrl.startsWith('http') ? formUrl : `https://${formUrl}`,
+      logo: "🚀",
+      amount: parseFloat(formAmount) || 1.0,
+      clicks: 1,
+    };
+
+    const updated = [...leaderboard, newEntry].sort((a, b) => b.amount - a.amount);
+    const ranked = updated.map((item, index) => ({ ...item, rank: index + 1 }));
+
+    setLeaderboard(ranked);
+    setIsModalOpen(false);
+    setFormName('');
+    setFormTagline('');
+    setFormUrl('');
+    setFormAmount('1');
+  };
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-[#1A1A1A] font-sans">
@@ -40,10 +69,12 @@ export default function RankRushApp() {
             <a href="#" className="text-[#7C3AED]">Home</a>
             <a href="#" className="hover:text-purple-600">Leaderboard</a>
             <a href="#" className="hover:text-purple-600">How It Works</a>
-            <a href="#" className="hover:text-purple-600">Rewards</a>
           </nav>
         </div>
-        <button className="bg-gradient-to-r from-[#7C3AED] to-pink-500 text-white font-extrabold px-5 py-2.5 rounded-2xl shadow-lg shadow-purple-500/25">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="bg-gradient-to-r from-[#7C3AED] to-pink-500 text-white font-extrabold px-5 py-2.5 rounded-2xl shadow-lg shadow-purple-500/25 hover:opacity-95 transition-transform active:scale-95"
+        >
           Donate $1 to Join →
         </button>
       </header>
@@ -63,7 +94,10 @@ export default function RankRushApp() {
           <p className="text-lg text-gray-600 max-w-xl mb-8">
             Get your brand on top. Outbid others, climb the ranks and get massive exposure. Simple. Fun. Viral.
           </p>
-          <button className="bg-[#7C3AED] text-white font-bold px-6 py-3.5 rounded-2xl shadow-lg">
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold px-6 py-3.5 rounded-2xl shadow-lg transition-transform active:scale-95"
+          >
             Start with $1 →
           </button>
         </div>
@@ -90,20 +124,20 @@ export default function RankRushApp() {
             <span className="text-2xl">🏆</span>
             <h2 className="text-2xl font-black">Live Leaderboard</h2>
             <span className="text-xs bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full font-bold">
-              ● Updates live
+              ● Live & Interactive
             </span>
           </div>
         </div>
 
-        {/* Top 3 Podium Grid */}
+        {/* Leaderboard Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {leaderboard.map((item) => (
             <a 
-              key={item.rank} 
+              key={item.id} 
               href={item.url} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="bg-white border-2 border-black rounded-3xl p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] transition-all"
+              className="bg-white border-2 border-black rounded-3xl p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] transition-all block"
             >
               <div className="flex justify-between items-start mb-4">
                 <span className="text-2xl font-black text-amber-500">#{item.rank}</span>
@@ -117,7 +151,7 @@ export default function RankRushApp() {
                 </div>
                 <div>
                   <h4 className="font-extrabold text-lg text-gray-900">{item.name}</h4>
-                  <p className="text-xs text-gray-500">{item.tagline}</p>
+                  <p className="text-xs text-gray-500 truncate max-w-[180px]">{item.tagline}</p>
                 </div>
               </div>
               <div className="flex items-center justify-between border-t border-gray-100 pt-4">
@@ -128,6 +162,75 @@ export default function RankRushApp() {
           ))}
         </div>
       </section>
+
+      {/* Submission Modal Popup */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white border-3 border-black rounded-3xl p-8 max-w-md w-full shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative">
+            <button 
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-4 right-4 text-xl font-bold bg-gray-100 w-8 h-8 rounded-full border border-black flex items-center justify-center hover:bg-gray-200"
+            >
+              ✕
+            </button>
+            <h3 className="text-2xl font-black mb-2">Claim Your Spot 🚀</h3>
+            <p className="text-xs text-gray-600 mb-6">Donate $1 or more to list your brand, project, or funny meme on the live leaderboard.</p>
+            
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase mb-1">Brand / Project Name</label>
+                <input 
+                  type="text" 
+                  required
+                  placeholder="e.g. Pixel Potato" 
+                  value={formName}
+                  onChange={(e) => setFormName(e.target.value)}
+                  className="w-full border-2 border-black rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-600"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold uppercase mb-1">Short Tagline</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. High-carb computing" 
+                  value={formTagline}
+                  onChange={(e) => setFormTagline(e.target.value)}
+                  className="w-full border-2 border-black rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-600"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold uppercase mb-1">Destination URL (Your Link)</label>
+                <input 
+                  type="text" 
+                  required
+                  placeholder="https://yourwebsite.com" 
+                  value={formUrl}
+                  onChange={(e) => setFormUrl(e.target.value)}
+                  className="w-full border-2 border-black rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-600"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold uppercase mb-1">Bid / Donation Amount ($ USD)</label>
+                <input 
+                  type="number" 
+                  min="1" 
+                  step="0.50"
+                  required
+                  value={formAmount}
+                  onChange={(e) => setFormAmount(e.target.value)}
+                  className="w-full border-2 border-black rounded-xl px-4 py-2.5 text-sm font-black text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                />
+              </div>
+              <button 
+                type="submit"
+                className="w-full bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-black py-3.5 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 transition-all"
+              >
+                Submit & Dethrone! 👑
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

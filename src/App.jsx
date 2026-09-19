@@ -1,41 +1,92 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
-const SUPABASE_URL='https://nffiijlpjbjljoidlfbv.supabase.co';
-const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mZmlpamxwamJqbGpvaWRsZmJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4MzY1NjAsImV4cCI6MjEwNTQxMjU2MH0.Qaz_vApZ4QlAP1SFD8AgcX3ARYwTsJhjpY9DVFCEn_0';
-const DOGE='https://upload.wikimedia.org/wikipedia/en/5/5f/Original_Doge_meme.jpg';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const DOGE = 'https://upload.wikimedia.org/wikipedia/en/5/5f/Original_Doge_meme.jpg';
 
-const demo=[
-{id:'1',name:'Nike',tagline:'Just Do It.',amount:1250,clicks:1200,logo:'N',url:'https://nike.com'},
-{id:'2',name:'Red Bull',tagline:'Gives You Wings.',amount:980,clicks:842,logo:'RB',url:'https://redbull.com'},
-{id:'3',name:'Apple',tagline:'Think Different.',amount:760,clicks:620,logo:'●',url:'https://apple.com'},
-{id:'4',name:"McDonald's",tagline:"I'm Lovin' It.",amount:540,clicks:540,logo:'M',url:'https://mcdonalds.com'},
-{id:'5',name:'Samsung',tagline:"Do What You Can't.",amount:430,clicks:430,logo:'S',url:'https://samsung.com'},
-{id:'6',name:'Coca-Cola',tagline:'Real Magic.',amount:420,clicks:420,logo:'C',url:'https://coca-cola.com'},
-{id:'7',name:'BMW',tagline:'The Ultimate Driving Machine.',amount:380,clicks:380,logo:'B',url:'https://bmw.com'}];
+const demo = [
+  { id:'1', name:'Nike', tagline:'Just Do It.', amount:1250, clicks:1200, logo:'NI', url:'https://nike.com' },
+  { id:'2', name:'Red Bull', tagline:'Gives You Wings.', amount:980, clicks:842, logo:'RB', url:'https://redbull.com' },
+  { id:'3', name:'Apple', tagline:'Think Different.', amount:760, clicks:620, logo:'●', url:'https://apple.com' },
+  { id:'4', name:"McDonald’s", tagline:"I’m Lovin’ It.", amount:540, clicks:540, logo:'M', url:'https://mcdonalds.com' },
+  { id:'5', name:'Samsung', tagline:"Do What You Can’t.", amount:430, clicks:430, logo:'S', url:'https://samsung.com' },
+  { id:'6', name:'Coca-Cola', tagline:'Real Magic.', amount:420, clicks:420, logo:'CC', url:'https://coca-cola.com' },
+  { id:'7', name:'BMW', tagline:'The Ultimate Driving Machine.', amount:380, clicks:380, logo:'B', url:'https://bmw.com' },
+];
 
-const money=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n||0);
-const compact=n=>new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:1}).format(n||0);
-const initials=n=>(n||'FS').split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase();
+const money = n => new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', maximumFractionDigits:0 }).format(n || 0);
+const compact = n => new Intl.NumberFormat('en-US', { notation:'compact', maximumFractionDigits:1 }).format(n || 0);
 
-function BrandMark({item,large=false}){
- const cls=item.name==='Nike'?'nike':item.name==='Red Bull'?'redbull':item.name==='Apple'?'apple':item.name==="McDonald's"?'mcd':item.name==='Samsung'?'samsung':item.name==='Coca-Cola'?'coke':'generic';
- return <div className={`brand-mark ${large?'large':''} ${cls}`}>{item.logoImage?<img src={item.logoImage} alt=""/>:item.logo||initials(item.name)}</div>;
-}
+function CrownLogo(){ return <span className="crown-logo" aria-hidden="true"><span>♛</span></span>; }
+function BrandLogo({item,small=false}){ return <span className={`brand-logo ${small?'small':''} logo-${item.rank||0}`}>{item.logo}</span>; }
+function QrMock(){ return <div className="qr-code" aria-hidden="true"><div className="qr-grid">{Array.from({length:121},(_,i)=><i key={i} className={(i%3===0||i%7===0||i%11===0)?'on':''}/>)}</div><span>₮</span></div>; }
 
 export default function App(){
- const [modal,setModal]=useState(false); const [board,setBoard]=useState([]); const [form,setForm]=useState({name:'',tagline:'',url:'',amount:'1'}); const [state,setState]=useState({loading:false,msg:''});
- useEffect(()=>{let dead=false;const load=async()=>{try{const r=await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_leaderboard`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SUPABASE_ANON_KEY,Authorization:`Bearer ${SUPABASE_ANON_KEY}`},body:JSON.stringify({p_board:'all_time'})});if(!r.ok)return;const rows=await r.json();if(!dead&&rows?.length)setBoard(rows.map((x,i)=>({id:x.id,name:x.name,tagline:x.tagline||'',amount:Number(x.total_cents||0)/100,clicks:0,logo:initials(x.name),logoImage:x.logo_url,url:x.destination_url,rank:x.rank||i+1})));}catch{}};load();const t=setInterval(load,15000);return()=>{dead=true;clearInterval(t)}},[]);
- const ranked=useMemo(()=>(board.length?board:demo).slice().sort((a,b)=>b.amount-a.amount).map((x,i)=>({...x,rank:i+1})),[board]);
- const leader=ranked[0],top3=ranked.slice(0,3),rows=ranked.slice(3,7); const set=(k,v)=>setForm(f=>({...f,[k]:v}));
- const submit=async e=>{e.preventDefault();setState({loading:true,msg:''});try{const r=await fetch(`${SUPABASE_URL}/functions/v1/create-submission`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SUPABASE_ANON_KEY,Authorization:`Bearer ${SUPABASE_ANON_KEY}`},body:JSON.stringify({name:form.name.trim(),tagline:form.tagline.trim(),url:form.url.trim(),amount:Number(form.amount||1)})});const p=await r.json();if(!r.ok)throw new Error(p.error||'Submission failed');setState({loading:false,msg:'Saved. Payment setup is the next step.'});}catch(err){setState({loading:false,msg:err.message||'Submission failed'})}};
- return <div className="site-shell"><div className="page-card">
- <header className="top-header"><a className="logo-wrap" href="#top"><div className="logo-icon">♛</div><div><div className="logo-word">FlexSpot<span>.lol</span></div><div className="logo-tag">REAL BRANDS. REAL SUPPORT. REAL EXPOSURE.</div></div></a><nav className="nav-links"><a className="active" href="#top">Home</a><a href="#leaderboard">Leaderboard</a><a href="#how">How It Works</a><a href="#rewards">Rewards</a><a href="#faq">FAQs</a></nav><div className="header-actions"><button className="search-btn">⌕</button><button className="primary small" onClick={()=>setModal(true)}>Donate $1 to Join →</button><button className="avatar-btn">•</button></div></header>
- <div className="stats-strip"><div className="stats-left"><span><i className="online-dot"/>142 currently online</span><b>|</b><span>Total Volume: <strong>$4,820</strong></span><b>|</b><span>All-time visitors: <strong>89K</strong></span></div><div className="stats-right">⚡ REAL BRANDS. REAL SUPPORT. REAL EXPOSURE.</div></div>
- <main id="top"><section className="hero"><div className="hero-copy"><div className="eyebrow">BRANDS COMPETE. THE INTERNET WINS.</div><h1>BIG BRAND VISIBILITY.<br/><span>START FROM JUST $1.</span></h1><p>Donate to climb the ranks, get massive visibility, drive real traffic, and be part of a community that loves great brands.</p><div className="hero-actions"><button className="primary hero-btn" onClick={()=>setModal(true)}>Start donating from $1 →</button><a className="secondary" href="#how"><span className="play">▶</span> How It Works</a></div><div className="benefits"><span>⚡ Live Leaderboard</span><span>👥 Instant Exposure</span><span>▥ Real People. Real Brands.</span><span>◎ Open to Everyone</span></div></div>
- <div className="hero-visual"><div className="dog-blob"><img src={DOGE} alt="Meme dog"/><div className="dog-crown">♛</div><div className="dog-glasses">▰▰</div></div><div className="scribble scribble-top">BRANDS<br/>GO VIRAL ↗</div><div className="scribble scribble-mid">SMALL<br/>DONATIONS<br/>BIG REACH ↗</div><div className="leader-spotlight"><small>Current Leader Spotlight</small><div className="spot-row"><BrandMark item={leader}/><div><strong>{leader.name}</strong><span>{leader.tagline}</span></div><b>#1</b></div><p>The #1 brand gets premium visibility on our homepage.</p></div></div>
- <aside className="donate-panel"><button className="panel-close">×</button><h3>Donate from <span>$1</span></h3><p>Support your favorite brand and help them climb the ranks. Crypto only.</p><div className="qr-box"><div className="qr-fake">▦▦▦<br/>▦●▦<br/>▦▦▦</div><div className="coin">₮</div></div><label>Choose Network</label><button className="network active"><span className="net-icon trc">◈</span><b>USDT (TRC20)</b><i>◉</i></button><button className="network"><span className="net-icon bep">◆</span><b>USDT (BEP20)</b><i>○</i></button><p className="panel-note">Scan the QR code or copy the address to make your donation.</p><button className="copy-btn">▣ Copy Address</button><div className="minimum">Minimum donation: $1 (= 1 USDT)</div><div className="thanks">Every donation fuels brand visibility.<br/>Thank you! ♥</div></aside></section>
- <section id="leaderboard" className="leaderboard-section"><div className="section-head"><div className="title-wrap"><span className="trophy">🏆</span><h2>Live Leaderboard</h2><span className="live-dot">●</span><small>Updates every few seconds</small></div><div className="tabs"><button className="active">All Brands</button><button>Top Gainers</button><button>Newest</button></div></div><div className="podium">{top3.map(item=><a key={item.id} href={item.url||'#'} target="_blank" rel="noreferrer" className={`pod-card rank-${item.rank}`}><div className="rank-pill">#{item.rank}</div><div className="pod-top"><BrandMark item={item} large/><div className="pod-name"><h3>{item.name}</h3><p>{item.tagline}</p></div><span className="site-label">↗ Website</span></div><div className="pod-meta"><span>◉ {compact(item.clicks)} clicks</span><span className="gain">▲ +{item.rank===1?'28':item.rank===2?'12':'9'}%</span></div><div className="pod-amount">{money(item.amount)}</div><div className="pod-caption">Current Highest Donation</div><div className={`pod-status status-${item.rank}`}>{item.rank===1?'🏆 Current Leader':item.rank===2?'🔒 Locked In':'🔒 Top Sponsored'}</div></a>)}</div>
- <div className="top10-head"><h3>Top 10 Brands</h3><a href="#leaderboard">View Full Leaderboard →</a></div><div className="top10-grid">{rows.map(item=><a className="top-row" key={item.id} href={item.url||'#'} target="_blank" rel="noreferrer"><b className="row-rank">{item.rank}</b><BrandMark item={item}/><div className="row-copy"><strong>{item.name}</strong><span>{item.tagline}</span></div><span className="row-clicks">◉ {compact(item.clicks)} clicks</span><b className="row-money">{money(item.amount)}</b><span className="row-gain">▲ +{item.rank===4?'6':item.rank===5?'8':item.rank===6?'5':'3'}%</span></a>)}</div><div className="bottom-stats"><div><span>♙</span><b>89K</b><small>All-time Visitors</small></div><div><span>◉</span><b>4.2M</b><small>Total Page Views</small></div><div><span>▥</span><b>100</b><small>Brands Featured</small></div><div><span>◎</span><b>Global</b><small>Open to All Brands</small></div><blockquote>“A simple donation. A massive opportunity.”<small>— FlexSpot.lol</small></blockquote></div></section></main></div>
- <div className="mobile-sticky"><button onClick={()=>setModal(true)}>⚡ Start donating from $1 →</button></div>
- {modal&&<div className="modal-backdrop"><div className="modal-card"><button className="modal-x" onClick={()=>setModal(false)}>×</button><div className="modal-step">STEP 1 OF 2</div><h2>Claim your FlexSpot.</h2><p>Add your public profile first. Payment comes next.</p><form onSubmit={submit}><label>Company / profile name<input required value={form.name} onChange={e=>set('name',e.target.value)} placeholder="Your brand name"/></label><label>Short tagline<input value={form.tagline} onChange={e=>set('tagline',e.target.value)} placeholder="One short line"/></label><label>Website or social profile<input required value={form.url} onChange={e=>set('url',e.target.value)} placeholder="https://yourwebsite.com"/></label><label>Donation amount<div className="amount-line"><span>$</span><input type="number" min="1" step="0.5" value={form.amount} onChange={e=>set('amount',e.target.value)}/></div></label>{state.msg&&<div className="form-message">{state.msg}</div>}<button className="primary submit-btn" disabled={state.loading}>{state.loading?'Saving…':'Continue to payment →'}</button></form></div></div>}</div>;
+  const [modal,setModal] = useState(false);
+  const [form,setForm] = useState({name:'',tagline:'',url:'',amount:'1'});
+  const [state,setState] = useState({loading:false,msg:''});
+  const ranked = useMemo(()=>demo.map((x,i)=>({...x,rank:i+1})),[]);
+  const leader = ranked[0];
+  const podium = [ranked[1],ranked[0],ranked[2]];
+  const topRows = ranked.slice(3,7);
+  const set=(k,v)=>setForm(f=>({...f,[k]:v}));
+
+  async function submit(e){
+    e.preventDefault();
+    if(!SUPABASE_URL||!SUPABASE_ANON_KEY){ setState({loading:false,msg:'Saved for preview. Payment setup is the next step.'}); return; }
+    setState({loading:true,msg:''});
+    try{
+      const r=await fetch(`${SUPABASE_URL}/functions/v1/create-submission`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SUPABASE_ANON_KEY,Authorization:`Bearer ${SUPABASE_ANON_KEY}`},body:JSON.stringify({name:form.name.trim(),tagline:form.tagline.trim(),url:form.url.trim(),amount:Number(form.amount||1)})});
+      const p=await r.json(); if(!r.ok) throw new Error(p.error||'Submission failed');
+      setState({loading:false,msg:'Saved. Crypto payment is the next step.'});
+    }catch(err){ setState({loading:false,msg:err.message||'Submission failed'}); }
+  }
+
+  return <div className="screen-bg">
+    <div className="app-window">
+      <header className="header">
+        <a className="brand" href="#home"><CrownLogo/><span><strong>FlexSpot<span>.lol</span></strong><small>REAL BRANDS. REAL SUPPORT. REAL EXPOSURE.</small></span></a>
+        <nav className="menu"><a className="active" href="#home">Home</a><a href="#leaderboard">Leaderboard</a><a href="#how">How It Works</a><a href="#rewards">Rewards</a><a href="#faq">FAQs</a></nav>
+        <div className="head-actions"><button className="icon-btn">⌕</button><button className="purple-btn nav-cta" onClick={()=>setModal(true)}>Donate $1 to Join →</button><button className="user-btn">●</button></div>
+      </header>
+
+      <div className="ticker"><div><span className="green-dot"/> <b>142</b> currently online <i/> Total Volume: <b>$4,820</b> <i/> All-time visitors: <b>89K</b></div><strong>⚡ REAL BRANDS. REAL SUPPORT. REAL EXPOSURE.</strong></div>
+
+      <main id="home">
+        <section className="hero-reference">
+          <div className="hero-copy-ref">
+            <div className="kicker">BRANDS COMPETE. THE INTERNET WINS.</div>
+            <h1>BIG BRAND VISIBILITY.<span>START FROM JUST $1.</span></h1>
+            <p>Donate to climb the ranks, get massive visibility, drive real traffic, and be part of a community that loves great brands.</p>
+            <div className="cta-row"><button className="purple-btn big" onClick={()=>setModal(true)}>Start donating from $1 →</button><a className="how-btn" href="#leaderboard"><b>▶</b> How It Works</a></div>
+            <div className="feature-row"><span>⚡ <b>Live Leaderboard</b></span><span>👥 <b>Instant Exposure</b></span><span>▥ <b>Real People. Real Brands.</b></span><span>◎ <b>Open to Everyone</b></span></div>
+          </div>
+
+          <div className="dog-stage">
+            <div className="dog-aura"/>
+            <img className="dog-img" src={DOGE} alt="Meme dog"/>
+            <div className="crown-overlay">♛</div><div className="glasses-overlay"><span/><span/></div>
+            <div className="meme-note note-a">SMALL<br/>DONATIONS<br/><b>BIG REACH</b><em>↙</em></div>
+            <div className="meme-note note-b">BRANDS<br/><b>GO VIRAL</b><em>↘</em></div>
+            <div className="leader-float"><div className="leader-head"><span>Current Leader Spotlight</span><b>#1</b></div><div className="leader-body"><BrandLogo item={leader}/><div><strong>{leader.name}</strong><span>{leader.tagline}</span></div></div><small>The #1 brand gets premium visibility on our homepage.</small></div>
+          </div>
+
+          <aside className="crypto-card"><button className="x-btn">×</button><h3>Donate from <span>$1</span></h3><p>Support your favorite brand and help them climb the ranks. Crypto only.</p><QrMock/><label>Choose Network</label><button className="chain active" onClick={()=>setModal(true)}><span className="trx">◈</span><b>USDT (TRC20)</b><i>◉</i></button><button className="chain" onClick={()=>setModal(true)}><span className="bnb">◆</span><b>USDT (BEP20)</b><i>○</i></button><small className="scan">Scan the QR code or copy the address to make your donation.</small><button className="copy-address" onClick={()=>setModal(true)}>▣ Copy Address</button><small className="minimum">Minimum donation: $1 (= 1 USDT)</small><div className="thank-box">Every donation fuels brand visibility.<br/><b>Thank you! ♥</b></div></aside>
+        </section>
+
+        <section className="leaderboard-ref" id="leaderboard">
+          <div className="leaderboard-title"><div><span className="cup">🏆</span><h2>Live Leaderboard</h2><span className="live-ball">●</span><small>Updates every few seconds</small></div><div className="filters"><button className="active">All Brands</button><button>Top Gainers</button><button>Newest</button></div></div>
+          <div className="podium-grid-ref">{podium.map(item=><a key={item.id} href={item.url} target="_blank" rel="noreferrer" className={`winner-card rank${item.rank}`}><span className="rank-chip">#{item.rank}</span>{item.rank===1&&<span className="mini-crown">♛</span>}<div className="winner-main"><BrandLogo item={item}/><div><h3>{item.name}</h3><p>{item.tagline}</p></div></div><div className="winner-meta"><span>◉ {compact(item.clicks)} clicks</span><b>▲ +{item.rank===1?'28':item.rank===2?'12':'9'}%</b></div><div className="winner-money">{money(item.amount)}</div><div className="winner-status">{item.rank===1?'🏆 Current Leader':item.rank===2?'🔒 Locked In':'🔒 Top Sponsored'}</div></a>)}</div>
+          <div className="top10-line"><h3>Top 10 Brands</h3><a href="#leaderboard">View Full Leaderboard →</a></div>
+          <div className="top10-ref">{topRows.map(item=><a key={item.id} href={item.url} target="_blank" rel="noreferrer" className="mini-row"><span className="num">{item.rank}</span><BrandLogo item={item} small/><span className="mini-copy"><b>{item.name}</b><small>{item.tagline}</small></span><span className="mini-click">◉ {compact(item.clicks)} clicks</span><strong>{money(item.amount)}</strong><span className="up">▲ +{item.rank===4?'6':item.rank===5?'8':item.rank===6?'5':'3'}%</span></a>)}</div>
+          <div className="metrics"><span>♙ <b>89K</b><small>All-time Visitors</small></span><span>◉ <b>4.2M</b><small>Total Page Views</small></span><span>▥ <b>100</b><small>Brands Featured</small></span><span>◎ <b>Global</b><small>Open to All Brands</small></span><blockquote>“A simple donation. A massive opportunity.”<small>— FlexSpot.lol</small></blockquote></div>
+        </section>
+      </main>
+    </div>
+
+    <div className="mobile-donate-strip" onClick={()=>setModal(true)}><span>₮</span><div><b>Donate with Crypto</b><small>From $1 · USDT (TRC20 / BEP20)</small></div><strong>▦ ›</strong></div>
+    <button className="mobile-bottom" onClick={()=>setModal(true)}>⚡ Dethrone #1</button>
+
+    {modal&&<div className="modal-backdrop"><div className="modal-card"><button className="modal-x" onClick={()=>setModal(false)}>×</button><div className="modal-step">STEP 1 OF 2</div><h2>Claim your FlexSpot.</h2><p>Submit your public profile first. Crypto payment comes next.</p><form onSubmit={submit}><label>Company / profile name<input required value={form.name} onChange={e=>set('name',e.target.value)} placeholder="Your brand name"/></label><label>Short tagline<input value={form.tagline} onChange={e=>set('tagline',e.target.value)} placeholder="One short line"/></label><label>Website or social profile<input required value={form.url} onChange={e=>set('url',e.target.value)} placeholder="https://yourwebsite.com"/></label><label>Donation amount<div className="amount-line"><span>$</span><input type="number" min="1" step="1" value={form.amount} onChange={e=>set('amount',e.target.value)}/></div></label>{state.msg&&<div className="form-message">{state.msg}</div>}<button className="purple-btn submit-btn" disabled={state.loading}>{state.loading?'Saving…':'Continue to payment →'}</button></form></div></div>}
+  </div>;
 }

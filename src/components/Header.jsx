@@ -61,7 +61,7 @@ export default function Header({ onClaim }) {
           </nav>
           <div className="flex items-center gap-2">
             <Link
-              to="/explore"
+              to="/leaderboard"
               className="hidden sm:grid place-items-center w-10 h-10 rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--ink-2)] hover:text-[var(--ink)] hover:border-[var(--ink-3)] transition-colors"
               title="Search brands"
               aria-label="Search brands"

@@ -156,7 +156,7 @@ export default function Admin({ spots, refresh }) {
           />
           <button onClick={() => (pin === ADMIN_PIN ? setAuthed(true) : flash('Wrong PIN.'))} className="btn-primary w-full py-3">Unlock dashboard</button>
           {msg && <p className="text-red-500 text-sm mt-3">{msg}</p>}
-          <p className="text-[11px] text-[var(--ink-3)] mt-4">Preview PIN: 1234 — client-side only, not real authentication. Set VITE_ADMIN_PIN before any production use.</p>
+          <p className="text-[11px] text-[var(--ink-3)] mt-4">Client-side gate only — not real authentication. Set VITE_ADMIN_PIN before any production use.</p>
         </div>
       </div>
     );

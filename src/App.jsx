@@ -13,6 +13,7 @@ import Rewards from './pages/Rewards';
 import FAQ from './pages/FAQ';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
+import Disclaimers from './pages/Disclaimers';
 import SpotProfile from './pages/SpotProfile';
 import Admin from './pages/Admin';
 import { fetchLeaderboard, fetchPendingSpots, rank, saveRankSnapshot, IS_LIVE } from './lib/store';
@@ -24,6 +25,7 @@ import CategoryPage from './pages/CategoryPage';
 import RootProfile from './components/RootProfile';
 import NotFound from './pages/NotFound';
 import SecurityGuard from './components/SecurityGuard';
+import PageHead from './components/PageHead';
 
 function ScrollTop() {
   const { pathname } = useLocation();
@@ -119,6 +121,7 @@ function Shell() {
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--ink)]">
       <ScrollTop />
+      <PageHead spots={spots} />
       <SecurityGuard />
       <Header onClaim={openClaim} />
       <main>
@@ -137,6 +140,7 @@ function Shell() {
           <Route path="/faq" element={<FAQ onClaim={openClaim} />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/disclaimers" element={<Disclaimers />} />
           <Route path="/s/:slug" element={<SpotProfile spots={spots} onClaim={openClaim} onBoost={openBoost} refresh={load} />} />
           <Route path="/admin" element={<Admin spots={spots} pending={pending} refresh={load} />} />
           {/* Root profiles — static routes always win over /:slug in React Router ranking */}

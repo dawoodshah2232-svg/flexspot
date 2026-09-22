@@ -190,7 +190,7 @@ export default function Rewards({ spots, onClaim }) {
             </span>
             <h2 className="font-display font-bold text-2xl sm:text-3xl text-[var(--ink)] mt-3">Spot Perks</h2>
             <p className="text-[var(--ink-2)] mt-2 max-w-lg mx-auto">
-              Purchasable upgrades to make your spot impossible to ignore. We're building the shop — get notified when it drops.
+              Purchasable upgrades to make your spot impossible to ignore. We're building the shop — claim your spot now and you'll be first in line when perks go live.
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8 relative">
@@ -216,7 +216,7 @@ export default function Rewards({ spots, onClaim }) {
                   onClick={onClaim}
                   className="w-full py-2.5 rounded-2xl font-bold text-sm text-[var(--blaze)] bg-[var(--blaze)]/10 border border-[var(--blaze)]/30 hover:bg-[var(--blaze)]/20 transition-colors"
                 >
-                  🔔 Notify me
+                  ⚡ Claim a spot for early access
                 </button>
               </motion.div>
             ))}
@@ -232,7 +232,7 @@ export default function Rewards({ spots, onClaim }) {
       {/* ── How rewards unlock ───────────────────────────── */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 mt-14 mb-16">
         <h2 className="font-display font-bold text-2xl sm:text-3xl text-[var(--ink)] text-center">How rewards unlock</h2>
-        <p className="text-[var(--ink-2)] text-center mt-2 mb-8">Four steps between you and eternal glory.</p>
+        <p className="text-[var(--ink-2)] text-center mt-2 mb-8">Five steps between you and eternal glory.</p>
         <div className="relative">
           <div className="absolute left-[27px] sm:left-1/2 top-4 bottom-4 w-0.5 bg-gradient-to-b from-[var(--gold)] via-[var(--blaze)] to-[var(--green)] opacity-40 sm:-translate-x-1/2" aria-hidden />
           {STEPS.map((s, i) => (

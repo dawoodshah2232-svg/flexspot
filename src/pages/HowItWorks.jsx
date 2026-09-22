@@ -92,6 +92,16 @@ export default function HowItWorks({ onClaim }) {
         >
           No ads account. No marketing degree. Just $1, a little nerve, and the guts to outrank everyone else.
         </motion.p>
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="text-[var(--ink-3)] mt-4 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed"
+        >
+          <strong className="text-[var(--ink-2)]">What is FlexSpot?</strong> FlexSpot is the internet's public
+          spotlight competition: anyone can claim a public leaderboard spot for their brand, creator page, or
+          meme — starting at $1 — and fans boost it to climb the live rankings. The highest total takes the crown.
+        </motion.p>
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}

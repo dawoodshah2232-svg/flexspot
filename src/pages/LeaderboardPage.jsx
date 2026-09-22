@@ -1,13 +1,21 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { SpotRow, useRaceCycle } from '../components/SpotCard';
 import Flee from '../components/Flee';
 import Podium from '../components/Podium';
 import DramaTicker from '../components/DramaTicker';
+import ClaimStrip from '../components/ClaimStrip';
 import { money, compact } from '../lib/format';
+
+const PAGE = 20;
 
 export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
   const [q, setQ] = useState('');
+  const [visibleCount, setVisibleCount] = useState(PAGE);
+  const [showJump, setShowJump] = useState(false);
+  const [jumpPending, setJumpPending] = useState(false);
+  const sentinelRef = useRef(null);
+  const bottomRef = useRef(null);
   const { race, count } = useRaceCycle();
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
@@ -17,6 +25,65 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
 
   const top3 = filtered.slice(0, 3).map((s) => ({ ...s, move: moves[s.slug] ?? s.move }));
   const rest = filtered.slice(3);
+  const visibleRows = rest.slice(0, visibleCount);
+
+  // infinite scroll: reset to the first page when the search query changes
+  useEffect(() => { setVisibleCount(PAGE); }, [q]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || rest.length === 0) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisibleCount((c) => (c < rest.length ? Math.min(c + PAGE, rest.length) : c));
+        }
+      },
+      { rootMargin: '500px' }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [rest.length]);
+
+  // jump-to-bottom button visibility
+  useEffect(() => {
+    const onScroll = () => setShowJump(window.scrollY > 600);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const jumpToBottom = () => {
+    setVisibleCount(rest.length);
+    setJumpPending(true);
+  };
+  useEffect(() => {
+    if (!jumpPending) return;
+    const raf = requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    });
+    setJumpPending(false);
+    return () => cancelAnimationFrame(raf);
+  }, [jumpPending, visibleCount]);
+
+  // rows interleaved with a claim strip after every 30th row
+  const cells = [];
+  visibleRows.forEach((s, i) => {
+    const above = i === 0 ? top3[top3.length - 1] : visibleRows[i - 1];
+    cells.push(
+      <SpotRow
+        key={s.slug}
+        spot={s}
+        move={moves[s.slug] ?? s.move}
+        highlight
+        onBoost={onBoost}
+        race={race}
+        count={count}
+        overtake={above ? { amount: above.amount, rank: above.rank } : null}
+      />
+    );
+    if ((i + 1) % 30 === 0) cells.push(<ClaimStrip key={`claim-${s.slug}`} onClaim={onClaim} />);
+  });
 
   return (
     <div className="pt-[92px]">
@@ -87,9 +154,19 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
             </div>
           ) : (
             <motion.div layout className="space-y-2.5">
-              {rest.map((s) => (
-                <SpotRow key={s.slug} spot={s} move={moves[s.slug] ?? s.move} highlight onBoost={onBoost} race={race} count={count} />
-              ))}
+              {cells}
+              {visibleCount < rest.length && (
+                <div className="card p-4 flex items-center gap-3 animate-pulse" aria-hidden="true">
+                  <div className="w-9 h-9 rounded-xl bg-[var(--line)] shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="h-3 rounded-full bg-[var(--line)] w-1/3 mb-2" />
+                    <div className="h-2 rounded-full bg-[var(--line)] w-1/2" />
+                  </div>
+                  <div className="text-xs font-bold text-[var(--ink-3)] whitespace-nowrap">✨ Loading more spots…</div>
+                </div>
+              )}
+              <div ref={sentinelRef} aria-hidden="true" />
+              <div ref={bottomRef} aria-hidden="true" />
             </motion.div>
           )}
         </div>
@@ -104,6 +181,16 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
             <button onClick={onClaim} className="btn-gold px-8 py-3.5 mt-6 font-extrabold">⚡ Claim My Spot From $1</button>
           </div>
         </div>
+
+        {/* jump to the last spot */}
+        <button
+          onClick={jumpToBottom}
+          aria-label="Jump to the last spot"
+          title="Jump to the last spot"
+          className={`fixed z-50 bottom-20 sm:bottom-8 right-4 sm:right-6 rounded-full pl-4 pr-5 py-3 font-display font-extrabold text-sm text-[var(--gold-deep)] dark:text-[#FCD34D] bg-[var(--surface)]/90 backdrop-blur-xl border border-[var(--gold)]/50 shadow-[0_8px_30px_rgba(245,158,11,0.25)] transition-all duration-300 hover:border-[var(--gold)] active:scale-95 ${showJump ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
+        >
+          ↓ {filtered.length}
+        </button>
       </div>
     </div>
   );

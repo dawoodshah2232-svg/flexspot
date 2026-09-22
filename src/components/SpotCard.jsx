@@ -92,9 +92,26 @@ export function useRaceCycle() {
 }
 const RACE_IDLE = { key: 0, running: false };
 
-export function SpotRow({ spot, move, onBoost, highlight, race, count = null }) {
+export function SpotRow({ spot, move, onBoost, highlight, race, count = null, overtake }) {
   const racer = RACE_RUNNERS[spot.rank];
   const r = race || RACE_IDLE;
+  // Overtake meter (leaderboard only): progress toward the rank directly above.
+  // overtake === undefined → feature off; null → last row (underdog line).
+  const showOvertake = overtake !== undefined;
+  const overtakeDiff = overtake ? overtake.amount - spot.amount : null;
+  const overtakePct = overtake && overtake.amount > 0
+    ? Math.min(100, Math.max(4, (spot.amount / overtake.amount) * 100))
+    : 0;
+  const overtakeText = !overtake
+    ? '🌱 The underdog slot — every giant started at $1'
+    : overtakeDiff > 0
+      ? `Only ${money(overtakeDiff)} to steal #${overtake.rank}`
+      : `Neck-and-neck with #${overtake.rank} — one boost takes it!`;
+  const overtakeTextShort = !overtake
+    ? '🌱 Every giant started at $1'
+    : overtakeDiff > 0
+      ? `Only ${money(overtakeDiff)} to #${overtake.rank}`
+      : `Tied with #${overtake.rank} — one boost!`;
   const bob = `${(parseFloat(raceDuration(spot.rank)) / 5).toFixed(2)}s`;
   // The position pill (P4 … P10) pops in at the finish gate the moment
   // this runner crosses it, and stays visible until the next race starts.
@@ -134,6 +151,21 @@ export function SpotRow({ spot, move, onBoost, highlight, race, count = null }) 
             <span>🖱 {compact(spot.clicks)}</span>
             <span className="hidden sm:inline"><MoveIndicator move={move} /></span>
           </div>
+          {/* compact overtake meter for small screens — bar + one short line */}
+          {showOvertake && (
+            <div className="md:hidden mt-1.5">
+              {overtake ? (
+                <>
+                  <div className="h-1 rounded-full bg-[var(--line)] overflow-hidden max-w-[220px]">
+                    <div className="h-full rounded-full bg-gradient-to-r from-[#B45309] via-[#F59E0B] to-[#FCD34D]" style={{ width: `${overtakePct}%` }} />
+                  </div>
+                  <div className="text-[10px] text-[var(--ink-3)] font-semibold mt-1 truncate">{overtakeTextShort}</div>
+                </>
+              ) : (
+                <div className="text-[10px] text-[var(--ink-3)] font-semibold truncate">{overtakeTextShort}</div>
+              )}
+            </div>
+          )}
         </div>
         {racer && (
           <div className="race-lane hidden md:block" title={racer.title} aria-hidden="true">
@@ -165,6 +197,22 @@ export function SpotRow({ spot, move, onBoost, highlight, race, count = null }) 
                 </span>
               </Flee>
             </span>
+          </div>
+        )}
+        {/* overtake meter — fills the dead center for rows without a race lane */}
+        {showOvertake && !racer && (
+          <div className="hidden md:flex flex-1 min-w-0 max-w-[260px] mx-auto flex-col justify-center px-2">
+            {overtake && (
+              <div className="h-1.5 rounded-full bg-[var(--line)] overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-[#B45309] via-[#F59E0B] to-[#FCD34D] shadow-[0_0_10px_rgba(245,158,11,0.45)]"
+                  style={{ width: `${overtakePct}%` }}
+                />
+              </div>
+            )}
+            <div className={`text-[11px] text-[var(--ink-3)] font-semibold truncate text-center ${overtake ? 'mt-1.5' : ''}`}>
+              {overtakeText}
+            </div>
           </div>
         )}
         <div className="text-right shrink-0">

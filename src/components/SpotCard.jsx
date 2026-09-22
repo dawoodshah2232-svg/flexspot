@@ -95,6 +95,15 @@ export function SpotRow({ spot, move, onBoost, highlight, race }) {
   const racer = RACE_RUNNERS[spot.rank];
   const r = race || RACE_IDLE;
   const bob = `${(parseFloat(raceDuration(spot.rank)) / 5).toFixed(2)}s`;
+  // The position pill (P4 … P10) pops in at the finish gate the moment
+  // this runner crosses it, and stays visible until the next race starts.
+  const [finished, setFinished] = useState(false);
+  useEffect(() => {
+    setFinished(false);
+    if (!r.running) return;
+    const t = setTimeout(() => setFinished(true), parseFloat(raceDuration(spot.rank)) * 1000);
+    return () => clearTimeout(t);
+  }, [r.key, r.running, spot.rank]);
   return (
     <motion.div
       layout
@@ -130,11 +139,12 @@ export function SpotRow({ spot, move, onBoost, highlight, race }) {
             <span className="race-gate race-gate-finish" />
             <span className="race-dashes" />
             <span className="race-gate race-gate-start" />
+            {finished && <span className="race-pos">P{spot.rank}</span>}
             <span
               key={r.key}
               className="race-runner"
               style={{
-                left: r.running ? '3%' : '94%',
+                left: r.running ? '52px' : '94%',
                 transitionDuration: raceDuration(spot.rank),
               }}
             >

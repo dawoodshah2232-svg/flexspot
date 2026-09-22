@@ -225,20 +225,20 @@ function LeaderboardSection({ spots, onBoost, onClaim }) {
 
       {/* ranks 4–10 — same row design as the leaderboard page */}
       <div className="mt-8">
-        <div className="flex items-center justify-between mb-4 px-1">
+        <div className="flex items-center justify-between mb-3 px-1">
           <span className="font-display font-bold text-xl text-[var(--ink)]">🔥 The chase pack</span>
-          {/* synced race countdown — desktop lanes only */}
-          <span className="hidden md:flex items-center justify-center h-9 w-32" aria-hidden="true">
-            {count !== null && (
-              <span
-                key={`${race.key}-${count}`}
-                className={`countdown-pop font-display font-black text-2xl tracking-tight ${count === 'GO' ? 'grad-text-anim' : 'grad-gold'}`}
-              >
-                {count === 'GO' ? '🚦 GO!' : `🏁 ${count}`}
-              </span>
-            )}
-          </span>
           <Link to="/leaderboard" className="text-sm font-bold text-[var(--blaze)] hover:underline">Full board →</Link>
+        </div>
+        {/* subtle race-control countdown, parked by the start gates */}
+        <div className="hidden md:flex justify-end pr-2 h-5 mb-1" aria-hidden="true">
+          {count !== null && (
+            <span
+              key={`${race.key}-${count}`}
+              className="countdown-pop text-[11px] font-bold tracking-[0.25em] text-[var(--ink-3)] opacity-50"
+            >
+              {count === 'GO' ? '🏁 GO!' : `🏁 ${count}`}
+            </span>
+          )}
         </div>
         <div className="space-y-2.5">
           <AnimatePresence initial={false}>

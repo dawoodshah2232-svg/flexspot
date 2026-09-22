@@ -24,7 +24,7 @@ export function Logo({ compact = false }) {
       {!compact && (
         <span className="leading-none hidden min-[380px]:block">
           <span className="block font-display font-extrabold text-[22px] tracking-tight text-[var(--ink)]">
-            Flex<span className="grad-text">Spot</span><span className="text-[13px] font-bold text-[var(--ink-3)] align-top">.LOL</span>
+            Flex<span className="grad-text">Spot</span><span className="lol-sticker" aria-hidden="true"><span className="lol-dot">.</span><span className="lol-l">L</span><span className="lol-l">O</span><span className="lol-l">L</span></span>
           </span>
         </span>
       )}

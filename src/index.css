@@ -356,6 +356,37 @@ table.admin-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; 
   50% { transform: translateY(-16px) rotateY(180deg); }
 }
 
+/* -------- playful .LOL sticker on the wordmark -------- */
+.lol-sticker {
+  display: inline-block; vertical-align: top;
+  font-size: 11px; font-weight: 900; letter-spacing: 0.05em; line-height: 1;
+  color: #3B1D02;
+  background: linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%);
+  border-radius: 8px; padding: 4px 7px 3px; margin-left: 4px;
+  transform: rotate(-6deg) translateY(-4px);
+  box-shadow: 0 3px 10px rgba(245,158,11,.5), inset 0 1px 0 rgba(255,255,255,.5);
+}
+.lol-sticker .lol-dot { display: inline-block; margin-right: 1px; }
+.lol-sticker .lol-l { display: inline-block; animation: lol-laugh 1.8s ease-in-out infinite; }
+.lol-sticker .lol-l:nth-child(3) { animation-delay: .14s; }
+.lol-sticker .lol-l:nth-child(4) { animation-delay: .28s; }
+@keyframes lol-laugh {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  22% { transform: translateY(-3px) rotate(-5deg); }
+  44% { transform: translateY(0) rotate(0deg); }
+  66% { transform: translateY(-2px) rotate(4deg); }
+}
+/* -------- finish-line position pill (P4 … P10) -------- */
+.race-pos {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%); z-index: 3;
+  font-size: 9px; font-weight: 800; letter-spacing: 0.08em; line-height: 1;
+  color: var(--ink-3); opacity: .8;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 999px; padding: 3px 7px; white-space: nowrap;
+  animation: race-pos-in .45s cubic-bezier(.2,1.4,.4,1) both;
+}
+@keyframes race-pos-in { from { opacity: 0; transform: translateY(-50%) scale(.5); } to { opacity: .8; transform: translateY(-50%) scale(1); } }
+
 /* -------- #2 silver / #3 bronze medal coins (pure CSS) -------- */
 .medal-coin { position: relative; width: 38px; height: 38px; border-radius: 9999px; display: grid; place-items: center;
   font-weight: 900; font-size: 15px; color: rgba(255,255,255,.95); text-shadow: 0 1px 2px rgba(0,0,0,.35);

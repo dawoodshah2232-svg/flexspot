@@ -71,20 +71,20 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
 
         {/* rest of board */}
         <div className="mt-10">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-3">
             <h2 className="font-display font-bold text-2xl text-snow">All spots <span className="text-mist text-base font-sans font-medium">({filtered.length} competing)</span></h2>
-            {/* synced race countdown — desktop lanes only */}
-            <span className="hidden md:flex items-center justify-center h-9 w-32" aria-hidden="true">
-              {count !== null && (
-                <span
-                  key={`${race.key}-${count}`}
-                  className={`countdown-pop font-display font-black text-2xl tracking-tight ${count === 'GO' ? 'grad-text-anim' : 'grad-gold'}`}
-                >
-                  {count === 'GO' ? '🚦 GO!' : `🏁 ${count}`}
-                </span>
-              )}
-            </span>
             <span className="text-xs text-mist font-semibold">Total buzz: <b className="text-[var(--blaze)]">{money(spots.reduce((a, s) => a + s.amount, 0))}</b></span>
+          </div>
+          {/* subtle race-control countdown, parked by the start gates */}
+          <div className="hidden md:flex justify-end pr-2 h-5 mb-1" aria-hidden="true">
+            {count !== null && (
+              <span
+                key={`${race.key}-${count}`}
+                className="countdown-pop text-[11px] font-bold tracking-[0.25em] text-[var(--ink-3)] opacity-50"
+              >
+                {count === 'GO' ? '🏁 GO!' : `🏁 ${count}`}
+              </span>
+            )}
           </div>
           {filtered.length === 0 ? (
             <div className="text-center py-16 text-mist">

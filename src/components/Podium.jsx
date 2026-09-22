@@ -167,11 +167,10 @@ export default function Podium({ spots, onBoost }) {
             <div className="absolute top-0 inset-x-0 h-1 bg-white/50" />
             <div className="absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-black/25 to-transparent" />
             <div className="absolute inset-y-0 left-0 w-3 bg-gradient-to-r from-white/25 to-transparent" />
-            <div className="relative h-full flex items-start justify-center pt-2">
-              <span className={`font-display font-black ${isFirst ? 'text-5xl text-[#7C2D12]/45' : 'text-4xl text-black/25'}`}>
-                {rank}
-              </span>
-            </div>
+          </div>
+          {/* award medallion pinned on the step: laurel + crown + rank */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <StepMedal rank={rank} />
           </div>
           {/* ground shadow */}
           <div className="absolute -bottom-3 left-4 right-4 h-3 bg-black/20 blur-md rounded-full" />
@@ -195,6 +194,94 @@ export default function Podium({ spots, onBoost }) {
         One dollar more than your rival steals their step. Ties go to whoever got there first.
       </p>
     </div>
+  );
+}
+
+// Award medallion pinned on each podium step: a laurel wreath in the step's
+// metal (gold / silver / bronze) flanking the rank, a little crown on top —
+// a proper award-badge look instead of a plain number.
+function StepMedal({ rank }) {
+  const metal = rank === 1 ? 'gold' : rank === 2 ? 'silver' : 'bronze';
+  const size = rank === 1 ? 92 : rank === 2 ? 68 : 58;
+  const gid = `sml-${metal}`;
+  const tones = {
+    gold: { stops: ['#FFF7D6', '#FCD34D', '#D97706'], stem: '#B45309', num: '#7C2D12', sub: '#A16207' },
+    silver: { stops: ['#FFFFFF', '#CBD5E1', '#64748B'], stem: '#64748B', num: '#334155', sub: '#64748B' },
+    bronze: { stops: ['#FDEBD3', '#DE9A52', '#8A5A2B'], stem: '#8A5A2B', num: '#57300C', sub: '#8A5A2B' },
+  }[metal];
+
+  const cx = 60, cy = 62, rx = 37, ry = 39;
+  const pt = (deg) => {
+    const a = (deg * Math.PI) / 180;
+    return [cx + rx * Math.cos(a), cy + ry * Math.sin(a)];
+  };
+  // right branch sweeps 82° → -40° (bottom up to upper-right),
+  // left branch mirrors 98° → 220°
+  const branches = [
+    { from: 82, to: -40, sweep: 0 },
+    { from: 98, to: 220, sweep: 1 },
+  ];
+  const N = 8;
+  const leaves = [];
+  branches.forEach(({ from, to }) => {
+    const dirSign = Math.sign(to - from);
+    for (let i = 0; i < N; i++) {
+      const t = i / (N - 1);
+      const deg = from + (to - from) * t;
+      const a = (deg * Math.PI) / 180;
+      const [x, y] = pt(deg);
+      // leaf points along the branch toward the tip, splayed alternately
+      const dx = dirSign * -rx * Math.sin(a);
+      const dy = dirSign * ry * Math.cos(a);
+      const tipAng = (Math.atan2(dy, dx) * 180) / Math.PI;
+      const rot = tipAng + (i % 2 === 0 ? 34 : -34);
+      const s = 1 - 0.32 * t; // taper toward the tip
+      const ox = x + 5.5 * Math.cos((rot * Math.PI) / 180);
+      const oy = y + 5.5 * Math.sin((rot * Math.PI) / 180);
+      leaves.push(
+        <ellipse key={`${from}-${i}`} cx={ox} cy={oy} rx={8 * s} ry={3.1 * s}
+          transform={`rotate(${rot.toFixed(1)} ${ox.toFixed(1)} ${oy.toFixed(1)})`}
+          fill={`url(#${gid})`} opacity={0.95} />
+      );
+    }
+  });
+
+  return (
+    <svg width={size} height={size * 0.92} viewBox="0 0 120 110"
+      style={{ filter: 'drop-shadow(0 4px 10px rgba(0,0,0,.35))' }} aria-hidden="true">
+      <defs>
+        <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={tones.stops[0]} />
+          <stop offset="48%" stopColor={tones.stops[1]} />
+          <stop offset="100%" stopColor={tones.stops[2]} />
+        </linearGradient>
+      </defs>
+      {/* stems */}
+      {branches.map(({ from, to, sweep }) => {
+        const [x1, y1] = pt(from);
+        const [x2, y2] = pt(to);
+        return (
+          <path key={from} d={`M ${x1.toFixed(1)} ${y1.toFixed(1)} A ${rx} ${ry} 0 0 ${sweep} ${x2.toFixed(1)} ${y2.toFixed(1)}`}
+            fill="none" stroke={tones.stem} strokeWidth={2.5} strokeLinecap="round" opacity={0.85} />
+        );
+      })}
+      {leaves}
+      {/* knot where the branches meet */}
+      <circle cx={60} cy={100} r={3.6} fill={`url(#${gid})`} stroke={tones.stem} strokeWidth={1} />
+      {/* crown */}
+      <g>
+        <polygon points="47,30 47,19 54,25 60,14 66,25 73,19 73,30"
+          fill={`url(#${gid})`} stroke={tones.stem} strokeWidth={1} strokeLinejoin="round" />
+        <circle cx={47} cy={17.5} r={2.1} fill={tones.stops[0]} stroke={tones.stem} strokeWidth={0.8} />
+        <circle cx={60} cy={12.5} r={2.4} fill={tones.stops[0]} stroke={tones.stem} strokeWidth={0.8} />
+        <circle cx={73} cy={17.5} r={2.1} fill={tones.stops[0]} stroke={tones.stem} strokeWidth={0.8} />
+      </g>
+      {/* rank */}
+      <text x={60} y={52} textAnchor="middle" fontSize={8.5} fontWeight={800}
+        letterSpacing={2.5} fill={tones.sub} fontFamily="'Inter', system-ui, sans-serif">RANK</text>
+      <text x={60} y={82} textAnchor="middle" fontSize={37} fontWeight={900}
+        fill={tones.num} fontFamily="'Bricolage Grotesque', 'Inter', system-ui, sans-serif">{rank}</text>
+    </svg>
   );
 }
 

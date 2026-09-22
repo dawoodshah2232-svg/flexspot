@@ -53,24 +53,35 @@ export default function Podium({ spots, onBoost }) {
               <span className="absolute" style={{ bottom: '36%', right: '6%' }}><Flee><span className="coin-flip !static text-lg" style={{ animationDelay: '-2.3s' }}>🪙</span></Flee></span>
             </div>
           )}
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <RankBadge rank={rank} size={isFirst ? 'lg' : 'md'} />
-            {!isFirst && (
-              <span className={`medal-coin ${rank === 2 ? 'medal-silver' : 'medal-bronze'}`} aria-hidden="true">{rank}</span>
-            )}
-            <span className={`text-[10px] uppercase tracking-[0.18em] font-extrabold px-2.5 py-1 rounded-full ${isFirst ? 'bg-[#F59E0B]/20 text-[#FCD34D] border border-[#F59E0B]/40' : 'text-[var(--ink-3)]'}`}>
-              {label}
-            </span>
-          </div>
+          {/* rank header: champion keeps its badge; #2/#3 get one big metallic
+              medal banner — a single numeral, no more 2-2-2 repetition */}
+          {isFirst ? (
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <RankBadge rank={rank} size="lg" />
+              <span className="text-[10px] uppercase tracking-[0.18em] font-extrabold px-2.5 py-1 rounded-full bg-[#F59E0B]/20 text-[#FCD34D] border border-[#F59E0B]/40">
+                {label}
+              </span>
+            </div>
+          ) : (
+            <div className="flex justify-center mb-4">
+              <div className={`rank-medal ${rank === 2 ? 'rank-medal-silver' : 'rank-medal-bronze'}`}>
+                <span className="rank-medal-num">{rank}</span>
+                <span className="rank-medal-text">
+                  <span className="rank-medal-word">{rank === 2 ? 'SECOND' : 'THIRD'}</span>
+                  <span className="rank-medal-sub">{rank === 2 ? 'SILVER' : 'BRONZE'}</span>
+                </span>
+              </div>
+            </div>
+          )}
 
           <Link to={`/s/${s.slug}`} className="block group">
             <div className="flex justify-center">
               <div className={isFirst ? 'relative' : ''}>
                 {isFirst && <div className="absolute -inset-2 rounded-full bg-[#F59E0B]/30 blur-lg" aria-hidden="true" />}
-                <BrandAvatar spot={s} size={isFirst ? 84 : 60} ring={isFirst} />
+                <BrandAvatar spot={s} size={isFirst ? 84 : 68} ring={isFirst} />
               </div>
             </div>
-            <div className={`font-display font-extrabold mt-3 truncate group-hover:underline ${isFirst ? 'text-2xl text-white' : 'text-lg text-[var(--ink)]'}`}>
+            <div className={`font-display font-extrabold mt-3 truncate group-hover:underline ${isFirst ? 'text-2xl text-white' : 'text-xl text-[var(--ink)]'}`}>
               {s.name}
             </div>
             <p className={`text-sm mt-0.5 truncate font-medium ${isFirst ? 'text-[#FCD34D]' : 'text-[var(--ink-2)]'}`}>{s.tagline}</p>
@@ -192,11 +203,11 @@ function stepFrontClass(rank) {
     return 'bg-gradient-to-b from-[#FCD34D] via-[#F59E0B] to-[#B45309] border-[#92400E]/40 shadow-[0_18px_40px_-12px_rgba(245,158,11,0.55)]';
   if (rank === 2)
     return 'bg-gradient-to-b from-slate-200 via-slate-300 to-slate-400 border-slate-400/50 shadow-[0_14px_30px_-12px_rgba(100,116,139,0.5)]';
-  return 'bg-gradient-to-b from-amber-400 via-amber-500 to-amber-700 border-amber-700/50 shadow-[0_14px_30px_-12px_rgba(180,83,9,0.5)]';
+  return 'bg-gradient-to-b from-[#EFB27A] via-[#C47F3D] to-[#8A5A24] border-[#6B4218]/50 shadow-[0_14px_30px_-12px_rgba(180,120,50,0.5)]';
 }
 
 function stepTopClass(rank) {
   if (rank === 1) return 'bg-[#FDE68A] border border-[#92400E]/30';
   if (rank === 2) return 'bg-slate-100 border border-slate-400/40';
-  return 'bg-amber-300 border border-amber-700/40';
+  return 'bg-[#F2C894] border border-[#6B4218]/40';
 }

@@ -168,7 +168,8 @@ export function SpotRow({ spot, move, onBoost, highlight, race, count = null }) 
           </div>
         )}
         <div className="text-right shrink-0">
-          <div className="font-display font-bold text-[var(--blaze-deep)] dark:text-[#FF8A66] text-lg">{money(spot.amount)}</div>
+          {/* the amount they paid to hold this rank — given pride of place */}
+          <div className="font-display font-black text-[var(--blaze-deep)] dark:text-[#FF8A66] text-xl sm:text-2xl tracking-tight whitespace-nowrap">🏆 {money(spot.amount)}</div>
           <div className="text-[10px] text-[var(--ink-3)] uppercase tracking-wider font-semibold">spot value</div>
         </div>
         <button

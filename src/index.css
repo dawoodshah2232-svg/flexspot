@@ -388,13 +388,25 @@ table.admin-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; 
 @keyframes race-pos-in { from { opacity: 0; transform: translateY(-50%) scale(.5); } to { opacity: .8; transform: translateY(-50%) scale(1); } }
 
 /* -------- #2 silver / #3 bronze medal coins (pure CSS) -------- */
-.medal-coin { position: relative; width: 38px; height: 38px; border-radius: 9999px; display: grid; place-items: center;
-  font-weight: 900; font-size: 15px; color: rgba(255,255,255,.95); text-shadow: 0 1px 2px rgba(0,0,0,.35);
-  animation: medal-spin 4.2s ease-in-out infinite; flex-shrink: 0; }
-.medal-coin::before { content: ''; position: absolute; inset: 4px; border-radius: 9999px; border: 2px dashed rgba(255,255,255,.55); }
-.medal-silver { background: radial-gradient(circle at 32% 30%, #FFFFFF 0%, #CBD5E1 38%, #94A3B8 72%, #64748B 100%); box-shadow: 0 3px 8px rgba(100,116,139,.45), inset 0 1px 2px rgba(255,255,255,.7); }
-.medal-bronze { background: radial-gradient(circle at 32% 30%, #FDE3B8 0%, #E0A45C 42%, #B4702E 76%, #8C5220 100%); box-shadow: 0 3px 8px rgba(140,82,32,.45), inset 0 1px 2px rgba(255,255,255,.6); }
-@keyframes medal-spin { 0%, 100% { transform: rotateY(-24deg); } 50% { transform: rotateY(24deg); } }
+/* -------- podium #2 / #3 rank medal: one big metallic banner, no repetition --------
+   A single bold numeral + place name on brushed metal — dark text so it reads
+   crisply in light mode too. */
+.rank-medal { display: inline-flex; align-items: center; gap: 12px; padding: 8px 22px 8px 16px;
+  border-radius: 999px; }
+.rank-medal-num { font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif; font-size: 32px; font-weight: 900; line-height: 1; }
+.rank-medal-text { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.15; }
+.rank-medal-word { font-size: 15px; font-weight: 800; letter-spacing: 0.14em; }
+.rank-medal-sub { font-size: 10px; font-weight: 700; letter-spacing: 0.26em; opacity: 0.72; }
+.rank-medal-silver { background: linear-gradient(135deg, #FFFFFF 0%, #DCE4ED 32%, #F5F8FB 52%, #B7C4D5 100%);
+  border: 1px solid #93A5BB; color: #2E3B52;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.95), inset 0 -2px 5px rgba(70,90,110,.20),
+    0 8px 18px -8px rgba(100,116,139,.55); }
+.rank-medal-silver .rank-medal-num { color: #232F45; text-shadow: 0 1px 0 #fff; }
+.rank-medal-bronze { background: linear-gradient(135deg, #FFF7EA 0%, #E9B981 32%, #F9E3C2 52%, #C68B4A 100%);
+  border: 1px solid #9A6428; color: #4E2F0F;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.95), inset 0 -2px 5px rgba(120,70,20,.20),
+    0 8px 18px -8px rgba(180,120,50,.55); }
+.rank-medal-bronze .rank-medal-num { color: #422806; text-shadow: 0 1px 0 rgba(255,255,255,.65); }
 
 /* -------- proper race lanes (ranks 4–10): synced start, sprint to finish, 3-2-1-GO loop -------- */
 .race-lane { position: relative; width: 104px; height: 40px; overflow: hidden; border-radius: 14px; flex-shrink: 0;
@@ -434,12 +446,17 @@ table.admin-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; 
   100% { transform: translate3d(var(--drift, 0px), 108vh, 0) rotate(680deg) scale(.9); opacity: 0; }
 }
 /* countdown pop: 3 · 2 · 1 · GO! */
-.countdown-pop { display: inline-block; animation: countdown-pop .72s cubic-bezier(.2,1.4,.4,1) both; }
+.countdown-pop { display: inline-block; animation: countdown-pop .72s cubic-bezier(.2,1.4,.4,1) both;
+  /* race-control chip: dark blurred pill so the text stays legible over the
+     scrolling road dashes behind it */
+  background: rgba(8, 10, 18, .66); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,.16); border-radius: 999px; padding: 3px 14px 3px 17px;
+  color: #F8FAFC; text-shadow: 0 1px 8px rgba(0,0,0,.9); }
 @keyframes countdown-pop { 0% { transform: scale(.3); opacity: 0; } 55% { transform: scale(1.18); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
 /* countdown parked in the CENTER of each race lane — subtle, race-control style */
 .race-count { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 4;
   font-size: 12px; font-weight: 800; letter-spacing: 0.32em; text-indent: 0.32em; white-space: nowrap;
-  color: var(--ink-3); opacity: .6; pointer-events: none; }
+  pointer-events: none; }
 /* podium #2 / #3 mini race lane: same road, emoji runs in place, dodges your cursor */
 .race-lane.podium-lane { width: 100%; max-width: none; flex: none; height: 48px; }
 .podium-runner { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -52%);

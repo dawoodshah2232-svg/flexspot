@@ -346,7 +346,7 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
               <DramaTicker />
               <FeedTicker />
               {IS_PREVIEW_DATA && (
-                <p className="text-[11px] text-[var(--ink-3)]">Preview data — demo brands shown for the redesign review.</p>
+                <p className="text-[11px] text-[var(--ink-3)]">Preview data — demo brands shown for illustration only.</p>
               )}
             </div>
           </div>

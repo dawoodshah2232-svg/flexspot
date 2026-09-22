@@ -148,7 +148,7 @@ export default function Admin({ spots, refresh }) {
           <h1 className="font-display font-bold text-2xl text-[var(--ink)] mb-2">Admin access</h1>
           <p className="text-[var(--ink-2)] text-sm mb-6">Enter the admin PIN to manage FlexSpot.</p>
           <input
-            type="password" inputMode="numeric" maxLength={12}
+            type="password" maxLength={64} autoComplete="current-password"
             className="field text-center text-2xl tracking-[0.4em] mb-4"
             placeholder="••••" value={pin}
             onChange={(e) => setPin(e.target.value)}

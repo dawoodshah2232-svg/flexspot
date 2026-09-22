@@ -12,4 +12,8 @@
   <url><loc>https://flexspot.lol/s/brewline</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://flexspot.lol/s/pixelforge</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://flexspot.lol/s/nomaddesk</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://flexspot.lol/claim</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://flexspot.lol/explore</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://flexspot.lol/privacy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://flexspot.lol/terms</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
 </urlset>

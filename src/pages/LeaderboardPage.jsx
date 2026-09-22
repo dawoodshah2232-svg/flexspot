@@ -8,7 +8,7 @@ import { money, compact } from '../lib/format';
 
 export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
   const [q, setQ] = useState('');
-  const { race } = useRaceCycle();
+  const { race, count } = useRaceCycle();
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
     if (!query) return spots;
@@ -88,7 +88,7 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
           ) : (
             <motion.div layout className="space-y-2.5">
               {rest.map((s) => (
-                <SpotRow key={s.slug} spot={s} move={moves[s.slug] ?? s.move} highlight onBoost={onBoost} race={race} />
+                <SpotRow key={s.slug} spot={s} move={moves[s.slug] ?? s.move} highlight onBoost={onBoost} race={race} count={count} />
               ))}
             </motion.div>
           )}

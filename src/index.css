@@ -424,6 +424,15 @@ table.admin-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; 
   filter: drop-shadow(0 3px 3px rgba(0,0,0,.25)); }
 .race-bob { display: inline-block; animation: race-bob .45s ease-in-out infinite; }
 @keyframes race-bob { 0%, 100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(-3px) rotate(5deg); } }
+/* one-time celebration burst on winner pages: glitter falls and disappears.
+   #1 gets the full cheers, #2 less, #3 even less. */
+.celebrate-particle { position: fixed; top: -48px; z-index: 90; pointer-events: none;
+  animation-name: celebrate-fall; animation-timing-function: cubic-bezier(.2,.6,.6,1); animation-fill-mode: forwards; }
+@keyframes celebrate-fall {
+  0% { transform: translate3d(0, -48px, 0) rotate(0deg) scale(1); opacity: 0; }
+  8% { opacity: 1; }
+  100% { transform: translate3d(var(--drift, 0px), 108vh, 0) rotate(680deg) scale(.9); opacity: 0; }
+}
 /* countdown pop: 3 · 2 · 1 · GO! */
 .countdown-pop { display: inline-block; animation: countdown-pop .72s cubic-bezier(.2,1.4,.4,1) both; }
 @keyframes countdown-pop { 0% { transform: scale(.3); opacity: 0; } 55% { transform: scale(1.18); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }

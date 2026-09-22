@@ -92,7 +92,7 @@ export function useRaceCycle() {
 }
 const RACE_IDLE = { key: 0, running: false };
 
-export function SpotRow({ spot, move, onBoost, highlight, race }) {
+export function SpotRow({ spot, move, onBoost, highlight, race, count = null }) {
   const racer = RACE_RUNNERS[spot.rank];
   const r = race || RACE_IDLE;
   const bob = `${(parseFloat(raceDuration(spot.rank)) / 5).toFixed(2)}s`;

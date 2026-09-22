@@ -8,6 +8,7 @@ import { money, compact, timeAgo, copyText } from '../lib/format';
 import { REWARDS } from '../lib/data';
 import { recordClick, recordReferralClick, getReferralStats, refCodeFor, getContributions } from '../lib/store';
 import Flee from '../components/Flee';
+import CelebrationBurst from '../components/CelebrationBurst';
 
 function Sparkline({ data }) {
   if (!data || data.length < 2) return null;
@@ -75,6 +76,8 @@ export default function SpotProfile({ spots, onClaim, onBoost }) {
 
   return (
     <div className="pt-[92px]">
+      {/* one-time winner celebration: full cheers for #1, less for #2, least for #3 */}
+      {spot.rank <= 3 && <CelebrationBurst rank={spot.rank} />}
       {/* cover */}
       <div className="relative overflow-hidden">
         <div className="blob w-[500px] h-[280px] bg-[var(--blaze-soft)] -top-24 left-1/3" />

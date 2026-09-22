@@ -177,7 +177,7 @@ const TABS = [
 
 function LeaderboardSection({ spots, onBoost, onClaim }) {
   const [tab, setTab] = useState('all');
-  const { race } = useRaceCycle();
+  const { race, count } = useRaceCycle();
   const ordered = useMemo(() => {
     const list = [...spots];
     if (tab === 'gainers') list.sort((a, b) => (b.move || 0) - (a.move || 0));
@@ -235,7 +235,7 @@ function LeaderboardSection({ spots, onBoost, onClaim }) {
         <div className="space-y-2.5">
           <AnimatePresence initial={false}>
             {ranked.slice(3, 10).map((s) => (
-              <SpotRow key={s.slug} spot={s} move={s.move} onBoost={onBoost} race={race} />
+              <SpotRow key={s.slug} spot={s} move={s.move} onBoost={onBoost} race={race} count={count} />
             ))}
           </AnimatePresence>
         </div>

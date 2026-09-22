@@ -8,6 +8,8 @@ import { USDT_NETWORKS, MIN_SPOT_AMOUNT } from '../lib/payments';
 import { CATEGORIES } from '../lib/data';
 import Celebration from '../components/Celebration';
 import Flee from '../components/Flee';
+import { useUnofficialHost } from '../components/SecurityGuard';
+import { currentHost } from '../lib/security';
 
 const AMOUNTS = [1, 5, 10, 25, 50, 100];
 
@@ -52,6 +54,8 @@ export default function ClaimPage({ spots, onSubmitted }) {
   const [custom, setCustom] = useState('');
   const [network, setNetwork] = useState(USDT_NETWORKS[0].id);
   const [copied, setCopied] = useState(false);
+  // Anti-phishing: on cloned copies the payment block is replaced by a warning.
+  const unofficialHost = useUnofficialHost();
   const [txId, setTxId] = useState('');
   const [screenshot, setScreenshot] = useState('');
   const [showExtras, setShowExtras] = useState(false);
@@ -545,6 +549,20 @@ export default function ClaimPage({ spots, onSubmitted }) {
             </div>
 
             <div className="rounded-2xl bg-[var(--surface-2)] border border-[var(--line)] p-5 text-center">
+              {unofficialHost ? (
+                <div className="py-6">
+                  <div className="text-4xl mb-3">🛡️</div>
+                  <div className="font-display font-bold text-red-500 text-lg mb-2">Payments disabled on this copy</div>
+                  <p className="text-sm text-[var(--ink-2)] max-w-sm mx-auto">
+                    This page is not running on the official FlexSpot domain, so payment details
+                    are hidden to protect you. Please continue only at <b className="text-[var(--ink)]">flexspot.lol</b>.
+                  </p>
+                </div>
+              ) : (
+              <>
+              <div className="flex items-center justify-center gap-1.5 text-[11px] font-bold text-emerald-500 mb-3">
+                <span>🔒 You're on <b>{currentHost()}</b> — always confirm the address bar before sending</span>
+              </div>
               <div className="text-xs font-semibold uppercase tracking-wider text-[var(--ink-3)] mb-3">
                 Scan to pay {money2(finalAmount())} USDT ({activeNetwork.name})
               </div>
@@ -552,20 +570,22 @@ export default function ClaimPage({ spots, onSubmitted }) {
                 <QRCodeSVG value={activeNetwork.address} size={200} level="M" />
               </div>
               <div className="mt-4">
-                <div className="text-xs text-[var(--ink-3)] mb-1.5">Deposit address — tap to copy</div>
+                <div className="text-xs text-[var(--ink-3)] mb-1.5">Deposit address — tap to copy · verify the first &amp; last characters</div>
                 <button
                   type="button"
                   onClick={copyAddress}
-                  className="w-full font-mono text-[13px] break-all bg-[#101223] text-white rounded-xl px-4 py-3.5 border border-[#2A2D4A] hover:border-[var(--blaze)] transition-colors"
+                  className="w-full font-mono text-[13px] break-all bg-[#101223] rounded-xl px-4 py-3.5 border border-[#2A2D4A] hover:border-[var(--blaze)] transition-colors"
                   title="Tap to copy"
                 >
-                  {activeNetwork.address}
+                  <span className="text-white font-bold">{activeNetwork.address.slice(0, 10)}</span><span className="text-white/45">{activeNetwork.address.slice(10, -10)}</span><span className="text-white font-bold">{activeNetwork.address.slice(-10)}</span>
                 </button>
                 <button type="button" onClick={copyAddress} className="btn-primary px-5 py-2.5 text-xs mt-3">
                   {copied ? '✓ Copied!' : '⧉ Copy address'}
                 </button>
               </div>
               <p className="text-xs text-[var(--ink-3)] mt-3">⚠️ {activeNetwork.note}</p>
+              </>
+              )}
             </div>
 
             <div>

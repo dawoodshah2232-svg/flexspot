@@ -23,6 +23,7 @@ import Explore from './pages/Explore';
 import CategoryPage from './pages/CategoryPage';
 import RootProfile from './components/RootProfile';
 import NotFound from './pages/NotFound';
+import SecurityGuard from './components/SecurityGuard';
 
 function ScrollTop() {
   const { pathname } = useLocation();
@@ -118,6 +119,7 @@ function Shell() {
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--ink)]">
       <ScrollTop />
+      <SecurityGuard />
       <Header onClaim={openClaim} />
       <main>
         <Routes>

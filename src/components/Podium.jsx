@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { BrandAvatar, RankBadge, MoveIndicator } from './SpotCard';
+import { BrandAvatar, MoveIndicator } from './SpotCard';
 import Flee from './Flee';
 import { money, compact } from '../lib/format';
 
@@ -56,9 +56,8 @@ export default function Podium({ spots, onBoost }) {
           {/* rank header: champion keeps its badge; #2/#3 get one big metallic
               medal banner — a single numeral, no more 2-2-2 repetition */}
           {isFirst ? (
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <RankBadge rank={rank} size="lg" />
-              <span className="text-[10px] uppercase tracking-[0.18em] font-extrabold px-2.5 py-1 rounded-full bg-[#F59E0B]/20 text-[#FCD34D] border border-[#F59E0B]/40">
+            <div className="flex items-center justify-center mb-3">
+              <span className="text-xs sm:text-sm uppercase tracking-[0.22em] font-black px-5 py-2 rounded-full bg-[#F59E0B]/20 text-[#FCD34D] border border-[#F59E0B]/40">
                 {label}
               </span>
             </div>
@@ -187,7 +186,7 @@ export default function Podium({ spots, onBoost }) {
       </div>
       <div className="relative grid sm:grid-cols-3 gap-4 sm:gap-5 items-end max-w-4xl mx-auto pt-10">
         {step(second, 2, '2nd · Silver', 'order-2 sm:order-1')}
-        {step(first, 1, '👑 Champion', 'order-1 sm:order-2')}
+        {step(first, 1, 'Champion', 'order-1 sm:order-2')}
         {step(third, 3, '3rd · Bronze', 'order-3 sm:order-3')}
       </div>
       <p className="text-center text-xs text-[var(--ink-3)] mt-6">

@@ -88,17 +88,6 @@ export default function Header({ onClaim }) {
                 </svg>
               )}
             </button>
-            <Link
-              to="/admin"
-              className="hidden sm:grid place-items-center w-10 h-10 rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--ink-2)] hover:text-[var(--ink)] hover:border-[var(--ink-3)] transition-colors"
-              title="Profile / admin"
-              aria-label="Profile"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <circle cx="12" cy="8" r="4" />
-                <path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" />
-              </svg>
-            </Link>
             <button onClick={onClaim} className="btn-primary whitespace-nowrap px-4 sm:px-6 py-2.5 text-sm shrink-0">
               <span className="hidden min-[420px]:inline">Claim Your Spot From $1</span>
               <span className="min-[420px]:hidden">Claim $1</span>

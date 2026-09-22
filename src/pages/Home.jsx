@@ -7,6 +7,7 @@ import Podium from '../components/Podium';
 import Floaties from '../components/Floaties';
 import { SpotRow, BrandAvatar, useRaceCycle } from '../components/SpotCard';
 import Flee from '../components/Flee';
+import Sway from '../components/Sway';
 import TopReferrers from '../components/TopReferrers';
 import { compact, money } from '../lib/format';
 import { LIVE_FEED_POOL, IS_PREVIEW_DATA } from '../lib/data';
@@ -94,14 +95,25 @@ function ChampionStage({ leader, onClaim }) {
           loading="eager"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-black/15" aria-hidden="true" />
-        {/* dancing hype-man cutout — original dance loop, background removed */}
-        <img
-          src={`${import.meta.env.BASE_URL}hero-dancer.webp`}
-          alt=""
-          aria-hidden="true"
-          className="hero-dancer pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-36 z-10 w-16 min-[420px]:w-[72px] sm:w-24 drop-shadow-[0_10px_16px_rgba(0,0,0,0.5)]"
-          loading="eager"
-        />
+        {/* dancing hype-man cutout — top-right of the banner, next to the frog king.
+            Grooves slowly (rotate + left/right sway) when the cursor comes near,
+            then eases back to his exact spot. Bigger + trending sticker. */}
+        <div className="hero-dancer-wrap absolute top-2.5 right-2.5 sm:top-3.5 sm:right-3.5 z-10 pointer-events-none flex flex-col items-center">
+          <Sway>
+            <span className="flex flex-col items-center">
+              <span className="mb-1 inline-flex items-center gap-1 bg-[#12B76A]/25 backdrop-blur border border-[#12B76A]/50 rounded-full px-2.5 py-1 text-[9px] sm:text-[10px] font-extrabold text-[#34D399] uppercase tracking-wider shadow-[0_4px_14px_-4px_rgba(18,183,106,0.8)]">
+                ▲ trending now
+              </span>
+              <img
+                src={`${import.meta.env.BASE_URL}hero-dancer.webp`}
+                alt=""
+                aria-hidden="true"
+                className="hero-dancer w-20 min-[420px]:w-24 sm:w-28 lg:w-32 drop-shadow-[0_10px_16px_rgba(0,0,0,0.5)]"
+                loading="eager"
+              />
+            </span>
+          </Sway>
+        </div>
         {/* champion ribbon — top-left of the photo */}
         <div className="absolute top-4 left-4">
           <div className="inline-flex items-center gap-2 bg-black/70 backdrop-blur-md text-[#FBBF24] border border-[#F59E0B]/60 font-black text-[11px] sm:text-xs uppercase tracking-[0.2em] rounded-full px-5 py-2 shadow-[0_8px_24px_-6px_rgba(245,158,11,0.7)]">

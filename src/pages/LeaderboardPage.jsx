@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { SpotRow, TopSpotCard } from '../components/SpotCard';
+import DramaTicker from '../components/DramaTicker';
 import { money } from '../lib/format';
 
 export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
@@ -23,6 +24,7 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
           </div>
           <h1 className="font-display font-bold text-4xl sm:text-6xl text-snow tracking-tight">The <span className="grad-gold">Leaderboard</span></h1>
           <p className="text-mist mt-4">The most competitive page on the internet. More support = higher spot. Where do you rank?</p>
+          <div className="flex justify-center mt-4"><DramaTicker /></div>
           <div className="flex flex-col sm:flex-row gap-3 justify-center mt-7">
             <button onClick={onClaim} className="btn-primary px-8 py-3.5">⚡ Claim Your Spot — $1</button>
           </div>
@@ -65,7 +67,7 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
           ) : (
             <motion.div layout className="space-y-2.5">
               {rest.map((s) => (
-                <SpotRow key={s.slug} spot={s} move={moves[s.slug]} highlight onBoost={onBoost} />
+                <SpotRow key={s.slug} spot={s} move={moves[s.slug] ?? s.move} highlight onBoost={onBoost} />
               ))}
             </motion.div>
           )}

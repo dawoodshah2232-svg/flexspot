@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { slugify, money2, copyText } from '../lib/format';
 import { submitSpot, approveLocalSpot, IS_LIVE, refCodeFor, recordReferralJoin } from '../lib/store';
@@ -6,7 +6,7 @@ import ShareButtons from './ShareButtons';
 
 const AMOUNTS = [1, 5, 10, 25, 50, 100];
 
-export default function ClaimModal({ open, onClose, onDone, boostSpot = null, initialRef = null }) {
+export default function ClaimModal({ open, onClose, onDone, boostSpot = null, initialRef = null, spots = [] }) {
   const [step, setStep] = useState(1);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -56,6 +56,22 @@ export default function ClaimModal({ open, onClose, onDone, boostSpot = null, in
     if (custom !== '' && Number.isFinite(c)) return Math.max(1, Math.round(c * 2) / 2);
     return amount;
   };
+
+  // Projected rank: where this contribution would land right now.
+  const projection = useMemo(() => {
+    if (!spots.length) return null;
+    const amt = finalAmount();
+    const effective = isBoost ? (boostSpot?.amount || 0) + amt : amt;
+    let rankPos = 1;
+    for (const s of spots) {
+      if (isBoost && s.slug === boostSpot?.slug) continue;
+      if (s.amount >= effective) rankPos++;
+      else break;
+    }
+    const above = spots.filter((s) => !(isBoost && s.slug === boostSpot?.slug))[rankPos - 2];
+    const gap = above ? Math.max(0.5, Math.round((above.amount - effective + 0.5) * 2) / 2) : 0;
+    return { rank: rankPos, above, gap };
+  }, [spots, amount, custom, isBoost, boostSpot]);
 
   const submit = async () => {
     setError('');
@@ -268,6 +284,21 @@ export default function ClaimModal({ open, onClose, onDone, boostSpot = null, in
                     <span className="text-sm text-mist">Your contribution</span>
                     <span className="font-display font-bold text-2xl text-neon">{money2(finalAmount())}</span>
                   </div>
+                  {projection && (
+                    <div className="mt-3 rounded-2xl bg-gold/10 border border-gold/30 p-4 text-sm">
+                      <div className="font-bold text-snow">
+                        💪 {money2(finalAmount())} would land {isBoost ? boostSpot.name : 'you'} at <span className="text-gold">#{projection.rank}</span> right now.
+                      </div>
+                      {projection.above && projection.rank > 1 && (
+                        <div className="text-mist text-xs mt-1">
+                          Only <b className="text-snow">{money2(projection.gap)}</b> away from passing <b className="text-snow">{projection.above.name}</b> at #{projection.rank - 1}. 😬
+                        </div>
+                      )}
+                      {projection.rank === 1 && (
+                        <div className="text-mist text-xs mt-1">The crown would be yours. 👑 Defend it well.</div>
+                      )}
+                    </div>
+                  )}
                   <div className="flex gap-2.5 mt-5">
                     {!isBoost && <button onClick={() => setStep(1)} className="btn-ghost px-5 py-3.5 text-sm">← Back</button>}
                     <button onClick={() => setStep(3)} className="btn-primary flex-1 py-3.5 text-[15px]">Continue → Payment</button>

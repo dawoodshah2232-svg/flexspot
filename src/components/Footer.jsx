@@ -24,9 +24,10 @@ export default function Footer({ onClaim }) {
         <div>
           <h4 className="font-display font-bold text-sm tracking-wide mb-4">SPOTLIGHT</h4>
           <ul className="space-y-2.5 text-sm text-mist">
-            <li><Link className="hover:text-snow transition-colors" to="/s/brewline">Top spot this week</Link></li>
-            <li><Link className="hover:text-snow transition-colors" to="/leaderboard">Trending now</Link></li>
-            <li><Link className="hover:text-snow transition-colors" to="/rewards">Weekly champion</Link></li>
+            <li><Link className="hover:text-snow transition-colors" to="/winners">Top spot this week</Link></li>
+            <li><Link className="hover:text-snow transition-colors" to="/trending">Trending now</Link></li>
+            <li><Link className="hover:text-snow transition-colors" to="/rising">Rising fast</Link></li>
+            <li><Link className="hover:text-snow transition-colors" to="/new">New to watch</Link></li>
           </ul>
         </div>
       </div>

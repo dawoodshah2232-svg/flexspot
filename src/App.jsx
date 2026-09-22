@@ -12,9 +12,10 @@ import Rewards from './pages/Rewards';
 import FAQ from './pages/FAQ';
 import SpotProfile from './pages/SpotProfile';
 import Admin from './pages/Admin';
-import { fetchLeaderboard, fetchPendingSpots, rank, IS_LIVE } from './lib/store';
+import { fetchLeaderboard, fetchPendingSpots, rank, saveRankSnapshot, IS_LIVE } from './lib/store';
 import { LIVE_FEED_POOL } from './lib/data';
 import { useTheme, useLiveViewers } from './lib/theme';
+import DiscoveryPage from './pages/DiscoveryPage';
 
 function ScrollTop() {
   const { pathname } = useLocation();
@@ -39,21 +40,14 @@ function Shell() {
   const load = useCallback(async () => {
     const data = await fetchLeaderboard();
     setPending(fetchPendingSpots());
-    setSpots((old) => {
-      const prev = {};
-      old.forEach((s) => { prev[s.slug] = s.amount; });
-      const mv = {};
-      data.forEach((s) => {
-        if (prev[s.slug] !== undefined && prev[s.slug] !== s.amount) {
-          mv[s.slug] = s.amount > prev[s.slug] ? 1 : -1;
-        }
-      });
-      if (Object.keys(mv).length) {
-        setMoves(mv);
-        setTimeout(() => setMoves({}), 1800);
-      }
-      return data;
-    });
+    // True rank deltas come from the store's snapshot tracking (spot.move)
+    const mv = {};
+    data.forEach((s) => { if (s.move) mv[s.slug] = s.move; });
+    if (Object.keys(mv).length) {
+      setMoves(mv);
+      setTimeout(() => setMoves({}), 2600);
+    }
+    setSpots(data);
     setLoading(false);
   }, []);
 
@@ -71,6 +65,8 @@ function Shell() {
     const tick = () => {
       setSpots((old) => {
         if (!old.length) return old;
+        const prevRank = {};
+        old.forEach((s) => { prevRank[s.slug] = s.rank; });
         const next = old.map((s) => ({ ...s }));
         const r = Math.random();
         if (r < 0.7) {
@@ -82,7 +78,19 @@ function Shell() {
           const [name, action] = LIVE_FEED_POOL[Math.floor(Math.random() * LIVE_FEED_POOL.length)];
           toast(`🔥 ${name} ${action}`);
         }
-        return rank(next);
+        const ranked = rank(next);
+        // True rank deltas: old rank - new rank (positive = climbed)
+        const mv = {};
+        ranked.forEach((s) => {
+          const d = (prevRank[s.slug] ?? s.rank) - s.rank;
+          if (d !== 0) mv[s.slug] = d;
+        });
+        if (Object.keys(mv).length) {
+          setMoves(mv);
+          setTimeout(() => setMoves({}), 2600);
+        }
+        saveRankSnapshot(ranked);
+        return ranked.map((s) => ({ ...s, move: mv[s.slug] || 0 }));
       });
     };
     const t = setInterval(tick, 22000);
@@ -114,14 +122,18 @@ function Shell() {
       <Navbar onClaim={openClaim} theme={theme} onToggleTheme={toggleTheme} viewers={viewers} />
       <main>
         <Routes>
-          <Route path="/" element={<Home spots={spots} onClaim={openClaim} viewers={viewers} />} />
+          <Route path="/" element={<Home spots={spots} onClaim={openClaim} onBoost={openBoost} viewers={viewers} />} />
           <Route path="/leaderboard" element={<LeaderboardPage spots={spots} moves={moves} onBoost={openBoost} onClaim={openClaim} />} />
+          <Route path="/trending" element={<DiscoveryPage mode="trending" spots={spots} moves={moves} onBoost={openBoost} onClaim={openClaim} />} />
+          <Route path="/rising" element={<DiscoveryPage mode="rising" spots={spots} moves={moves} onBoost={openBoost} onClaim={openClaim} />} />
+          <Route path="/winners" element={<DiscoveryPage mode="winners" spots={spots} moves={moves} onBoost={openBoost} onClaim={openClaim} />} />
+          <Route path="/new" element={<DiscoveryPage mode="new" spots={spots} moves={moves} onBoost={openBoost} onClaim={openClaim} />} />
           <Route path="/how-it-works" element={<HowItWorks onClaim={openClaim} />} />
           <Route path="/rewards" element={<Rewards spots={spots} onClaim={openClaim} />} />
           <Route path="/faq" element={<FAQ onClaim={openClaim} />} />
           <Route path="/s/:slug" element={<SpotProfile spots={spots} onClaim={openClaim} onBoost={openBoost} />} />
           <Route path="/admin" element={<Admin spots={spots} pending={pending} refresh={load} />} />
-          <Route path="*" element={<Home spots={spots} onClaim={openClaim} />} />
+          <Route path="*" element={<Home spots={spots} onClaim={openClaim} onBoost={openBoost} viewers={viewers} />} />
         </Routes>
       </main>
       <Footer onClaim={openClaim} />
@@ -133,6 +145,7 @@ function Shell() {
         onDone={onDone}
         boostSpot={boostSpot}
         initialRef={refParam}
+        spots={spots}
       />
 
       {/* toasts */}

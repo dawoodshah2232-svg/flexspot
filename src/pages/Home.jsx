@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import CountUp from '../components/CountUp';
-import { BrandAvatar, RankBadge } from '../components/SpotCard';
+import DramaTicker from '../components/DramaTicker';
+import Podium from '../components/Podium';
+import { BrandAvatar, RankBadge, MoveIndicator } from '../components/SpotCard';
 import { money, compact } from '../lib/format';
 import { LIVE_FEED_POOL } from '../lib/data';
 import { IS_LIVE } from '../lib/store';
@@ -16,50 +18,6 @@ function LiveStat({ icon, value, label, format }) {
           <CountUp to={value} format={format} />
         </div>
         <div className="text-[11px] text-mist font-medium mt-1">{label}</div>
-      </div>
-    </div>
-  );
-}
-
-function HeroBoard({ spots }) {
-  const top = spots.slice(0, 5);
-  return (
-    <div className="relative">
-      <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-5xl crown-bob z-10">👑</div>
-      <div className="glass rounded-3xl p-4 shadow-card relative overflow-hidden">
-        <div className="flex items-center justify-between mb-3 px-1">
-          <span className="font-display font-bold text-sm text-snow">🔥 Live leaderboard</span>
-          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-neon"><span className="live-dot" /> updating</span>
-        </div>
-        <div className="space-y-2">
-          <AnimatePresence initial={false}>
-            {top.map((s) => (
-              <motion.div
-                key={s.slug}
-                layout
-                initial={{ opacity: 0, x: 40 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -40 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className={`flex items-center gap-3 rounded-2xl p-2.5 border ${s.rank === 1 ? 'bg-gold/10 border-gold/40' : 'bg-line/5 border-line/5'}`}
-              >
-                <RankBadge rank={s.rank} />
-                <BrandAvatar spot={s} size={38} />
-                <div className="flex-1 min-w-0">
-                  <div className="font-bold text-sm text-snow truncate">{s.name}</div>
-                  <div className="text-[11px] text-mist truncate">{s.tagline}</div>
-                </div>
-                <div className="font-display font-bold text-neon">{money(s.amount)}</div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
-      </div>
-      <div className="anim-floaty absolute -left-4 top-16 glass rounded-2xl px-3 py-2 text-xs font-bold text-snow shadow-card hidden sm:block">
-        <span className="text-neon">+$25</span> boost received ⚡
-      </div>
-      <div className="anim-floaty2 absolute -right-3 bottom-16 glass rounded-2xl px-3 py-2 text-xs font-bold text-snow shadow-card hidden sm:block">
-        🎉 New spot claimed
       </div>
     </div>
   );
@@ -90,7 +48,7 @@ function FeedTicker() {
   );
 }
 
-export default function Home({ spots, onClaim, viewers }) {
+export default function Home({ spots, onClaim, onBoost, viewers }) {
   const totalRaised = useMemo(() => spots.reduce((a, s) => a + s.amount, 0), [spots]);
   const stats = [
     { icon: '🟢', value: viewers ?? 0, label: 'people here now', format: (n) => Math.round(n).toString() },
@@ -124,9 +82,46 @@ export default function Home({ spots, onClaim, viewers }) {
                 Explore Leaderboard
               </Link>
             </div>
-            <div className="mt-8 max-w-md"><FeedTicker /></div>
+            <div className="mt-8 max-w-md space-y-3">
+              <DramaTicker />
+              <FeedTicker />
+            </div>
           </div>
-          <HeroBoard spots={spots} />
+          <div>
+            <Podium spots={spots.slice(0, 3)} onBoost={onBoost} />
+            {/* ranks 4–10 */}
+            <div className="mt-4 rounded-3xl bg-card border border-line/5 p-3">
+              <div className="flex items-center justify-between px-2 py-1.5">
+                <span className="font-display font-bold text-sm text-snow">🔥 Top 10 — the chase pack</span>
+                <Link to="/leaderboard" className="text-[11px] font-semibold text-electric hover:underline">Full board →</Link>
+              </div>
+              <div className="space-y-1">
+                <AnimatePresence initial={false}>
+                  {spots.slice(3, 10).map((s) => (
+                    <motion.div
+                      key={s.slug}
+                      layout
+                      initial={{ opacity: 0, x: 40 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -40 }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                    >
+                      <Link to={`/s/${s.slug}`} className="flex items-center gap-3 rounded-2xl p-2 hover:bg-line/5 transition-colors">
+                        <RankBadge rank={s.rank} />
+                        <BrandAvatar spot={s} size={34} />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-bold text-sm text-snow truncate">{s.name}</div>
+                          <div className="text-[11px] text-mist truncate">{s.tagline}</div>
+                        </div>
+                        <MoveIndicator move={s.move} />
+                        <div className="font-display font-bold text-neon text-sm">{money(s.amount)}</div>
+                      </Link>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* live stats band */}
@@ -193,6 +188,27 @@ export default function Home({ spots, onClaim, viewers }) {
         </div>
         <div className="text-center mt-8">
           <Link to="/how-it-works" className="text-electric text-sm font-semibold hover:underline">Learn more about how it works →</Link>
+        </div>
+      </section>
+
+      {/* why brands flex here */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-20">
+        <h2 className="font-display font-bold text-3xl sm:text-4xl text-snow text-center">Why brands <span className="grad-text">flex here</span></h2>
+        <p className="text-mist text-center mt-3 max-w-xl mx-auto">Traditional ads cost thousands and get ignored. A FlexSpot puts you in front of everyone — and every dollar works twice: as promotion and as ranking power.</p>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-10">
+          {[
+            { icon: '👁️', t: 'Public visibility', d: 'Your brand on a page people check daily — not buried in an ad auction.' },
+            { icon: '🤝', t: 'Social proof', d: 'A live support total next to your name beats any testimonial.' },
+            { icon: '🌐', t: 'Website traffic', d: 'Every spot links straight to you. Clicks are the whole point.' },
+            { icon: '🔍', t: 'Brand discovery', d: 'Get discovered beside bigger names by thousands of curious visitors.' },
+            { icon: '⚡', t: 'Community support', d: 'Fans, friends and customers can boost you up the board in real time.' },
+          ].map((b) => (
+            <div key={b.t} className="card-lift bg-card border border-line/5 rounded-3xl p-5">
+              <div className="text-4xl mb-3">{b.icon}</div>
+              <h3 className="font-display font-bold text-snow mb-1.5">{b.t}</h3>
+              <p className="text-mist text-xs leading-relaxed">{b.d}</p>
+            </div>
+          ))}
         </div>
       </section>
 

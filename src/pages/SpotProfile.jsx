@@ -109,6 +109,25 @@ export default function SpotProfile({ spots, onClaim, onBoost }) {
               </div>
             </motion.div>
           )}
+          {(spot.move || 0) > 0 && (
+            <div className="mt-4 rounded-2xl bg-neon/10 border border-neon/30 p-4 flex items-center gap-3">
+              <span className="text-2xl">🔥</span>
+              <p className="text-sm text-snow font-semibold">
+                Climbed {spot.move} spot{spot.move > 1 ? 's' : ''} recently — momentum is on your side. Keep it going.
+              </p>
+            </div>
+          )}
+          {(spot.move || 0) < 0 && (
+            <div className="mt-4 rounded-2xl bg-red-500/10 border border-red-500/30 p-4 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">😬</span>
+                <p className="text-sm text-snow font-semibold">
+                  Someone just passed you — slipped {Math.abs(spot.move)} spot{spot.move < -1 ? 's' : ''}. A small boost takes it back.
+                </p>
+              </div>
+              <button onClick={() => onBoost(spot)} className="btn-primary px-4 py-2 text-xs shrink-0">⚡ Fight back</button>
+            </div>
+          )}
         </div>
       </div>
 

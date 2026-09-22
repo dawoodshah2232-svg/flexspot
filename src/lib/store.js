@@ -8,6 +8,7 @@ const LS_SPOTS = 'flexspot_local_spots';
 const LS_CLICKS = 'flexspot_local_clicks';
 const LS_REFS = 'flexspot_local_refs';
 const LS_BOOSTS = 'flexspot_local_boosts';
+const LS_RANKS = 'flexspot_rank_snapshot';
 
 const readLS = (k, fb) => {
   try { const v = JSON.parse(localStorage.getItem(k)); return v ?? fb; } catch { return fb; }
@@ -47,7 +48,7 @@ export async function fetchLeaderboard() {
     try {
       const data = await rpc('get_leaderboard', { p_board: 'all_time' });
       const live = (Array.isArray(data) ? data : []).map(mapLiveRow);
-      if (live.length) return rank(live);
+      if (live.length) return withMovement(rank(live));
     } catch { /* fall through to demo */ }
   }
   const local = readLS(LS_SPOTS, []).filter((s) => !s.pending);
@@ -59,7 +60,7 @@ export async function fetchLeaderboard() {
     clicks: s.clicks + (clicks[s.slug] || 0),
   });
   const merged = [...DEMO_SPOTS.map(withBoosts), ...local.map(withBoosts)];
-  return rank(merged);
+  return withMovement(rank(merged));
 }
 
 // Pending submissions (visible in Admin only)
@@ -71,6 +72,31 @@ export function fetchPendingSpots() {
 export function rank(spots) {
   const sorted = [...spots].sort((a, b) => b.amount - a.amount);
   return sorted.map((s, i) => ({ ...s, rank: i + 1 }));
+}
+
+// True rank-movement tracking: compares current ranks against the last saved
+// snapshot. Positive move = climbed (old rank - new rank). On first run, demo
+// spots can seed movement via `seedMove` so the UI demonstrates the indicators.
+export function withMovement(spots) {
+  let snap = {};
+  try { snap = JSON.parse(localStorage.getItem(LS_RANKS)) || {}; } catch {}
+  const firstRun = Object.keys(snap).length === 0;
+  const out = spots.map((s) => {
+    let move = 0;
+    if (firstRun) move = s.seedMove || 0;
+    else if (snap[s.slug] !== undefined) move = snap[s.slug] - s.rank;
+    return { ...s, move };
+  });
+  saveRankSnapshot(spots);
+  return out;
+}
+
+export function saveRankSnapshot(spots) {
+  try {
+    const snap = {};
+    spots.forEach((s) => { snap[s.slug] = s.rank; });
+    localStorage.setItem(LS_RANKS, JSON.stringify(snap));
+  } catch {}
 }
 
 export function getSpot(slug, spots) {

@@ -615,6 +615,14 @@ export default function ClaimPage({ spots, onSubmitted }) {
               </div>
             </div>
 
+            <p className="text-xs text-[var(--ink-3)] leading-relaxed text-center">
+              ⚠️ By submitting, you agree to our{' '}
+              <Link to="/terms" className="text-[var(--blaze)] hover:underline font-semibold">Terms of Service</Link>{' '}
+              and <Link to="/disclaimers" className="text-[var(--blaze)] hover:underline font-semibold">Disclaimers</Link>.
+              All sales are final once published. Crypto transfers are irreversible — double-check the
+              wallet address and network before sending.
+            </p>
+
             <div className="flex gap-2.5">
               <button onClick={() => setStep(amountStep)} className="btn-ghost px-5 py-3.5 text-sm">← Back</button>
               <button onClick={submit} disabled={busy} className="btn-gold flex-1 py-3.5 text-[15px]">

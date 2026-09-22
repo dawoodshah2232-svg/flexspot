@@ -494,6 +494,7 @@ export function getReferralEvents(code, limit = 50) {
 }
 
 export function getSpotReferrers(slug, limit = 5) {
+  ensureReferralSeed();
   const ids = readLS(LS_REF_ID, {});
   const stats = readLS(LS_REF_STATS, {});
   return Object.entries(ids)
@@ -504,6 +505,7 @@ export function getSpotReferrers(slug, limit = 5) {
 }
 
 export function getTopReferrers(limit = 8) {
+  ensureReferralSeed();
   const ids = readLS(LS_REF_ID, {});
   const stats = readLS(LS_REF_STATS, {});
   return Object.entries(ids)

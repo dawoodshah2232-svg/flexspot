@@ -4,7 +4,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { BrandAvatar, RankBadge } from '../components/SpotCard';
 import ShareButtons from '../components/ShareButtons';
 import CountUp from '../components/CountUp';
-import { money, compact, timeAgo, copyText } from '../lib/format';
+import { money, compact, timeAgo, copyText, spotPath } from '../lib/format';
 import { REWARDS } from '../lib/data';
 import { recordClick, recordReferralClick, getContributions, createReferralIdentity, myReferralCode, creditReferralVisit, getSpotReferrers } from '../lib/store';
 import Flee from '../components/Flee';
@@ -83,8 +83,15 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
     );
   }
 
-  const visit = (url) => { recordClick(spot.slug); window.open(url, '_blank', 'noopener'); };
-  const refLink = myCode ? `${window.location.origin}/s/${spot.slug}?ref=${myCode}` : '';
+  // Outbound visit: only allow http(s) destinations. The claim flow's normUrl
+  // already forces https://, but the admin manual-entry path stores raw input,
+  // so never trust this value — a javascript: URL must not execute here.
+  const visit = (url) => {
+    if (!/^https?:\/\//i.test(url || '')) return;
+    recordClick(spot.slug);
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+  const refLink = myCode ? `${window.location.origin}${spotPath(spot.slug, myCode)}` : '';
   const copyRef = async () => {
     if (!refLink) return;
     const ok = await copyText(refLink);

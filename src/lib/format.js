@@ -48,8 +48,18 @@ export const initials = (name) =>
     .join('')
     .toUpperCase();
 
+// Base path of the deployed app ("/flexspot/" on GitHub Pages preview, "/" on production).
+// Share/referral URLs must include it, otherwise they 404 on the preview domain.
+export const appBase = () => {
+  const b = (import.meta.env.BASE_URL || '/').replace(/\/+$/, '');
+  return b === '' ? '' : b;
+};
+
+export const spotPath = (slug, refCode) =>
+  `${appBase()}/s/${slug}${refCode ? `?ref=${encodeURIComponent(refCode)}` : ''}`;
+
 export const shareLinks = (spot, origin, refCode) => {
-  const url = `${origin}/s/${spot.slug}${refCode ? `?ref=${encodeURIComponent(refCode)}` : ''}`;
+  const url = `${origin}${spotPath(spot.slug, refCode)}`;
   const text = `Help ${spot.name} reach #1 on FlexSpot 🏆`;
   return {
     url,

@@ -3,7 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 export function Logo({ compact = false }) {
   return (
     <Link to="/" className="flex items-center gap-2.5 group">
-      <span className="relative grid place-items-center w-10 h-10 rounded-2xl bg-gradient-to-br from-electric to-[#7A4DFF] shadow-glowblue group-hover:scale-105 transition-transform">
+      <span className="relative grid place-items-center w-10 h-10 rounded-2xl bg-gradient-to-br from-[var(--blaze)] to-[#7A4DFF] shadow-[var(--shadow-blaze)] group-hover:scale-105 transition-transform">
         <svg viewBox="0 0 24 24" className="w-5 h-5 text-white" fill="currentColor">
           <path d="M13 2 4.5 13.5H11L9.5 22 19 10h-6.5L13 2z" />
         </svg>
@@ -11,7 +11,7 @@ export function Logo({ compact = false }) {
       </span>
       {!compact && (
         <span className="font-display leading-none">
-          <span className="block text-[19px] font-bold tracking-tight text-snow">FlexSpot<span className="text-electric">.LOL</span></span>
+          <span className="block text-[19px] font-bold tracking-tight text-snow">FlexSpot<span className="text-[var(--blaze)]">.LOL</span></span>
           <span className="block text-[9px] font-semibold tracking-[0.22em] text-mist uppercase mt-0.5">Claim your spot</span>
         </span>
       )}

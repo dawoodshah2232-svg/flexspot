@@ -1,21 +1,28 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import Navbar from './components/Navbar';
+import Header from './components/Header';
+import Flee from './components/Flee';
 import MobileNav from './components/MobileNav';
 import Footer from './components/Footer';
-import ClaimModal from './components/ClaimModal';
 import Home from './pages/Home';
+import ClaimPage from './pages/ClaimPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import HowItWorks from './pages/HowItWorks';
 import Rewards from './pages/Rewards';
 import FAQ from './pages/FAQ';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
 import SpotProfile from './pages/SpotProfile';
 import Admin from './pages/Admin';
 import { fetchLeaderboard, fetchPendingSpots, rank, saveRankSnapshot, IS_LIVE } from './lib/store';
 import { LIVE_FEED_POOL } from './lib/data';
-import { useTheme, useLiveViewers } from './lib/theme';
+import { useLiveViewers } from './lib/theme';
 import DiscoveryPage from './pages/DiscoveryPage';
+import Explore from './pages/Explore';
+import CategoryPage from './pages/CategoryPage';
+import RootProfile from './components/RootProfile';
+import NotFound from './pages/NotFound';
 
 function ScrollTop() {
   const { pathname } = useLocation();
@@ -27,15 +34,10 @@ function Shell() {
   const [spots, setSpots] = useState([]);
   const [pending, setPending] = useState([]);
   const [moves, setMoves] = useState({});
-  const [claimOpen, setClaimOpen] = useState(false);
-  const [boostSpot, setBoostSpot] = useState(null);
   const [toasts, setToasts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { theme, toggle: toggleTheme } = useTheme();
   const viewers = useLiveViewers();
   const navigate = useNavigate();
-  const location = useLocation();
-  const refParam = new URLSearchParams(location.search).get('ref');
 
   const load = useCallback(async () => {
     const data = await fetchLeaderboard();
@@ -97,33 +99,33 @@ function Shell() {
     return () => clearInterval(t);
   }, [loading, toast]);
 
-  const openClaim = useCallback(() => { setBoostSpot(null); setClaimOpen(true); }, []);
-  const openBoost = useCallback((spot) => { setBoostSpot(spot); setClaimOpen(true); }, []);
+  const openClaim = useCallback(() => { navigate('/claim'); }, [navigate]);
+  const openBoost = useCallback((spot) => { navigate(`/claim?boost=${spot.slug}`); }, [navigate]);
 
-  const onDone = useCallback(() => {
-    load();
-    setTimeout(() => navigate('/leaderboard'), 600);
-  }, [load, navigate]);
+  const onSubmitted = useCallback(() => { load(); }, [load]);
 
   if (loading) {
     return (
-      <div className="min-h-screen grid place-items-center bg-ink">
+      <div className="min-h-screen grid place-items-center bg-[var(--bg)]">
         <div className="text-center">
-          <div className="text-5xl mb-4 anim-floaty">⚡</div>
-          <div className="font-display font-bold text-snow text-lg">Loading the spotlight…</div>
+          <Flee><div className="text-5xl mb-4 anim-floaty">⚡</div></Flee>
+          <div className="font-display font-bold text-[var(--ink)] text-lg">Loading the spotlight…</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-ink text-snow">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--ink)]">
       <ScrollTop />
-      <Navbar onClaim={openClaim} theme={theme} onToggleTheme={toggleTheme} viewers={viewers} />
+      <Header onClaim={openClaim} />
       <main>
         <Routes>
           <Route path="/" element={<Home spots={spots} onClaim={openClaim} onBoost={openBoost} viewers={viewers} />} />
+          <Route path="/claim" element={<ClaimPage spots={spots} onSubmitted={onSubmitted} />} />
           <Route path="/leaderboard" element={<LeaderboardPage spots={spots} moves={moves} onBoost={openBoost} onClaim={openClaim} />} />
+          <Route path="/explore" element={<Explore spots={spots} onBoost={openBoost} onClaim={openClaim} />} />
+          <Route path="/explore/:category" element={<CategoryPage spots={spots} moves={moves} onBoost={openBoost} onClaim={openClaim} />} />
           <Route path="/trending" element={<DiscoveryPage mode="trending" spots={spots} moves={moves} onBoost={openBoost} onClaim={openClaim} />} />
           <Route path="/rising" element={<DiscoveryPage mode="rising" spots={spots} moves={moves} onBoost={openBoost} onClaim={openClaim} />} />
           <Route path="/winners" element={<DiscoveryPage mode="winners" spots={spots} moves={moves} onBoost={openBoost} onClaim={openClaim} />} />
@@ -131,22 +133,17 @@ function Shell() {
           <Route path="/how-it-works" element={<HowItWorks onClaim={openClaim} />} />
           <Route path="/rewards" element={<Rewards spots={spots} onClaim={openClaim} />} />
           <Route path="/faq" element={<FAQ onClaim={openClaim} />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
           <Route path="/s/:slug" element={<SpotProfile spots={spots} onClaim={openClaim} onBoost={openBoost} />} />
           <Route path="/admin" element={<Admin spots={spots} pending={pending} refresh={load} />} />
-          <Route path="*" element={<Home spots={spots} onClaim={openClaim} onBoost={openBoost} viewers={viewers} />} />
+          {/* Root profiles — static routes always win over /:slug in React Router ranking */}
+          <Route path="/:slug" element={<RootProfile spots={spots} onClaim={openClaim} onBoost={openBoost} />} />
+          <Route path="*" element={<NotFound onClaim={openClaim} />} />
         </Routes>
       </main>
       <Footer onClaim={openClaim} />
       <MobileNav onClaim={openClaim} />
-
-      <ClaimModal
-        open={claimOpen}
-        onClose={() => setClaimOpen(false)}
-        onDone={onDone}
-        boostSpot={boostSpot}
-        initialRef={refParam}
-        spots={spots}
-      />
 
       {/* toasts */}
       <div className="fixed bottom-24 lg:bottom-8 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-2 pointer-events-none w-full px-4">
@@ -157,7 +154,7 @@ function Shell() {
               initial={{ opacity: 0, y: 16, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8, scale: 0.95 }}
-              className="toast-pop glass rounded-2xl px-5 py-3 text-sm font-semibold text-snow shadow-card whitespace-nowrap max-w-full overflow-hidden text-ellipsis"
+              className="toast-pop rounded-2xl px-5 py-3 text-sm font-semibold whitespace-nowrap max-w-full overflow-hidden text-ellipsis bg-[var(--surface)] text-[var(--ink)] border border-[var(--line)] shadow-[var(--shadow-card)]"
             >
               {t.msg}
             </motion.div>

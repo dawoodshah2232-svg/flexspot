@@ -53,7 +53,6 @@ export const shareLinks = (spot, origin) => {
   const text = `Help ${spot.name} reach #1 on FlexSpot 🏆`;
   return {
     url,
-    whatsapp: `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`,
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
     x: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
     telegram: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`,

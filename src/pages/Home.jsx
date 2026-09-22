@@ -4,25 +4,46 @@ import { AnimatePresence, motion } from 'framer-motion';
 import CountUp from '../components/CountUp';
 import DramaTicker from '../components/DramaTicker';
 import Podium from '../components/Podium';
-import { BrandAvatar, RankBadge, MoveIndicator } from '../components/SpotCard';
-import { money, compact } from '../lib/format';
-import { LIVE_FEED_POOL } from '../lib/data';
+import Floaties from '../components/Floaties';
+import { SpotRow, BrandAvatar, useRaceCycle } from '../components/SpotCard';
+import Flee from '../components/Flee';
+import { compact, money } from '../lib/format';
+import { LIVE_FEED_POOL, IS_PREVIEW_DATA } from '../lib/data';
 import { IS_LIVE } from '../lib/store';
 
-function LiveStat({ icon, value, label, format }) {
+/* ---------------- Floating live-stats pill ---------------- */
+// Total volume is REAL: $1,603 seed base + every actual claim/boost on the board.
+// Brands live is REAL: the actual spot count. Online-now stays a simulated ambient ticker.
+const VOLUME_BASE = 1603;
+
+function LiveStatsPill({ viewers, totalVolume, brandCount }) {
+  const stats = [
+    { icon: '🟢', value: <CountUp to={viewers ?? 0} format={(n) => Math.round(n).toString()} />, label: 'online now' },
+    { icon: '💰', value: <>{money(totalVolume)}</>, label: 'total volume' },
+    { icon: '⚡', value: <CountUp to={brandCount} format={(n) => Math.round(n).toString()} />, label: 'brands live' },
+  ];
   return (
-    <div className="flex items-center gap-3 bg-line/5 border border-line/10 rounded-2xl px-4 py-3">
-      <span className="text-2xl">{icon}</span>
-      <div>
-        <div className="font-display font-bold text-xl text-snow leading-none">
-          <CountUp to={value} format={format} />
-        </div>
-        <div className="text-[11px] text-mist font-medium mt-1">{label}</div>
+    <div className="flex flex-col items-center px-4">
+      <p className="text-center text-[11px] font-bold tracking-[0.18em] uppercase text-[var(--ink-3)] mb-3">
+        Real brands. Real bids. Live now.
+      </p>
+      <div className="inline-flex flex-wrap justify-center items-center gap-x-5 gap-y-2 sm:gap-8 bg-[var(--surface)]/90 backdrop-blur border border-[var(--line)] rounded-3xl min-[420px]:rounded-full px-4 min-[420px]:pl-5 min-[420px]:pr-6 sm:pl-6 sm:pr-8 py-2.5 shadow-[var(--shadow-card)] max-w-full">
+        {stats.map((s, i) => (
+          <div key={s.label} className="flex items-center gap-2.5">
+            {i > 0 && <span className="w-px h-6 bg-[var(--line)] -ml-2.5 sm:-ml-4" aria-hidden="true" />}
+            <Flee><span className="text-base block">{s.icon}</span></Flee>
+            <div className="leading-tight">
+              <div className="font-display font-extrabold text-[15px] text-[var(--ink)]">{s.value}</div>
+              <div className="text-[10px] font-semibold text-[var(--ink-3)] uppercase tracking-wider">{s.label}</div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
+/* ---------------- Viral feed ticker ---------------- */
 function FeedTicker() {
   const [idx, setIdx] = useState(0);
   useEffect(() => {
@@ -39,215 +60,388 @@ function FeedTicker() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
-          className="text-mist"
+          className="text-[var(--ink-2)]"
         >
-          <b className="text-snow">{name}</b> {action}
+          <b className="text-[var(--ink)]">{name}</b> {action}
         </motion.span>
       </AnimatePresence>
     </div>
   );
 }
 
-export default function Home({ spots, onClaim, onBoost, viewers }) {
-  const totalRaised = useMemo(() => spots.reduce((a, s) => a + s.amount, 0), [spots]);
-  const stats = [
-    { icon: '🟢', value: viewers ?? 0, label: 'people here now', format: (n) => Math.round(n).toString() },
-    { icon: '🔥', value: 5240 + spots.filter((s) => s.id?.startsWith('local-')).length, label: 'spots claimed', format: (n) => Math.round(n).toLocaleString() },
-    { icon: '👀', value: 89000 + spots.reduce((a, s) => a + (s.views || 0), 0), label: 'visitors this month', format: (n) => compact(n) },
-    { icon: '⚡', value: totalRaised, label: 'support contributed', format: (n) => '$' + compact(n) },
-  ];
+/* ---------------- Hero right visual: the Champion's Stage ---------------- */
+const HERO_KING = `${import.meta.env.BASE_URL}hero-king.jpg`;
+
+function ChampionStage({ leader, onClaim }) {
+  return (
+    <div className="relative rounded-[32px] overflow-hidden champion-stage shadow-[var(--shadow-lift)]">
+      {/* rotating light rays */}
+      <div className="stage-rays" aria-hidden="true" />
+      {/* rising gold particles */}
+      <div className="stage-particles" aria-hidden="true">
+        {['12%', '32%', '58%', '76%', '88%'].map((left, i) => (
+          <span key={i} className="stage-particle" style={{ left, animationDelay: `${-i * 1.7}s`, animationDuration: `${5 + i}s` }} />
+        ))}
+      </div>
+
+      {/* the frog king on his throne */}
+      <div className="relative">
+        <img
+          src={HERO_KING}
+          alt="The FlexSpot frog king defending his golden throne"
+          className="w-full h-52 min-[420px]:h-60 sm:h-72 object-cover"
+          loading="eager"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-black/15" aria-hidden="true" />
+        {/* champion ribbon */}
+        <div className="absolute top-4 inset-x-0 flex justify-center">
+          <div className="inline-flex items-center gap-2 bg-black/70 backdrop-blur-md text-[#FBBF24] border border-[#F59E0B]/60 font-black text-[11px] sm:text-xs uppercase tracking-[0.2em] rounded-full px-5 py-2 shadow-[0_8px_24px_-6px_rgba(245,158,11,0.7)]">
+            <span>👑</span> Reigning champion <span>👑</span>
+          </div>
+        </div>
+        {/* floating chips over the photo */}
+        <div className="absolute bottom-3.5 left-4 bg-white/10 backdrop-blur border border-white/25 rounded-2xl px-3 py-2 text-center anim-floaty">
+          <div className="text-[10px] font-bold text-white/60 uppercase tracking-wider">#1 spot</div>
+          <div className="text-sm font-extrabold text-white truncate max-w-[130px]">{leader?.name ?? '—'}</div>
+        </div>
+        <div className="absolute bottom-3.5 right-4 bg-[#12B76A]/20 backdrop-blur border border-[#12B76A]/40 rounded-2xl px-3 py-2 text-center anim-floaty" style={{ animationDelay: '-0.6s' }}>
+          <div className="text-xs font-extrabold text-[#34D399]">▲ trending</div>
+          <div className="text-[10px] font-bold text-white/60 uppercase tracking-wider">right now</div>
+        </div>
+      </div>
+
+      <div className="relative p-6 sm:p-8 pt-5 pb-14 sm:pb-16">
+        {/* the champion brand card */}
+        {leader && (
+          <Link to={`/s/${leader.slug}`} className="group relative block rounded-3xl border-2 border-[#FBBF24] bg-gradient-to-br from-[#7C3AED]/30 via-white/[0.07] to-[#F59E0B]/20 backdrop-blur-md p-4 sm:p-5 overflow-hidden hover:border-[#FCD34D] transition-colors shadow-[0_0_44px_-8px_rgba(251,191,36,0.55)]">
+            <div className="podium-shine" aria-hidden="true" />
+            <div className="flex items-center gap-4">
+              <BrandAvatar spot={leader} size={64} ring />
+              <div className="min-w-0 flex-1">
+                <div className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#FCD34D]">Champion of the internet</div>
+                <div className="font-display font-extrabold text-xl sm:text-2xl text-white truncate group-hover:underline">{leader.name}</div>
+                <div className="text-sm text-white/60 truncate">{leader.tagline}</div>
+              </div>
+              <div className="text-right shrink-0">
+                <div className="font-display font-black text-2xl sm:text-3xl text-[#FCD34D]">{money(leader.amount)}</div>
+                <div className="text-[10px] uppercase tracking-widest text-white/50 font-bold">spot value</div>
+                <div className="text-xs font-bold text-white/70 mt-1">👁 {compact(leader.views)} views</div>
+              </div>
+            </div>
+          </Link>
+        )}
+
+        {/* dethrone CTA */}
+        <button onClick={onClaim} className="btn-gold w-full py-4 mt-4 text-base font-extrabold">
+          <span aria-hidden="true">⚔️</span> <span className="shine-text-btn">Steal the crown — from just $1</span>
+        </button>
+        <p className="text-center text-white/50 text-xs mt-2.5">One dollar more than the champ takes their throne.</p>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- Hero right visual ---------------- */
+function HeroVisual({ leader, onClaim }) {
+  return (
+    <div className="relative">
+      <ChampionStage leader={leader} onClaim={onClaim} />
+      {/* claim card overlapping the bottom edge */}
+      <div className="relative z-10 -mt-10 mx-4 sm:mx-10 bg-[var(--surface)]/95 backdrop-blur border border-[var(--line)] rounded-3xl shadow-[var(--shadow-lift)] p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--ink-3)]">Manual approval · crypto only</div>
+            <div className="font-display font-extrabold text-lg text-[var(--ink)] mt-0.5"><span className="sheen-light">Claim Your Spot From $1</span></div>
+          </div>
+          <Flee><span className="text-3xl shrink-0 block">🎟️</span></Flee>
+        </div>
+        <ul className="text-[13px] text-[var(--ink-2)] mt-3 grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+          <li className="flex items-center gap-2"><span className="text-[#12B76A]">✓</span> Name, pic & story</li>
+          <li className="flex items-center gap-2"><span className="text-[#12B76A]">✓</span> USDT payment proof</li>
+          <li className="flex items-center gap-2"><span className="text-[#12B76A]">✓</span> Live after approval</li>
+        </ul>
+        <button onClick={onClaim} className="btn-primary w-full py-3 mt-4 text-sm">
+          Start From $1 →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- Leaderboard section (mirrors /leaderboard) ---------------- */
+const TABS = [
+  { id: 'all', label: 'All Brands' },
+  { id: 'gainers', label: 'Top Gainers' },
+  { id: 'newest', label: 'Newest' },
+];
+
+function LeaderboardSection({ spots, onBoost, onClaim }) {
+  const [tab, setTab] = useState('all');
+  const { race, count } = useRaceCycle();
+  const ordered = useMemo(() => {
+    const list = [...spots];
+    if (tab === 'gainers') list.sort((a, b) => (b.move || 0) - (a.move || 0));
+    else if (tab === 'newest') list.sort((a, b) => (b.joinedAt || 0) - (a.joinedAt || 0));
+    else list.sort((a, b) => b.amount - a.amount || (a.joinedAt || 0) - (b.joinedAt || 0));
+    return list;
+  }, [spots, tab]);
+  const ranked = ordered.map((s, i) => ({ ...s, rank: i + 1, displayRank: i + 1 }));
 
   return (
-    <div>
-      {/* HERO */}
-      <section className="relative overflow-hidden pt-[68px]">
-        <div className="blob w-[420px] h-[420px] bg-electric/40 -top-20 -left-32" />
-        <div className="blob w-[380px] h-[380px] bg-neon/20 top-40 right-[-120px]" style={{ animationDelay: '-6s' }} />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-12 sm:pt-20 pb-14 grid lg:grid-cols-2 gap-12 items-center relative">
-          <div>
-            <div className="inline-flex items-center gap-2 bg-line/5 border border-line/10 rounded-full px-4 py-1.5 text-xs font-semibold text-mist mb-6">
-              <span className="live-dot" /> The internet's public spotlight marketplace
-            </div>
-            <h1 className="font-display font-bold text-[42px] sm:text-6xl lg:text-[68px] leading-[1.02] tracking-tight text-snow">
-              Claim Your Spot<br />On The <span className="grad-text">Internet.</span>
-            </h1>
-            <p className="text-mist text-base sm:text-lg mt-5 max-w-lg leading-relaxed">
-              Starting from just <b className="text-snow">$1</b>, get discovered, climb the leaderboard, and show the world what you're building.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 mt-8">
-              <button onClick={onClaim} className="btn-primary px-8 py-4 text-base">
-                ⚡ Claim My Spot From $1
-              </button>
-              <Link to="/leaderboard" className="btn-ghost px-8 py-4 text-base text-center">
-                Explore Leaderboard
-              </Link>
-            </div>
-            <div className="mt-8 max-w-md space-y-3">
-              <DramaTicker />
-              <FeedTicker />
-            </div>
-          </div>
-          <div>
-            <Podium spots={spots.slice(0, 3)} onBoost={onBoost} />
-            {/* ranks 4–10 */}
-            <div className="mt-4 rounded-3xl bg-card border border-line/5 p-3">
-              <div className="flex items-center justify-between px-2 py-1.5">
-                <span className="font-display font-bold text-sm text-snow">🔥 Top 10 — the chase pack</span>
-                <Link to="/leaderboard" className="text-[11px] font-semibold text-electric hover:underline">Full board →</Link>
-              </div>
-              <div className="space-y-1">
-                <AnimatePresence initial={false}>
-                  {spots.slice(3, 10).map((s) => (
-                    <motion.div
-                      key={s.slug}
-                      layout
-                      initial={{ opacity: 0, x: 40 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -40 }}
-                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                    >
-                      <Link to={`/s/${s.slug}`} className="flex items-center gap-3 rounded-2xl p-2 hover:bg-line/5 transition-colors">
-                        <RankBadge rank={s.rank} />
-                        <BrandAvatar spot={s} size={34} />
-                        <div className="flex-1 min-w-0">
-                          <div className="font-bold text-sm text-snow truncate">{s.name}</div>
-                          <div className="text-[11px] text-mist truncate">{s.tagline}</div>
-                        </div>
-                        <MoveIndicator move={s.move} />
-                        <div className="font-display font-bold text-neon text-sm">{money(s.amount)}</div>
-                      </Link>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* live stats band */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-4 relative">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {stats.map((s) => <LiveStat key={s.label} {...s} />)}
-          </div>
-        </div>
-      </section>
-
-      {/* marquee */}
-      <div className="border-y border-line/5 bg-coal/50 py-4 overflow-hidden">
-        <div className="marquee-track gap-10 text-sm font-semibold text-mist">
-          {[...spots.slice(0, 8), ...spots.slice(0, 8)].map((s, i) => (
-            <span key={i} className="flex items-center gap-2 whitespace-nowrap">
-              <span className="text-gold">#{s.rank}</span> {s.name} <span className="text-neon font-bold">{money(s.amount)}</span> <span className="text-line/20">•</span>
-            </span>
+    <section className="relative max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
+      <Floaties
+        items={[
+          { emoji: '🏁', left: '1%', top: '6%', size: 30, cls: 'hidden xl:block', opacity: 0.5 },
+          { emoji: '🐇', left: '96%', top: '12%', size: 28, cls: 'hidden xl:block', opacity: 0.5 },
+          { emoji: '🐢', left: '2%', top: '48%', size: 30, cls: 'hidden xl:block', opacity: 0.45 },
+          { emoji: '⚡', left: '95%', top: '58%', size: 26, cls: 'hidden xl:block', opacity: 0.45 },
+          { emoji: '🍿', left: '3%', top: '86%', size: 26, cls: 'hidden xl:block', opacity: 0.4 },
+          { emoji: '🥇', left: '94%', top: '88%', size: 28, cls: 'hidden xl:block', opacity: 0.4 },
+        ]}
+      />
+      <div className="text-center mb-8 relative">
+        <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--ink)]">🏆 Live Leaderboard</h2>
+        <p className="text-[var(--ink-2)] mt-2 flex items-center justify-center gap-2 text-sm">
+          <span className="live-dot" /> Updates every few seconds · highest amount wins · ties go to whoever got there first
+        </p>
+        <div className="flex justify-center gap-2 mt-6 flex-wrap">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
+                tab === t.id
+                  ? 'bg-[var(--ink)] text-[var(--bg)] shadow-[var(--shadow-card)]'
+                  : 'bg-[var(--surface)] text-[var(--ink-2)] border border-[var(--line)] hover:border-[var(--ink-3)]'
+              }`}
+            >
+              {t.label}
+            </button>
           ))}
         </div>
       </div>
 
-      {/* leaderboard preview */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-16">
-        <div className="flex items-end justify-between mb-6">
-          <div>
-            <h2 className="font-display font-bold text-3xl sm:text-4xl text-snow">🏆 The Leaderboard</h2>
-            <p className="text-mist mt-2">Live rankings. More support = higher spot. Beat your competitors.</p>
-          </div>
-          <Link to="/leaderboard" className="btn-ghost px-5 py-2.5 text-sm hidden sm:block">View all →</Link>
+      <Podium spots={ranked.slice(0, 3)} onBoost={onBoost} />
+
+      {/* ranks 4–10 — same row design as the leaderboard page */}
+      <div className="mt-8">
+        <div className="flex items-center justify-between mb-4 px-1">
+          <span className="font-display font-bold text-xl text-[var(--ink)]">🔥 The chase pack</span>
+          {/* synced race countdown — desktop lanes only */}
+          <span className="hidden md:flex items-center justify-center h-9 w-32" aria-hidden="true">
+            {count !== null && (
+              <span
+                key={`${race.key}-${count}`}
+                className={`countdown-pop font-display font-black text-2xl tracking-tight ${count === 'GO' ? 'grad-text-anim' : 'grad-gold'}`}
+              >
+                {count === 'GO' ? '🚦 GO!' : `🏁 ${count}`}
+              </span>
+            )}
+          </span>
+          <Link to="/leaderboard" className="text-sm font-bold text-[var(--blaze)] hover:underline">Full board →</Link>
         </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {spots.slice(0, 4).map((s) => (
-            <Link key={s.slug} to={`/s/${s.slug}`} className={`card-lift rounded-3xl p-5 border ${s.rank === 1 ? 'bg-gold/[0.07] border-gold/40' : 'bg-card border-line/5'}`}>
-              <div className="flex items-center justify-between mb-4">
-                <RankBadge rank={s.rank} />
-                {s.rank === 1 && <span className="text-2xl crown-bob">👑</span>}
+        <div className="space-y-2.5">
+          <AnimatePresence initial={false}>
+            {ranked.slice(3, 10).map((s) => (
+              <SpotRow key={s.slug} spot={s} move={s.move} onBoost={onBoost} race={race} />
+            ))}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      <div className="text-center mt-8">
+        <button onClick={onClaim} className="btn-primary px-8 py-4 text-base">
+          ⚡ Only $1 away from the board — claim yours
+        </button>
+      </div>
+    </section>
+  );
+}
+
+/* ---------------- Footer statistics — reworked ---------------- */
+function FooterStats() {
+  const items = [
+    { icon: '👥', chip: 'bg-[var(--blaze-soft)]', num: 89, suffix: 'K', decimals: 0, label: 'all-time visitors' },
+    { icon: '👁️', chip: 'bg-[var(--blue-soft)]', num: 4.2, suffix: 'M', decimals: 1, label: 'profile views' },
+    { icon: '⚡', chip: 'bg-[var(--gold-soft)]', num: 100, suffix: '+', decimals: 0, label: 'brands featured' },
+    { icon: '🌎', chip: 'bg-[var(--green-soft)]', text: 'Global', label: 'community worldwide' },
+  ];
+  return (
+    <section className="border-y border-[var(--line-soft)] bg-[var(--surface-2)]/60">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {items.map((it) => (
+          <div
+            key={it.label}
+            className="card card-lift rounded-3xl p-5 flex items-center gap-4"
+          >
+            <span className={`grid place-items-center w-13 h-13 sm:w-14 sm:h-14 rounded-2xl text-2xl sm:text-[28px] shrink-0 ${it.chip}`} style={{ width: 56, height: 56 }}>
+              {it.icon}
+            </span>
+            <div className="leading-tight min-w-0">
+              <div className="font-display font-black text-[26px] sm:text-3xl text-[var(--ink)] tracking-tight">
+                {it.text ?? (
+                  <CountUp to={it.num} format={(n) => n.toFixed(it.decimals)} />
+                )}
+                {!it.text && <span className="grad-text">{it.suffix}</span>}
               </div>
-              <BrandAvatar spot={s} size={52} />
-              <h3 className="font-display font-bold text-lg text-snow mt-3 truncate">{s.name}</h3>
-              <p className="text-mist text-xs truncate">{s.tagline}</p>
-              <div className="font-display font-bold text-2xl text-neon mt-3">{money(s.amount)}</div>
-            </Link>
-          ))}
+              <div className="text-[11px] font-bold text-[var(--ink-3)] uppercase tracking-[0.12em] mt-0.5">{it.label}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+const BENEFITS = [
+  { icon: '⚡', label: 'Live Leaderboard' },
+  { icon: '👥', label: 'Real People' },
+  { icon: '📊', label: 'Brand Exposure' },
+  { icon: '🌎', label: 'Open To Everyone' },
+];
+
+export default function Home({ spots, onClaim, onBoost, viewers }) {
+  const totalVolume = useMemo(() => VOLUME_BASE + spots.reduce((a, s) => a + s.amount, 0), [spots]);
+  const leader = useMemo(() => [...spots].sort((a, b) => b.amount - a.amount || (a.joinedAt || 0) - (b.joinedAt || 0))[0], [spots]);
+
+  return (
+    <div className="pt-[92px]">
+      {/* HERO */}
+      <section className="relative overflow-hidden">
+        <Floaties
+          items={[
+            { emoji: '🚀', left: '2%', top: '12%', size: 30, cls: 'hidden lg:block' },
+            { emoji: '💰', left: '94%', top: '8%', size: 26, cls: 'hidden lg:block', opacity: 0.45 },
+            { emoji: '🔥', left: '46%', top: '4%', size: 24, opacity: 0.4 },
+            { emoji: '👑', left: '90%', top: '72%', size: 30, cls: 'hidden lg:block', opacity: 0.4 },
+            { emoji: '😂', left: '3%', top: '78%', size: 26, cls: 'hidden lg:block', opacity: 0.35 },
+            { emoji: '💎', left: '52%', top: '88%', size: 22, opacity: 0.4 },
+          ]}
+        />
+        <div className="blob w-[420px] h-[420px] bg-[#F59E0B]/15 -top-20 -left-32" />
+        <div className="blob w-[380px] h-[380px] bg-[#F59E0B]/15 top-40 right-[-120px]" style={{ animationDelay: '-6s' }} />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-16 grid lg:grid-cols-2 gap-8 lg:gap-10 items-center relative">
+          <div>
+            <div className="inline-flex items-center gap-2 bg-[var(--surface)] border border-[var(--line)] rounded-full px-4 py-1.5 text-[11px] font-bold tracking-[0.14em] text-[var(--ink-2)] mb-5 shadow-[var(--shadow-card)]">
+              <span className="live-dot" /> BRANDS COMPETE. THE INTERNET WINS.
+            </div>
+            <h1 className="font-display font-extrabold text-[38px] min-[400px]:text-[44px] sm:text-6xl lg:text-[72px] leading-[1.02] tracking-tight text-balance">
+              <span className="block sheen-light pb-1">BIG BRAND VISIBILITY.</span>
+              <span className="block grad-text-anim pb-2">START FROM JUST $1.</span>
+            </h1>
+            <p className="text-[var(--ink-2)] text-base sm:text-lg mt-4 max-w-lg leading-relaxed">
+              Anyone can boost any brand with <b className="text-[var(--ink)]">$1</b> — your name lands on their page,
+              and the highest total takes the crown. 👑
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 mt-7">
+              <button onClick={onClaim} className="btn-primary px-8 py-4 text-base">
+                Start From $1 →
+              </button>
+              <Link to="/how-it-works" className="btn-ghost px-8 py-4 text-base text-center">
+                How It Works
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-7 max-w-lg">
+              {BENEFITS.map((b) => (
+                <div key={b.label} className="flex items-center gap-2 bg-[var(--surface)] border border-[var(--line)] rounded-2xl px-3 py-2.5 shadow-[var(--shadow-card)]">
+                  <Flee><span className="text-xl block">{b.icon}</span></Flee>
+                  <span className="text-xs font-bold text-[var(--ink)] leading-tight">{b.label}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-7 max-w-md space-y-3">
+              <DramaTicker />
+              <FeedTicker />
+              {IS_PREVIEW_DATA && (
+                <p className="text-[11px] text-[var(--ink-3)]">Preview data — demo brands shown for the redesign review.</p>
+              )}
+            </div>
+          </div>
+          <div className="pb-2">
+            <HeroVisual leader={leader} onClaim={onClaim} />
+          </div>
         </div>
-        <Link to="/leaderboard" className="btn-ghost w-full py-3.5 text-sm mt-6 sm:hidden text-center block">View full leaderboard →</Link>
       </section>
 
-      {/* how it works */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-20">
-        <h2 className="font-display font-bold text-3xl sm:text-4xl text-snow text-center">From invisible to <span className="grad-text">unmissable</span> in 3 steps</h2>
-        <div className="grid sm:grid-cols-3 gap-4 mt-10">
+      {/* live stats — between hero and leaderboard */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 -mt-4 pb-2">
+        <LiveStatsPill viewers={viewers} totalVolume={totalVolume} brandCount={spots.length} />
+      </div>
+
+      <LeaderboardSection spots={spots} onBoost={onBoost} onClaim={onClaim} />
+
+      <FooterStats />
+
+      {/* HOW IT WORKS TEASER */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-14">
+        <div className="text-center mb-10">
+          <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--ink)]">
+            From unknown to <span className="grad-text">unmissable.</span>
+          </h2>
+          <p className="text-[var(--ink-2)] mt-3 max-w-xl mx-auto">
+            Anyone can claim a public spotlight on FlexSpot. Four steps and your brand is on the board.
+          </p>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { n: '1', icon: '⚡', t: 'Claim your spot', d: 'Add your name, logo, link and story. No signup, under a minute, from $1.' },
-            { n: '2', icon: '🚀', t: 'Climb the board', d: 'Every dollar of support pushes you higher. Boost yourself or get friends to back you.' },
-            { n: '3', icon: '👑', t: 'Own the spotlight', d: 'Hit #1 and take the crown. Share your rank everywhere and watch the clicks roll in.' },
+            { icon: '👁️', tint: 'from-[#7C3AED] to-[#4F46E5]', t: 'More Visibility', d: 'Your brand sits on a public leaderboard the internet actually watches.' },
+            { icon: '🚀', tint: 'from-[#2E7CF6] to-[#1B5FD0]', t: 'More Traffic', d: 'Real visitors click through to your website every day.' },
+            { icon: '🤝', tint: 'from-[#12B76A] to-[#0E9F5D]', t: 'Community Support', d: 'Fans and customers boost the brands they love up the ranks.' },
+            { icon: '🏆', tint: 'from-[#F59E0B] to-[#D97706]', t: 'Public Recognition', d: 'Winners get the crown, the spotlight, and the bragging rights.' },
           ].map((s) => (
-            <div key={s.n} className="card-lift bg-card border border-line/5 rounded-3xl p-6 relative overflow-hidden">
-              <div className="text-5xl mb-4">{s.icon}</div>
-              <div className="absolute top-4 right-5 font-display font-bold text-6xl text-line/5">{s.n}</div>
-              <h3 className="font-display font-bold text-xl text-snow mb-2">{s.t}</h3>
-              <p className="text-mist text-sm leading-relaxed">{s.d}</p>
+            <div key={s.t} className="card card-lift p-6 text-center">
+              <div className={`mx-auto w-14 h-14 rounded-2xl bg-gradient-to-br ${s.tint} grid place-items-center text-[28px] shadow-[var(--shadow-lift)] mb-4`}>
+                {s.icon}
+              </div>
+              <h3 className="font-display font-bold text-lg text-[var(--ink)]">{s.t}</h3>
+              <p className="text-sm text-[var(--ink-2)] mt-2 leading-relaxed">{s.d}</p>
             </div>
           ))}
         </div>
         <div className="text-center mt-8">
-          <Link to="/how-it-works" className="text-electric text-sm font-semibold hover:underline">Learn more about how it works →</Link>
+          <button onClick={onClaim} className="btn-primary px-8 py-4 text-base">
+            Start From $1 →
+          </button>
         </div>
       </section>
 
-      {/* why brands flex here */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-20">
-        <h2 className="font-display font-bold text-3xl sm:text-4xl text-snow text-center">Why brands <span className="grad-text">flex here</span></h2>
-        <p className="text-mist text-center mt-3 max-w-xl mx-auto">Traditional ads cost thousands and get ignored. A FlexSpot puts you in front of everyone — and every dollar works twice: as promotion and as ranking power.</p>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-10">
-          {[
-            { icon: '👁️', t: 'Public visibility', d: 'Your brand on a page people check daily — not buried in an ad auction.' },
-            { icon: '🤝', t: 'Social proof', d: 'A live support total next to your name beats any testimonial.' },
-            { icon: '🌐', t: 'Website traffic', d: 'Every spot links straight to you. Clicks are the whole point.' },
-            { icon: '🔍', t: 'Brand discovery', d: 'Get discovered beside bigger names by thousands of curious visitors.' },
-            { icon: '⚡', t: 'Community support', d: 'Fans, friends and customers can boost you up the board in real time.' },
-          ].map((b) => (
-            <div key={b.t} className="card-lift bg-card border border-line/5 rounded-3xl p-5">
-              <div className="text-4xl mb-3">{b.icon}</div>
-              <h3 className="font-display font-bold text-snow mb-1.5">{b.t}</h3>
-              <p className="text-mist text-xs leading-relaxed">{b.d}</p>
+      {/* CTA BAND — premium dark */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-20">
+        <div className="relative overflow-hidden rounded-[32px] p-8 sm:p-14 text-center text-white shadow-[var(--shadow-blaze)]"
+          style={{
+            background: 'radial-gradient(1200px 500px at 50% -10%, #7C3AED 0%, #4C1D95 45%, #1E1B4B 100%)',
+          }}>
+          <div className="absolute inset-0 opacity-[0.15]" aria-hidden="true"
+            style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,0.7) 1px, transparent 1px)', backgroundSize: '26px 26px' }} />
+          <div className="absolute -top-24 left-1/4 w-72 h-72 bg-[#F59E0B]/25 rounded-full blur-3xl" aria-hidden="true" />
+          <div className="absolute -bottom-24 right-1/4 w-72 h-72 bg-[#7C3AED]/40 rounded-full blur-3xl" aria-hidden="true" />
+          <div className="relative">
+            <Flee className="absolute left-[8%] top-6 hidden sm:block"><span className="anim-floaty block text-4xl drop-shadow-[0_8px_14px_rgba(0,0,0,0.45)]">✨</span></Flee>
+            <Flee className="absolute right-[10%] top-16 hidden sm:block"><span className="anim-floaty block text-4xl drop-shadow-[0_8px_14px_rgba(0,0,0,0.45)]" style={{ animationDelay: '-1.4s' }}>👑</span></Flee>
+            <Flee className="absolute left-[14%] bottom-16 hidden sm:block"><span className="anim-floaty block text-4xl drop-shadow-[0_8px_14px_rgba(0,0,0,0.45)]" style={{ animationDelay: '-2.2s' }}>⚡</span></Flee>
+            <Flee className="absolute right-[7%] bottom-8 hidden sm:block"><span className="anim-floaty block text-4xl drop-shadow-[0_8px_14px_rgba(0,0,0,0.45)]" style={{ animationDelay: '-0.8s' }}>✨</span></Flee>
+            <div className="relative inline-block mb-5">
+              <div className="absolute -inset-5 bg-[#F59E0B]/40 blur-2xl rounded-full" aria-hidden="true" />
+              <Flee><div className="relative text-7xl sm:text-8xl anim-floaty drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]">👑</div></Flee>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* viral CTA band */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-20">
-        <div className="spotlight relative overflow-hidden rounded-[32px] bg-gradient-to-br from-electric/25 via-card to-card border border-electric/30 p-8 sm:p-14 text-center">
-          <div className="text-5xl mb-4 anim-floaty">👀</div>
-          <h2 className="font-display font-bold text-3xl sm:text-5xl text-snow max-w-2xl mx-auto leading-tight">
-            Your competitors are already <span className="grad-gold">on the board.</span>
-          </h2>
-          <p className="text-mist mt-4 max-w-xl mx-auto">Every minute you wait, someone else takes the spotlight. Claim your spot now — from just $1.</p>
-          <button onClick={onClaim} className="btn-gold px-10 py-4 text-base mt-8">⚡ Claim My Spot — $1</button>
-          <p className="text-xs text-mist mt-4">Join 5,240+ brands, creators & startups already competing</p>
-        </div>
-      </section>
-
-      {/* rewards teaser */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-20">
-        <div className="flex items-end justify-between mb-6">
-          <div>
-            <h2 className="font-display font-bold text-3xl sm:text-4xl text-snow">🎖️ Rewards worth fighting for</h2>
-            <p className="text-mist mt-2">Badges, titles and glory for the boldest competitors.</p>
+            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-[11px] font-extrabold tracking-[0.18em] text-[#FCD34D] mb-5">
+              <span className="live-dot" /> THE #1 SPOT IS UP FOR GRABS
+            </div>
+            <h2 className="font-display font-extrabold text-3xl sm:text-5xl leading-tight">
+              The crown is waiting.<br /><span className="shine-text">Take the spotlight.</span>
+            </h2>
+            <p className="text-white/85 mt-4 max-w-lg mx-auto">
+              Every day, thousands of visitors browse the FlexSpot leaderboard. Your brand could be the one they remember.
+            </p>
+            <button onClick={onClaim} className="btn-gold mt-8 px-10 py-4 rounded-full text-base font-extrabold shadow-[var(--shadow-gold)] hover:-translate-y-0.5 transition-transform">
+              ⚡ Claim Your Spot From $1
+            </button>
+            <div className="flex items-center justify-center gap-4 sm:gap-6 mt-5 text-[11px] font-bold text-white/70 uppercase tracking-wider flex-wrap">
+              <span>✓ No account needed</span>
+              <span>✓ USDT · from $1</span>
+              <span>✓ Live after approval</span>
+            </div>
           </div>
-          <Link to="/rewards" className="btn-ghost px-5 py-2.5 text-sm hidden sm:block">All rewards →</Link>
-        </div>
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-          {[
-            { icon: '👑', t: 'Top Spot Holder', d: 'Rule the #1 position' },
-            { icon: '🏆', t: 'Weekly Champion', d: 'Top earner of the week' },
-            { icon: '🚀', t: 'Fastest Climber', d: 'Biggest rank jump in 24h' },
-            { icon: '📣', t: 'Most Shared', d: 'Referral machine' },
-            { icon: '❤️', t: 'Community Favorite', d: 'Most loved this week' },
-            { icon: '⚡', t: 'Early Adopter', d: 'First 100 spots ever' },
-          ].map((r) => (
-            <div key={r.t} className="card-lift bg-card border border-line/5 rounded-3xl p-5 flex items-center gap-4">
-              <span className="text-4xl">{r.icon}</span>
-              <div><h3 className="font-display font-bold text-snow">{r.t}</h3><p className="text-mist text-xs">{r.d}</p></div>
-            </div>
-          ))}
         </div>
       </section>
     </div>

@@ -18,7 +18,7 @@ export default function DramaTicker({ lines = DRAMA_LINES, interval = 4200, clas
     return () => clearInterval(t);
   }, [lines.length, interval]);
   return (
-    <div className={`flex items-center gap-2.5 text-sm min-h-[24px] ${className}`}>
+    <div className={`flex items-center gap-2.5 text-sm min-h-[24px] max-w-full overflow-hidden ${className}`}>
       <span className="live-dot shrink-0" />
       <AnimatePresence mode="wait">
         <motion.span
@@ -27,7 +27,7 @@ export default function DramaTicker({ lines = DRAMA_LINES, interval = 4200, clas
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.3 }}
-          className="font-semibold text-snow/90"
+          className="font-semibold text-snow/90 min-w-0 flex-1 truncate"
         >
           {lines[idx]}
         </motion.span>

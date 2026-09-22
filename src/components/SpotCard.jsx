@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { money, compact, gradientFor, initials } from '../lib/format';
@@ -6,11 +7,13 @@ export function BrandAvatar({ spot, size = 44, ring = false }) {
   const [g1, g2] = gradientFor(spot.slug || spot.name);
   return (
     <span
-      className={`relative grid place-items-center rounded-2xl font-display font-bold text-white shrink-0 overflow-hidden ${ring ? 'ring-2 ring-gold/70' : ''}`}
-      style={{ width: size, height: size, fontSize: size * 0.38, background: `linear-gradient(135deg, ${g1}, ${g2})` }}
+      className={`relative grid place-items-center rounded-2xl font-display font-bold text-white shrink-0 overflow-hidden ${ring ? 'ring-2 ring-[var(--gold)]' : ''}`}
+      style={{ width: size, height: size, fontSize: spot.mark ? size * 0.52 : size * 0.38, background: `linear-gradient(135deg, ${g1}, ${g2})` }}
     >
       {spot.logo ? (
         <img src={spot.logo} alt="" className="w-full h-full object-cover" />
+      ) : spot.mark ? (
+        <span aria-hidden="true" style={{ transform: 'translateY(-2%)' }}>{spot.mark}</span>
       ) : (
         initials(spot.name)
       )}
@@ -20,11 +23,11 @@ export function BrandAvatar({ spot, size = 44, ring = false }) {
 
 export function RankBadge({ rank, size = 'md' }) {
   const styles = {
-    1: 'bg-gradient-to-br from-gold to-golddeep text-[#231600] shadow-glowgold',
+    1: 'bg-gradient-to-br from-[var(--gold)] to-[var(--gold-deep)] text-white shadow-[var(--shadow-gold)]',
     2: 'bg-gradient-to-br from-slate-200 to-slate-400 text-slate-900',
-    3: 'bg-gradient-to-br from-amber-600 to-amber-800 text-white',
+    3: 'bg-gradient-to-br from-amber-500 to-amber-700 text-white',
   };
-  const cls = styles[rank] || 'bg-line/10 text-mist border border-line/10';
+  const cls = styles[rank] || 'bg-[var(--surface-2)] text-[var(--ink-2)] border border-[var(--line)]';
   const sz = size === 'lg' ? 'w-12 h-12 text-xl' : 'w-9 h-9 text-sm';
   return (
     <span className={`grid place-items-center rounded-xl font-display font-bold ${sz} ${cls}`}>
@@ -34,12 +37,64 @@ export function RankBadge({ rank, size = 'md' }) {
 }
 
 export function MoveIndicator({ move }) {
-  if (!move) return <span className="text-mist/50 text-xs font-semibold">–</span>;
-  if (move > 0) return <span className="text-neon text-xs font-bold">▲ {move}</span>;
-  return <span className="text-red-400 text-xs font-bold">▼ {Math.abs(move)}</span>;
+  if (!move) return <span className="text-[var(--ink-3)] text-xs font-semibold">–</span>;
+  if (move > 0) return <span className="text-[#0A8A4E] dark:text-[#34D399] text-xs font-bold">▲ {move}</span>;
+  return <span className="text-[var(--blaze)] text-xs font-bold">▼ {Math.abs(move)}</span>;
 }
 
-export function SpotRow({ spot, move, onBoost, highlight }) {
+// Proper race lanes: ranks 4–10 line up at the start gate (right), sprint
+// LEFT toward the finish gate when the countdown hits GO, and STOP there.
+// Speed is strictly rank-ordered and matched to the emoji: the 🚀 rocket is
+// the fastest machine on the track so it runs #4, down to #10 the 🐌 snail.
+// (🐇 rabbit and 🐢 turtle are reserved for podium #2 and #3.)
+export const RACE_RUNNERS = {
+  4: { emoji: '🚀', title: 'Rocket blasting off the line' },
+  5: { emoji: '🐆', title: 'Leopard chasing the rocket' },
+  6: { emoji: '🦊', title: 'Fox dashing up' },
+  7: { emoji: '🏎️', title: 'Race car speeding up' },
+  8: { emoji: '🛹', title: 'Skater rolling toward the top' },
+  9: { emoji: '🐝', title: 'Bee buzzing up the ranks' },
+  10: { emoji: '🐌', title: 'Snail… still trying' },
+};
+// Sprint time per rank: #4 → 2.20s (first across the line) … #10 → 5.50s.
+export const raceDuration = (rank) => `${(2.2 + (rank - 4) * 0.55).toFixed(2)}s`;
+// Shared race clock: 3 · 2 · 1 · GO! → runners sprint → pause at the
+// finish line → countdown again. Every lane using the same { race, count }
+// stays perfectly in sync like a real race.
+export function useRaceCycle() {
+  const [race, setRace] = useState({ key: 0, running: false });
+  const [count, setCount] = useState(null);
+  useEffect(() => {
+    const timers = [];
+    const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+    const GO_AT = 2300; // 3·2·1 at 750ms each, then GO
+    const RACE_MS = 6400; // slower than the slowest runner (5.5s)
+    const REST_MS = 1800; // everyone catches their breath at the finish
+    const cycle = () => {
+      setCount(3);
+      later(() => setCount(2), 750);
+      later(() => setCount(1), 1500);
+      later(() => {
+        setCount('GO');
+        // remount runners at the start gate (fresh element = no transition)…
+        setRace((r) => ({ key: r.key + 1, running: false }));
+        // …then release them one paint later so the sprint animates.
+        later(() => setRace((r) => ({ ...r, running: true })), 60);
+      }, GO_AT);
+      later(() => setCount(null), GO_AT + 800);
+      later(cycle, GO_AT + RACE_MS + REST_MS);
+    };
+    cycle();
+    return () => timers.forEach(clearTimeout);
+  }, []);
+  return { race, count };
+}
+const RACE_IDLE = { key: 0, running: false };
+
+export function SpotRow({ spot, move, onBoost, highlight, race }) {
+  const racer = RACE_RUNNERS[spot.rank];
+  const r = race || RACE_IDLE;
+  const bob = `${(parseFloat(raceDuration(spot.rank)) / 5).toFixed(2)}s`;
   return (
     <motion.div
       layout
@@ -48,32 +103,64 @@ export function SpotRow({ spot, move, onBoost, highlight }) {
     >
       <Link
         to={`/s/${spot.slug}`}
-        className="card-lift flex items-center gap-3 sm:gap-4 bg-card border border-line/5 rounded-2xl p-3 sm:p-4"
+        className="card card-lift flex items-center gap-3 sm:gap-4 p-3 sm:p-4"
       >
         <RankBadge rank={spot.rank} />
         <BrandAvatar spot={spot} />
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 lg:flex-none lg:w-60 xl:w-72">
           <div className="flex items-center gap-2">
-            <h3 className="font-display font-bold text-snow truncate text-[15px]">{spot.name}</h3>
+            <h3 className="font-display font-bold text-[var(--ink)] truncate text-[15px]">{spot.name}</h3>
             {spot.rank === 1 && <span className="text-sm">👑</span>}
+            {spot.pending && (
+              <span className="shrink-0 text-[10px] font-extrabold uppercase tracking-wider text-amber-700 dark:text-amber-300 bg-amber-500/15 border border-amber-500/40 rounded-full px-2 py-0.5" title="Payment under review">
+                ⏳ Pending
+              </span>
+            )}
             {spot.gift && <span className="text-sm" title={`Surprised by ${spot.gift.from}`}>🎁</span>}
           </div>
-          <p className="text-mist text-xs truncate">{spot.gift ? `🎁 Surprised by ${spot.gift.from}` : spot.tagline}</p>
-          <div className="flex items-center gap-3 mt-1 text-[11px] text-mist/80">
+          <p className="text-[var(--ink-2)] text-xs truncate">{spot.gift ? `🎁 Surprised by ${spot.gift.from}` : spot.tagline}</p>
+          <div className="flex items-center gap-3 mt-1 text-[11px] text-[var(--ink-3)]">
             <span>👁 {compact(spot.views)}</span>
             <span>🖱 {compact(spot.clicks)}</span>
             <span className="hidden sm:inline"><MoveIndicator move={move} /></span>
           </div>
         </div>
+        {racer && (
+          <div className="race-lane hidden md:block" title={racer.title} aria-hidden="true">
+            <span className="race-gate race-gate-finish" />
+            <span className="race-dashes" />
+            <span className="race-gate race-gate-start" />
+            <span
+              key={r.key}
+              className="race-runner"
+              style={{
+                left: r.running ? '3%' : '94%',
+                transitionDuration: raceDuration(spot.rank),
+              }}
+            >
+              <span className="race-bob" style={{ animationDuration: bob }}>
+                {racer.emoji}
+              </span>
+            </span>
+          </div>
+        )}
         <div className="text-right shrink-0">
-          <div className="font-display font-bold text-neon text-lg">{money(spot.amount)}</div>
-          <div className="text-[10px] text-mist uppercase tracking-wider font-semibold">raised</div>
+          <div className="font-display font-bold text-[var(--blaze-deep)] dark:text-[#FF8A66] text-lg">{money(spot.amount)}</div>
+          <div className="text-[10px] text-[var(--ink-3)] uppercase tracking-wider font-semibold">spot value</div>
         </div>
         <button
           onClick={(e) => { e.preventDefault(); onBoost && onBoost(spot); }}
-          className="btn-primary hidden sm:block px-4 py-2 text-xs shrink-0"
+          className="btn-primary hidden sm:inline-flex px-4 py-2 text-xs shrink-0"
         >
           Boost ⚡
+        </button>
+        <button
+          onClick={(e) => { e.preventDefault(); onBoost && onBoost(spot); }}
+          aria-label={`Boost ${spot.name}`}
+          title={`Boost ${spot.name}`}
+          className="sm:hidden grid place-items-center w-11 h-11 rounded-2xl text-white text-lg shrink-0 active:scale-95 transition-transform bg-gradient-to-br from-[var(--blaze)] to-[#4F46E5] shadow-[var(--shadow-blaze)]"
+        >
+          ⚡
         </button>
       </Link>
     </motion.div>
@@ -86,10 +173,8 @@ export function TopSpotCard({ spot, place }) {
     <motion.div layout transition={{ type: 'spring', stiffness: 260, damping: 30 }} className={isFirst ? 'sm:col-span-1' : ''}>
       <Link
         to={`/s/${spot.slug}`}
-        className={`spotlight card-lift relative block rounded-3xl p-5 sm:p-6 border overflow-hidden ${
-          isFirst
-            ? 'gold-card bg-gradient-to-b from-[#2A2113] to-card border-gold/50'
-            : 'bg-card border-line/10'
+        className={`card card-lift relative block rounded-3xl p-5 sm:p-6 overflow-hidden ${
+          isFirst ? 'border-2 border-[var(--gold)]' : ''
         }`}
       >
         {isFirst && (
@@ -98,7 +183,7 @@ export function TopSpotCard({ spot, place }) {
         <div className="flex items-center gap-2 mb-4">
           <RankBadge rank={place} size="lg" />
           <div>
-            <div className={`text-[10px] font-bold uppercase tracking-[0.18em] ${isFirst ? 'text-gold' : 'text-mist'}`}>
+            <div className={`text-[10px] font-bold uppercase tracking-[0.18em] ${isFirst ? 'text-[var(--gold-deep)] dark:text-[var(--gold)]' : 'text-[var(--ink-3)]'}`}>
               {isFirst ? 'Internet Spotlight Winner' : `Rank #${place}`}
             </div>
             {isFirst && <div className="shine-text font-display font-bold text-sm">Holding the crown</div>}
@@ -107,22 +192,22 @@ export function TopSpotCard({ spot, place }) {
         <div className="flex items-center gap-4">
           <BrandAvatar spot={spot} size={64} ring={isFirst} />
           <div className="min-w-0">
-            <h3 className="font-display font-bold text-xl text-snow truncate">{spot.name}</h3>
-            <p className="text-mist text-sm truncate">{spot.tagline}</p>
+            <h3 className="font-display font-bold text-xl text-[var(--ink)] truncate">{spot.name}</h3>
+            <p className="text-[var(--ink-2)] text-sm truncate">{spot.tagline}</p>
           </div>
         </div>
         <div className="flex items-end justify-between mt-5">
           <div>
-            <div className={`font-display font-bold text-3xl ${isFirst ? 'text-gold' : 'text-snow'}`}>{money(spot.amount)}</div>
-            <div className="text-[11px] text-mist uppercase tracking-wider font-semibold">total support</div>
+            <div className={`font-display font-bold text-3xl ${isFirst ? 'text-[var(--gold-deep)] dark:text-[var(--gold)]' : 'text-[var(--ink)]'}`}>{money(spot.amount)}</div>
+            <div className="text-[11px] text-[var(--ink-3)] uppercase tracking-wider font-semibold">spot value</div>
           </div>
-          <div className="text-right text-xs text-mist space-y-1">
+          <div className="text-right text-xs text-[var(--ink-2)] space-y-1">
             <div>👁 {compact(spot.views)} views</div>
             <div>🖱 {compact(spot.clicks)} clicks</div>
           </div>
         </div>
         {isFirst && (
-          <div className="mt-4 rounded-xl bg-gold/10 border border-gold/30 px-4 py-2.5 text-center text-sm font-semibold text-gold">
+          <div className="mt-4 rounded-xl bg-[var(--gold-soft)] border border-[var(--gold)]/40 px-4 py-2.5 text-center text-sm font-semibold text-[var(--gold-deep)] dark:text-[var(--gold)]">
             👑 The most visible spot on the internet right now
           </div>
         )}

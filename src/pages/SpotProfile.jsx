@@ -6,7 +6,8 @@ import ShareButtons from '../components/ShareButtons';
 import CountUp from '../components/CountUp';
 import { money, compact, timeAgo, copyText } from '../lib/format';
 import { REWARDS } from '../lib/data';
-import { recordClick, recordReferralClick, getReferralStats, refCodeFor } from '../lib/store';
+import { recordClick, recordReferralClick, getReferralStats, refCodeFor, getContributions } from '../lib/store';
+import Flee from '../components/Flee';
 
 function Sparkline({ data }) {
   if (!data || data.length < 2) return null;
@@ -48,6 +49,7 @@ export default function SpotProfile({ spots, onClaim, onBoost }) {
 
   const myRef = useMemo(() => (spot ? refCodeFor(spot.slug) : ''), [spot]);
   const refStats = useMemo(() => getReferralStats(myRef), [myRef, spots]);
+  const contribs = useMemo(() => (spot ? getContributions(spot.slug) : []), [spot, spots]);
   const badges = useMemo(() => REWARDS.filter((r) => { try { return r.check(spots) === spot?.slug; } catch { return false; } }), [spots, spot]);
   const neighbors = useMemo(() => {
     if (!spot) return [];
@@ -56,8 +58,8 @@ export default function SpotProfile({ spots, onClaim, onBoost }) {
 
   if (!spot) {
     return (
-      <div className="pt-[68px] max-w-2xl mx-auto px-4 py-24 text-center">
-        <div className="text-6xl mb-4">🕳️</div>
+      <div className="pt-[92px] max-w-2xl mx-auto px-4 py-24 text-center">
+        <Flee><div className="text-6xl mb-4">🕳️</div></Flee>
         <h1 className="font-display font-bold text-3xl text-snow">This spot is unclaimed</h1>
         <p className="text-mist mt-3">Nobody owns <b className="text-snow">/{slug}</b> yet. Take it before someone else does.</p>
         <button onClick={onClaim} className="btn-primary px-8 py-3.5 mt-6">⚡ Claim this spot — $1</button>
@@ -72,10 +74,10 @@ export default function SpotProfile({ spots, onClaim, onBoost }) {
   };
 
   return (
-    <div className="pt-[68px]">
+    <div className="pt-[92px]">
       {/* cover */}
       <div className="relative overflow-hidden">
-        <div className="blob w-[500px] h-[280px] bg-electric/30 -top-24 left-1/3" />
+        <div className="blob w-[500px] h-[280px] bg-[var(--blaze-soft)] -top-24 left-1/3" />
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-12 pb-8 relative">
           <Link to="/leaderboard" className="text-mist text-sm hover:text-snow">← Back to leaderboard</Link>
           <div className="flex flex-col sm:flex-row sm:items-center gap-5 mt-6">
@@ -90,7 +92,7 @@ export default function SpotProfile({ spots, onClaim, onBoost }) {
               {badges.length > 0 && (
                 <div className="flex gap-2 mt-3 flex-wrap">
                   {badges.map((b) => (
-                    <span key={b.slug} className="text-xs font-bold bg-gold/15 border border-gold/40 text-gold rounded-full px-3 py-1">{b.icon} {b.name}</span>
+                    <span key={b.slug} className="text-xs font-bold bg-gold/15 border border-gold/40 text-[var(--gold-deep)] rounded-full px-3 py-1">{b.icon} {b.name}</span>
                   ))}
                 </div>
               )}
@@ -100,6 +102,17 @@ export default function SpotProfile({ spots, onClaim, onBoost }) {
               {spot.website && <button onClick={() => visit(spot.website)} className="btn-ghost px-6 py-3 text-sm flex-1 sm:flex-none">Visit ↗</button>}
             </div>
           </div>
+          {spot.pending && (
+            <div className="mt-6 rounded-2xl bg-amber-500/10 border border-amber-500/40 p-4 sm:p-5 flex items-start gap-3">
+              <span className="text-2xl">⏳</span>
+              <div>
+                <div className="font-bold text-snow text-sm">Payment under review</div>
+                <p className="text-mist text-sm mt-1 leading-relaxed">
+                  This spot is live on the leaderboard with its pledged amount. The badge clears once our team verifies the payment — usually within 24 hours.
+                </p>
+              </div>
+            </div>
+          )}
           {spot.gift?.from && (
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-6 rounded-2xl bg-gradient-to-r from-gold/20 via-gold/10 to-transparent border border-gold/40 p-4 sm:p-5 flex items-start gap-3">
               <span className="text-2xl">🎁</span>
@@ -110,7 +123,7 @@ export default function SpotProfile({ spots, onClaim, onBoost }) {
             </motion.div>
           )}
           {(spot.move || 0) > 0 && (
-            <div className="mt-4 rounded-2xl bg-neon/10 border border-neon/30 p-4 flex items-center gap-3">
+            <div className="mt-4 rounded-2xl bg-[var(--green-soft)] border border-[var(--green)] p-4 flex items-center gap-3">
               <span className="text-2xl">🔥</span>
               <p className="text-sm text-snow font-semibold">
                 Climbed {spot.move} spot{spot.move > 1 ? 's' : ''} recently — momentum is on your side. Keep it going.
@@ -136,7 +149,7 @@ export default function SpotProfile({ spots, onClaim, onBoost }) {
         <div className="lg:col-span-2 space-y-5">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { l: 'Total support', v: money(spot.amount), c: 'text-neon' },
+              { l: 'Total buzz', v: money(spot.amount), c: 'text-[var(--blaze)]' },
               { l: 'Views', v: compact(spot.views), c: 'text-snow' },
               { l: 'Outbound clicks', v: compact(spot.clicks), c: 'text-snow' },
               { l: 'Claimed', v: timeAgo(spot.joinedAt), c: 'text-snow' },
@@ -155,16 +168,66 @@ export default function SpotProfile({ spots, onClaim, onBoost }) {
               {spot.website && <button onClick={() => visit(spot.website)} className="btn-ghost px-4 py-2 text-xs">🌐 Website</button>}
               {spot.socials?.x && <button onClick={() => visit(spot.socials.x)} className="btn-ghost px-4 py-2 text-xs">𝕏 Twitter</button>}
               {spot.socials?.instagram && <button onClick={() => visit(spot.socials.instagram)} className="btn-ghost px-4 py-2 text-xs">📸 Instagram</button>}
+              {spot.socials?.facebook && <button onClick={() => visit(spot.socials.facebook)} className="btn-ghost px-4 py-2 text-xs">📘 Facebook</button>}
+              {spot.socials?.linkedin && <button onClick={() => visit(spot.socials.linkedin)} className="btn-ghost px-4 py-2 text-xs">💼 LinkedIn</button>}
             </div>
           </div>
 
           <div className="bg-card border border-line/5 rounded-3xl p-6">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="font-display font-bold text-lg text-snow">Support momentum</h2>
-              <span className="text-xs font-bold text-neon">▲ climbing</span>
+              <h2 className="font-display font-bold text-lg text-snow">Spotlight momentum</h2>
+              <span className="text-xs font-bold text-[var(--green)]">▲ climbing</span>
             </div>
             <Sparkline data={spot.trend && spot.trend.length > 1 ? spot.trend : [spot.amount * 0.6, spot.amount * 0.8, spot.amount]} />
-            <p className="text-xs text-mist mt-2">Last 7 days of verified support for this spot.</p>
+            <p className="text-xs text-mist mt-2">Last 7 days of verified visibility for this spot.</p>
+          </div>
+
+          {/* boost squad — everyone who chipped in */}
+          <div className="bg-card border border-line/5 rounded-3xl p-6">
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="font-display font-bold text-lg text-snow">💪 Boost squad</h2>
+              {contribs.length > 0 && (
+                <span className="text-[11px] font-bold text-[var(--ink-3)] uppercase tracking-wider">
+                  {contribs.length} booster{contribs.length > 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
+            <p className="text-mist text-sm mb-4">
+              Real people chipping in $1+ to push <b className="text-snow">{spot.name}</b> up. Your name could be right here. 👇
+            </p>
+            {contribs.length > 0 ? (
+              <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                {contribs.map((c, i) => (
+                  <motion.div
+                    key={`${c.at}-${i}`}
+                    initial={{ opacity: 0, x: -12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: Math.min(i * 0.05, 0.4) }}
+                    className="flex items-center gap-3 rounded-2xl bg-[var(--surface-2)] border border-[var(--line)] px-3.5 py-2.5"
+                  >
+                    <span className="grid place-items-center w-9 h-9 rounded-full bg-gradient-to-br from-[var(--blaze)] to-[var(--gold)] text-white font-display font-bold text-sm shrink-0">
+                      {(c.name || '?').trim().charAt(0).toUpperCase()}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-bold text-snow truncate">{c.name}</div>
+                      {c.handle && <div className="text-[11px] text-mist truncate">{c.handle}</div>}
+                    </div>
+                    <div className="text-right shrink-0">
+                      <div className="text-sm font-extrabold text-[#0A8A4E] dark:text-[#34D399]">+{money(c.amount)}</div>
+                      <div className="text-[10px] text-mist">{timeAgo(c.at)}</div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-2xl border-2 border-dashed border-[var(--line)] p-5 text-center">
+                <div className="text-3xl mb-1.5">🏟️</div>
+                <p className="text-sm text-mist">No boosters yet — be the first legend.</p>
+              </div>
+            )}
+            <button onClick={() => onBoost(spot)} className="btn-primary w-full py-3.5 mt-4 text-sm">
+              ⚡ Chip in $1 — get your name here
+            </button>
           </div>
 
           <div className="bg-card border border-line/5 rounded-3xl p-6">
@@ -174,10 +237,10 @@ export default function SpotProfile({ spots, onClaim, onBoost }) {
           </div>
 
           {/* referral */}
-          <div className="rounded-3xl bg-gradient-to-br from-electric/15 to-card border border-electric/25 p-6">
+          <div className="rounded-3xl bg-gradient-to-br from-[var(--blaze-soft)] to-card border border-[var(--blaze)] p-6">
             <h2 className="font-display font-bold text-lg text-snow mb-1">🔗 Your referral hub</h2>
             <p className="text-mist text-sm mb-4">Invite friends with your link. Joins through your code grow your referral stats and unlock rewards.</p>
-            <button onClick={copyRef} className="w-full font-mono text-sm bg-ink/60 border border-line/10 rounded-xl px-4 py-3 text-electric hover:border-electric/50 transition-colors break-all">
+            <button onClick={copyRef} className="w-full font-mono text-sm bg-ink/60 border border-line/10 rounded-xl px-4 py-3 text-[var(--blaze)] hover:border-[var(--blaze)] transition-colors break-all">
               {window.location.origin}/s/{spot.slug}?ref={myRef}
             </button>
             <div className="text-xs text-mist mt-2 mb-4">{copiedRef ? '✓ Referral link copied!' : 'Tap to copy your referral link'}</div>

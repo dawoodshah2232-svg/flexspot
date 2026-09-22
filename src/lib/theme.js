@@ -3,10 +3,10 @@ import { useCallback, useEffect, useState } from 'react';
 const KEY = 'flexspot-theme';
 
 function initial() {
-  if (typeof window === 'undefined') return 'dark';
+  if (typeof window === 'undefined') return 'light';
   const saved = localStorage.getItem(KEY);
   if (saved === 'light' || saved === 'dark') return saved;
-  return 'dark';
+  return 'light'; // light is the default theme
 }
 
 export function useTheme() {

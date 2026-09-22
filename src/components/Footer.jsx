@@ -1,10 +1,20 @@
 import { Link } from 'react-router-dom';
 import { Logo } from './Header';
+import Floaties from './Floaties';
 
 export default function Footer({ onClaim }) {
   return (
-    <footer className="border-t border-[var(--line-soft)] bg-[var(--surface)] mt-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 grid gap-10 md:grid-cols-4">
+    <footer className="relative overflow-hidden border-t border-[var(--line-soft)] bg-[var(--surface)] mt-20">
+      <Floaties
+        items={[
+          { emoji: '👑', left: '2%', top: '18%', size: 26, cls: 'hidden md:block', opacity: 0.35 },
+          { emoji: '⚡', left: '96%', top: '12%', size: 24, cls: 'hidden md:block', opacity: 0.35 },
+          { emoji: '🚀', left: '88%', top: '68%', size: 26, cls: 'hidden md:block', opacity: 0.3 },
+          { emoji: '💎', left: '6%', top: '72%', size: 22, cls: 'hidden md:block', opacity: 0.3 },
+          { emoji: '✨', left: '50%', top: '8%', size: 20, cls: 'hidden md:block', opacity: 0.3 },
+        ]}
+      />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 grid gap-10 md:grid-cols-4 relative">
         <div className="md:col-span-2">
           <Logo />
           <p className="text-[var(--ink-2)] text-sm mt-4 max-w-sm leading-relaxed">

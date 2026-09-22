@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { money, compact, gradientFor, initials } from '../lib/format';
+import Flee from './Flee';
 
 export function BrandAvatar({ spot, size = 44, ring = false }) {
   const [g1, g2] = gradientFor(spot.slug || spot.name);
@@ -138,6 +139,14 @@ export function SpotRow({ spot, move, onBoost, highlight, race }) {
           <div className="race-lane hidden md:block" title={racer.title} aria-hidden="true">
             <span className="race-gate race-gate-finish" />
             <span className="race-dashes" />
+            {/* race-control countdown parked in the center of the road */}
+            {count !== null && (
+              <span className="race-count">
+                <span key={`c-${r.key}-${count}`} className="countdown-pop">
+                  {count === 'GO' ? 'GO!' : count}
+                </span>
+              </span>
+            )}
             <span className="race-gate race-gate-start" />
             {finished && <span className="race-pos">P{spot.rank}</span>}
             <span
@@ -148,9 +157,13 @@ export function SpotRow({ spot, move, onBoost, highlight, race }) {
                 transitionDuration: raceDuration(spot.rank),
               }}
             >
-              <span className="race-bob" style={{ animationDuration: bob }}>
-                {racer.emoji}
-              </span>
+              {/* racers playfully dodge the cursor — Flee's transform is on its
+                  own wrapper, so the race positioning + bob animation are untouched */}
+              <Flee>
+                <span className="race-bob" style={{ animationDuration: bob }}>
+                  {racer.emoji}
+                </span>
+              </Flee>
             </span>
           </div>
         )}

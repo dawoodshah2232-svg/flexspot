@@ -97,12 +97,21 @@ export default function Podium({ spots, onBoost }) {
             </div>
           ) : (
             <div className="mt-4 rounded-xl bg-[var(--surface-2)] border border-[var(--line)] overflow-hidden">
-              <div className="relative h-9">
-                <span className="runner-dust absolute top-1/2 text-xs" style={{ animationDuration: rank === 2 ? '2.1s' : '4.8s' }} aria-hidden="true">💨</span>
-                <span className="runner absolute top-1/2 text-xl" style={{ animationDuration: rank === 2 ? '2.1s' : '4.8s' }} aria-hidden="true">{rank === 2 ? '🐇' : '🐢'}</span>
-                <div className="absolute bottom-1 left-3 right-3 h-0.5 rounded bg-[var(--line)]" aria-hidden="true" />
+              {/* winner's victory lane: same road design, rabbit/turtle runs in place
+                  (road dashes scroll beneath) and dodges your cursor */}
+              <div className="race-lane podium-lane" aria-hidden="true">
+                <span className="race-gate race-gate-finish" />
+                <span className="race-dashes" />
+                <span className="race-gate race-gate-start" />
+                <span className="podium-runner">
+                  <Flee>
+                    <span className="race-bob" style={{ animationDuration: rank === 2 ? '0.4s' : '0.7s' }}>
+                      {rank === 2 ? '🐇' : '🐢'}
+                    </span>
+                  </Flee>
+                </span>
               </div>
-              <div className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[var(--ink-3)] pb-1.5 -mt-0.5">
+              <div className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[var(--ink-3)] py-1.5">
                 {rank === 2 ? '🐇 sprinting for #1' : '🐢 crawling for #2'}
               </div>
             </div>

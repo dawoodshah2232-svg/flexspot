@@ -427,6 +427,14 @@ table.admin-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; 
 /* countdown pop: 3 · 2 · 1 · GO! */
 .countdown-pop { display: inline-block; animation: countdown-pop .72s cubic-bezier(.2,1.4,.4,1) both; }
 @keyframes countdown-pop { 0% { transform: scale(.3); opacity: 0; } 55% { transform: scale(1.18); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+/* countdown parked in the CENTER of each race lane — subtle, race-control style */
+.race-count { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 4;
+  font-size: 12px; font-weight: 800; letter-spacing: 0.32em; text-indent: 0.32em; white-space: nowrap;
+  color: var(--ink-3); opacity: .6; pointer-events: none; }
+/* podium #2 / #3 mini race lane: same road, emoji runs in place, dodges your cursor */
+.race-lane.podium-lane { width: 100%; max-width: none; flex: none; height: 48px; }
+.podium-runner { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -52%);
+  font-size: 27px; line-height: 1; z-index: 2; filter: drop-shadow(0 3px 3px rgba(0,0,0,.25)); }
 /* little rocket hovering by the champion's crown */
 .rocket-launch { display: inline-block; animation: rocket-launch 2.8s ease-in-out infinite; filter: drop-shadow(0 4px 8px rgba(124,58,237,.55)); }
 @keyframes rocket-launch { 0%, 100% { transform: translateY(7px) rotate(-16deg); } 50% { transform: translateY(-7px) rotate(-16deg); } }

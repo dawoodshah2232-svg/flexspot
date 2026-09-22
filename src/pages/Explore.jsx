@@ -80,7 +80,7 @@ export default function Explore({ spots, onBoost, onClaim }) {
         </div>
 
         <div className="card mt-10 p-8 text-center">
-          <div className="text-4xl mb-3">⚡</div>
+          <div className="text-4xl mb-3"><Flee><span className="inline-block">⚡</span></Flee></div>
           <h2 className="font-display font-bold text-2xl text-[var(--ink)]">
             Your brand belongs on this list.
           </h2>

@@ -126,7 +126,7 @@ export default function HowItWorks({ onClaim }) {
                   </span>
                   <div className="flex items-center gap-3 mb-4 relative">
                     <div className={`shrink-0 w-14 h-14 rounded-2xl ${a.soft} border ${a.ring} grid place-items-center text-3xl shadow-sm`}>
-                      {s.icon}
+                      <Flee><span className="inline-block">{s.icon}</span></Flee>
                     </div>
                     <div>
                       <div className={`inline-flex items-center gap-1.5 text-[11px] font-extrabold ${a.text} uppercase tracking-[0.18em]`}>

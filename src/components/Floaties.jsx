@@ -18,11 +18,11 @@ export default function Floaties({ items }) {
   useEffect(() => {
     const box = boxRef.current;
     if (!box) return;
-    const st = { rect: null, mouse: null, spots: [] };
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    const st = { mouse: null, spots: [] };
 
     const measure = () => {
       const r = box.getBoundingClientRect();
-      st.rect = r;
       st.spots = itemsRef.current.map((f) => ({
         // base anchor in px, derived from the item's % position
         x: (parseFloat(f.left) / 100) * r.width,
@@ -33,26 +33,30 @@ export default function Floaties({ items }) {
     measure();
     window.addEventListener('resize', measure);
 
-    const onMove = (e) => {
-      if (!st.rect) return;
-      const x = e.clientX - st.rect.left;
-      const y = e.clientY - st.rect.top;
-      const m = 90; // margin so emojis react just before the cursor enters
-      st.mouse =
-        x > -m && x < st.rect.width + m && y > -m && y < st.rect.height + m
-          ? { x, y }
-          : null;
-    };
+    // Store raw viewport coords; the box rect is re-measured every frame so
+    // scrolling never desyncs the cursor mapping (stale-rect bug fix).
+    const onMove = (e) => { st.mouse = { x: e.clientX, y: e.clientY }; };
+    const onLeave = () => { st.mouse = null; };
     window.addEventListener('mousemove', onMove, { passive: true });
+    document.documentElement.addEventListener('mouseleave', onLeave);
 
     let raf = 0;
     const tick = () => {
+      const r = box.getBoundingClientRect();
+      let mx = null;
+      let my = null;
+      if (st.mouse) {
+        const m = 90; // margin so emojis react just before the cursor enters
+        const x = st.mouse.x - r.left;
+        const y = st.mouse.y - r.top;
+        if (x > -m && x < r.width + m && y > -m && y < r.height + m) { mx = x; my = y; }
+      }
       st.spots.forEach((p, i) => {
         let tx = 0;
         let ty = 0;
-        if (st.mouse) {
-          const dx = p.x - st.mouse.x;
-          const dy = p.y - st.mouse.y;
+        if (mx !== null) {
+          const dx = p.x - mx;
+          const dy = p.y - my;
           const d = Math.hypot(dx, dy) || 1;
           if (d < FLEE_RADIUS) {
             const f = (1 - d / FLEE_RADIUS) * FLEE_PUSH;
@@ -73,6 +77,7 @@ export default function Floaties({ items }) {
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', measure);
       window.removeEventListener('mousemove', onMove);
+      document.documentElement.removeEventListener('mouseleave', onLeave);
     };
   }, []);
 

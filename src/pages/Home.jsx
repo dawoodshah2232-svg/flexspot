@@ -177,7 +177,7 @@ const TABS = [
 
 function LeaderboardSection({ spots, onBoost, onClaim }) {
   const [tab, setTab] = useState('all');
-  const { race, count } = useRaceCycle();
+  const { race } = useRaceCycle();
   const ordered = useMemo(() => {
     const list = [...spots];
     if (tab === 'gainers') list.sort((a, b) => (b.move || 0) - (a.move || 0));
@@ -191,12 +191,12 @@ function LeaderboardSection({ spots, onBoost, onClaim }) {
     <section className="relative max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
       <Floaties
         items={[
-          { emoji: '🏁', left: '1%', top: '6%', size: 30, cls: 'hidden xl:block', opacity: 0.5 },
-          { emoji: '🐇', left: '96%', top: '12%', size: 28, cls: 'hidden xl:block', opacity: 0.5 },
-          { emoji: '🐢', left: '2%', top: '48%', size: 30, cls: 'hidden xl:block', opacity: 0.45 },
-          { emoji: '⚡', left: '95%', top: '58%', size: 26, cls: 'hidden xl:block', opacity: 0.45 },
-          { emoji: '🍿', left: '3%', top: '86%', size: 26, cls: 'hidden xl:block', opacity: 0.4 },
-          { emoji: '🥇', left: '94%', top: '88%', size: 28, cls: 'hidden xl:block', opacity: 0.4 },
+          { emoji: '🏁', left: '1%', top: '6%', size: 30, cls: 'hidden lg:block', opacity: 0.5 },
+          { emoji: '🐇', left: '96%', top: '12%', size: 28, cls: 'hidden lg:block', opacity: 0.5 },
+          { emoji: '🐢', left: '2%', top: '48%', size: 30, cls: 'hidden lg:block', opacity: 0.45 },
+          { emoji: '⚡', left: '95%', top: '58%', size: 26, cls: 'hidden lg:block', opacity: 0.45 },
+          { emoji: '🍿', left: '3%', top: '86%', size: 26, cls: 'hidden lg:block', opacity: 0.4 },
+          { emoji: '🥇', left: '94%', top: '88%', size: 28, cls: 'hidden lg:block', opacity: 0.4 },
         ]}
       />
       <div className="text-center mb-8 relative">
@@ -229,17 +229,9 @@ function LeaderboardSection({ spots, onBoost, onClaim }) {
           <span className="font-display font-bold text-xl text-[var(--ink)]">🔥 The chase pack</span>
           <Link to="/leaderboard" className="text-sm font-bold text-[var(--blaze)] hover:underline">Full board →</Link>
         </div>
-        {/* subtle race-control countdown, parked by the start gates */}
-        <div className="hidden md:flex justify-end pr-2 h-5 mb-1" aria-hidden="true">
-          {count !== null && (
-            <span
-              key={`${race.key}-${count}`}
-              className="countdown-pop text-[11px] font-bold tracking-[0.25em] text-[var(--ink-3)] opacity-50"
-            >
-              {count === 'GO' ? '🏁 GO!' : `🏁 ${count}`}
-            </span>
-          )}
-        </div>
+        <p className="hidden md:block text-[11px] text-[var(--ink-3)] px-1 mb-2" aria-hidden="true">
+          🎯 Psst — the racers are shy. Try catching one with your cursor.
+        </p>
         <div className="space-y-2.5">
           <AnimatePresence initial={false}>
             {ranked.slice(3, 10).map((s) => (

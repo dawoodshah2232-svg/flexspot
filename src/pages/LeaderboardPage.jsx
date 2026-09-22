@@ -8,7 +8,7 @@ import { money, compact } from '../lib/format';
 
 export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
   const [q, setQ] = useState('');
-  const { race, count } = useRaceCycle();
+  const { race } = useRaceCycle();
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
     if (!query) return spots;
@@ -75,17 +75,9 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
             <h2 className="font-display font-bold text-2xl text-snow">All spots <span className="text-mist text-base font-sans font-medium">({filtered.length} competing)</span></h2>
             <span className="text-xs text-mist font-semibold">Total buzz: <b className="text-[var(--blaze)]">{money(spots.reduce((a, s) => a + s.amount, 0))}</b></span>
           </div>
-          {/* subtle race-control countdown, parked by the start gates */}
-          <div className="hidden md:flex justify-end pr-2 h-5 mb-1" aria-hidden="true">
-            {count !== null && (
-              <span
-                key={`${race.key}-${count}`}
-                className="countdown-pop text-[11px] font-bold tracking-[0.25em] text-[var(--ink-3)] opacity-50"
-              >
-                {count === 'GO' ? '🏁 GO!' : `🏁 ${count}`}
-              </span>
-            )}
-          </div>
+          <p className="hidden md:block text-[11px] text-mist mt-1 mb-2" aria-hidden="true">
+            🎯 Psst — the racers are shy. Try catching one with your cursor.
+          </p>
           {filtered.length === 0 ? (
             <div className="text-center py-16 text-mist">
               <div className="text-5xl mb-4">🔍</div>

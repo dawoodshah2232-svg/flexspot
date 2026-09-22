@@ -86,7 +86,7 @@ export default function SpotProfile({ spots, onClaim, onBoost }) {
               <div className="flex items-center gap-3 flex-wrap">
                 <RankBadge rank={spot.rank} size="lg" />
                 <h1 className="font-display font-bold text-3xl sm:text-4xl text-snow">{spot.name}</h1>
-                {spot.rank === 1 && <span className="text-3xl crown-bob">👑</span>}
+                {spot.rank === 1 && <Flee><span className="text-3xl crown-bob inline-block">👑</span></Flee>}
               </div>
               <p className="text-mist mt-1.5 text-[15px]">{spot.tagline}</p>
               {badges.length > 0 && (
@@ -262,7 +262,7 @@ export default function SpotProfile({ spots, onClaim, onBoost }) {
         {/* side */}
         <div className="space-y-5">
           <div className="rounded-3xl bg-gold/[0.06] border border-gold/25 p-6 text-center">
-            <div className="text-4xl mb-2">👑</div>
+            <div className="text-4xl mb-2"><Flee><span className="inline-block">👑</span></Flee></div>
             <h3 className="font-display font-bold text-snow">Want the crown?</h3>
             <p className="text-mist text-sm mt-1 mb-4">Claim your own spot and challenge #{spot.rank}.</p>
             <button onClick={onClaim} className="btn-gold w-full py-3 text-sm">⚡ Claim your spot</button>

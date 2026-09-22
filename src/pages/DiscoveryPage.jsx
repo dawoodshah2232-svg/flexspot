@@ -77,7 +77,7 @@ export default function DiscoveryPage({ mode, spots, moves, onBoost, onClaim }) 
         </div>
 
         <div className="mt-10 rounded-3xl bg-gradient-to-br from-[var(--blaze-soft)] via-card to-card border border-[var(--blaze)] p-8 text-center">
-          <div className="text-4xl mb-3">⚡</div>
+          <div className="text-4xl mb-3"><Flee><span className="inline-block">⚡</span></Flee></div>
           <h2 className="font-display font-bold text-2xl text-snow">Your brand belongs on this list.</h2>
           <p className="text-mist text-sm mt-2">Claim your spot from $1 and start climbing.</p>
           <button onClick={onClaim} className="btn-primary px-8 py-3.5 mt-5">Claim my spot — $1</button>

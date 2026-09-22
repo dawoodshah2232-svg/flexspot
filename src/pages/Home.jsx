@@ -94,6 +94,14 @@ function ChampionStage({ leader, onClaim }) {
           loading="eager"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-black/15" aria-hidden="true" />
+        {/* dancing hype-man cutout — original dance loop, background removed */}
+        <img
+          src={`${import.meta.env.BASE_URL}hero-dancer.webp`}
+          alt=""
+          aria-hidden="true"
+          className="hero-dancer pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-36 z-10 w-16 min-[420px]:w-[72px] sm:w-24 drop-shadow-[0_10px_16px_rgba(0,0,0,0.5)]"
+          loading="eager"
+        />
         {/* champion ribbon — top-left of the photo */}
         <div className="absolute top-4 left-4">
           <div className="inline-flex items-center gap-2 bg-black/70 backdrop-blur-md text-[#FBBF24] border border-[#F59E0B]/60 font-black text-[11px] sm:text-xs uppercase tracking-[0.2em] rounded-full px-5 py-2 shadow-[0_8px_24px_-6px_rgba(245,158,11,0.7)]">

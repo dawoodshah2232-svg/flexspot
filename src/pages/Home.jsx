@@ -146,15 +146,6 @@ function ChampionStage({ leader, onClaim }) {
 function HeroVisual({ leader, onClaim }) {
   return (
     <div className="relative">
-      {/* winner meme sticker above the champion stage — gentle left/right sway */}
-      <div className="relative z-10 flex justify-center sm:justify-end sm:pr-8 -mb-6 sm:-mb-8">
-        <img
-          src={`${import.meta.env.BASE_URL}meme-winner.png`}
-          alt="Excuse me, I'm the winner here — meme"
-          className="meme-sway w-24 min-[420px]:w-28 sm:w-36 rounded-2xl border-2 border-[#FBBF24] shadow-[0_14px_34px_-10px_rgba(0,0,0,0.55)]"
-          loading="eager"
-        />
-      </div>
       <ChampionStage leader={leader} onClaim={onClaim} />
       {/* claim card overlapping the bottom edge */}
       <div className="relative z-10 -mt-10 mx-4 sm:mx-10 bg-[var(--surface)]/95 backdrop-blur border border-[var(--line)] rounded-3xl shadow-[var(--shadow-lift)] p-5">

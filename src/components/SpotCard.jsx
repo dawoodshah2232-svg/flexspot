@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { money, compact, gradientFor, initials } from '../lib/format';
+import { money, money2, compact, gradientFor, initials } from '../lib/format';
 import Flee from './Flee';
 
 export function BrandAvatar({ spot, size = 44, ring = false }) {
@@ -102,15 +102,18 @@ export function SpotRow({ spot, move, onBoost, highlight, race, count = null, ov
   const overtakePct = overtake && overtake.amount > 0
     ? Math.min(100, Math.max(4, (spot.amount / overtake.amount) * 100))
     : 0;
+  // Ties are broken by seniority, so overtaking needs (diff + $0.01); money2
+  // keeps cent-level gaps honest instead of displaying "Only $0".
+  const overtakeNeeded = overtake ? Math.max(0.01, overtake.amount - spot.amount + 0.01) : null;
   const overtakeText = !overtake
     ? '🌱 The underdog slot — every giant started at $1'
     : overtakeDiff > 0
-      ? `Only ${money(overtakeDiff)} to steal #${overtake.rank}`
+      ? `Only ${money2(overtakeNeeded)} to steal #${overtake.rank}`
       : `Neck-and-neck with #${overtake.rank} — one boost takes it!`;
   const overtakeTextShort = !overtake
     ? '🌱 Every giant started at $1'
     : overtakeDiff > 0
-      ? `Only ${money(overtakeDiff)} to #${overtake.rank}`
+      ? `Only ${money2(overtakeNeeded)} to #${overtake.rank}`
       : `Tied with #${overtake.rank} — one boost!`;
   const bob = `${(parseFloat(raceDuration(spot.rank)) / 5).toFixed(2)}s`;
   // The position pill (P4 … P10) pops in at the finish gate the moment

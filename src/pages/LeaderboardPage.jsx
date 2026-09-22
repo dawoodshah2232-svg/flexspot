@@ -10,7 +10,10 @@ import { money, compact } from '../lib/format';
 const PAGE = 20;
 
 export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
-  const [q, setQ] = useState('');
+  // Deep/search-engine links may carry ?q= (see the SearchAction in index.html JSON-LD)
+  const [q, setQ] = useState(() => {
+    try { return new URLSearchParams(window.location.search).get('q') || ''; } catch { return ''; }
+  });
   const [visibleCount, setVisibleCount] = useState(PAGE);
   const [showJump, setShowJump] = useState(false);
   const [jumpPending, setJumpPending] = useState(false);
@@ -24,8 +27,11 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
   }, [spots, q]);
 
   const top3 = filtered.slice(0, 3).map((s) => ({ ...s, move: moves[s.slug] ?? s.move }));
-  const rest = filtered.slice(3);
-  const visibleRows = rest.slice(0, visibleCount);
+  // When the user searches, the top-3 must NOT be crowned a podium — the
+  // results keep their true ranks in a flat list instead.
+  const isSearching = q.trim().length > 0;
+  const listRows = isSearching ? filtered : filtered.slice(3);
+  const visibleRows = listRows.slice(0, visibleCount);
 
   // infinite scroll: reset to the first page when the search query changes
   useEffect(() => { setVisibleCount(PAGE); }, [q]);
@@ -43,7 +49,7 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
     );
     io.observe(el);
     return () => io.disconnect();
-  }, [rest.length]);
+  }, [listRows.length]);
 
   // jump-to-bottom button visibility
   useEffect(() => {
@@ -54,7 +60,7 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
   }, []);
 
   const jumpToBottom = () => {
-    setVisibleCount(rest.length);
+    setVisibleCount(listRows.length);
     setJumpPending(true);
   };
   useEffect(() => {
@@ -69,7 +75,7 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
   // rows interleaved with a claim strip after every 30th row
   const cells = [];
   visibleRows.forEach((s, i) => {
-    const above = i === 0 ? top3[top3.length - 1] : visibleRows[i - 1];
+    const above = i === 0 ? (isSearching ? null : top3[top3.length - 1]) : visibleRows[i - 1];
     cells.push(
       <SpotRow
         key={s.slug}
@@ -79,7 +85,9 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
         onBoost={onBoost}
         race={race}
         count={count}
-        overtake={above ? { amount: above.amount, rank: above.rank } : null}
+        // In search mode the overtake meter is disabled (undefined) — it only
+        // makes sense against the live top of the board, not a filtered list.
+        overtake={isSearching ? undefined : (above ? { amount: above.amount, rank: above.rank } : null)}
       />
     );
     if ((i + 1) % 30 === 0) cells.push(<ClaimStrip key={`claim-${s.slug}`} onClaim={onClaim} />);
@@ -124,8 +132,8 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
           </div>
         </div>
 
-        {/* podium */}
-        {top3.length > 0 && (
+        {/* podium — hidden during search so filtered results keep their true ranks */}
+        {!isSearching && top3.length > 0 && (
           <div className="mt-12">
             <div className="text-center mb-2">
               <span className="inline-flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.2em] text-[var(--gold-deep)] bg-[var(--gold-soft)] border border-[var(--gold)]/30 rounded-full px-4 py-1.5">
@@ -139,7 +147,7 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
         {/* rest of board */}
         <div className="mt-10">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-display font-bold text-2xl text-snow">All spots <span className="text-mist text-base font-sans font-medium">({filtered.length} competing)</span></h2>
+            <h2 className="font-display font-bold text-2xl text-snow">{isSearching ? <>Results for <span className="grad-gold">“{q.trim()}”</span></> : 'All spots'} <span className="text-mist text-base font-sans font-medium">({filtered.length} competing)</span></h2>
             <span className="text-xs text-mist font-semibold">Total buzz: <b className="text-[var(--blaze)]">{money(spots.reduce((a, s) => a + s.amount, 0))}</b></span>
           </div>
           <p className="hidden md:block text-[11px] text-mist mt-1 mb-2" aria-hidden="true">

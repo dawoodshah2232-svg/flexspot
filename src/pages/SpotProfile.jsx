@@ -43,19 +43,24 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
 
   // Incoming referral visit: +$1 to this spot's total, once per visitor per day.
   // creditReferralVisit is idempotent per day, so re-runs are harmless.
+  const refParam = params.get('ref');
   useEffect(() => {
     setMyCode(spot ? myReferralCode(spot.slug) : null);
     setRefCredit(null);
     if (!spot) return;
-    const ref = params.get('ref');
-    if (!ref) return;
-    const res = creditReferralVisit(ref, spot.slug);
+    if (!refParam) return;
+    const res = creditReferralVisit(refParam, spot.slug);
     if (res.ok && !res.already) {
       setRefCredit({ name: res.name });
       if (refresh) refresh();
     } else if (!res.ok) {
-      recordReferralClick(ref); // legacy spot-level codes still count clicks
+      recordReferralClick(refParam); // legacy spot-level codes still count clicks
     }
+  }, [spot?.slug, refParam]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Preview analytics: count real profile views (feeds the Admin analytics tab).
+  useEffect(() => {
+    if (spot) recordVisit(`/s/${spot.slug}`, { source: document.referrer ? new URL(document.referrer).hostname : 'direct' });
   }, [spot?.slug]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {

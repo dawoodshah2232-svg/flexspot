@@ -529,3 +529,11 @@ table.admin-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; 
 /* -------- subtle glows for podium #2 / #3 -------- */
 .podium-glow-2 { box-shadow: 0 10px 34px -14px rgba(100,116,139,.55); border-color: rgba(148,163,184,.55) !important; }
 .podium-glow-3 { box-shadow: 0 10px 34px -14px rgba(180,83,9,.5); border-color: rgba(217,119,6,.5) !important; }
+
+/* winner meme sticker: playful left/right sway above the champion stage */
+@keyframes meme-sway {
+  0%, 100% { transform: rotate(4deg) translateX(-8px); }
+  50% { transform: rotate(7deg) translateX(8px); }
+}
+.meme-sway { animation: meme-sway 3.4s ease-in-out infinite; transform-origin: 50% 20%; }
+@media (prefers-reduced-motion: reduce) { .meme-sway { animation: none; } }

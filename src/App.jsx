@@ -137,7 +137,7 @@ function Shell() {
           <Route path="/faq" element={<FAQ onClaim={openClaim} />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
-          <Route path="/s/:slug" element={<SpotProfile spots={spots} onClaim={openClaim} onBoost={openBoost} />} />
+          <Route path="/s/:slug" element={<SpotProfile spots={spots} onClaim={openClaim} onBoost={openBoost} refresh={load} />} />
           <Route path="/admin" element={<Admin spots={spots} pending={pending} refresh={load} />} />
           {/* Root profiles — static routes always win over /:slug in React Router ranking */}
           <Route path="/:slug" element={<RootProfile spots={spots} onClaim={openClaim} onBoost={openBoost} />} />

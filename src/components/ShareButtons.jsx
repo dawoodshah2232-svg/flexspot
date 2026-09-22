@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { shareLinks, copyText } from '../lib/format';
 
-export default function ShareButtons({ spot, compact = false }) {
+export default function ShareButtons({ spot, compact = false, refCode = null }) {
   const [copied, setCopied] = useState(false);
   const origin = window.location.origin;
-  const links = shareLinks(spot, origin);
+  const links = shareLinks(spot, origin, refCode);
 
   const doCopy = async () => {
     const ok = await copyText(links.url);

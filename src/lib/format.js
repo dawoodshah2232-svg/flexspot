@@ -48,8 +48,8 @@ export const initials = (name) =>
     .join('')
     .toUpperCase();
 
-export const shareLinks = (spot, origin) => {
-  const url = `${origin}/s/${spot.slug}`;
+export const shareLinks = (spot, origin, refCode) => {
+  const url = `${origin}/s/${spot.slug}${refCode ? `?ref=${encodeURIComponent(refCode)}` : ''}`;
   const text = `Help ${spot.name} reach #1 on FlexSpot 🏆`;
   return {
     url,

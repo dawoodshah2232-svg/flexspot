@@ -96,7 +96,7 @@ export const FAQS = [
   { q: 'What can I promote?', a: 'Almost anything: your personal brand, company, website, social profile, startup, creator page, product, event, or community. If it has a link, it can have a spot.' },
   { q: 'Do I need an account to claim a spot?', a: 'No. Claiming takes under a minute: enter your details, choose your boost starting at $1, and complete payment. You\'ll get a management link by email to edit your spot later.' },
   { q: 'How do payments work right now?', a: 'We\'re in Phase 1: after claiming, you complete payment manually and our team verifies it — usually within a few hours. Automatic payment processing is coming soon.' },
-  { q: 'How do referrals work?', a: 'Every spot gets a unique referral link (flexspot.lol/s/your-name?ref=CODE). When friends join through your link, your referral stats grow — and referral milestones unlock rewards and ranking boosts.' },
+  { q: 'How do referrals work?', a: 'Every spot has a personal referral link (flexspot.lol/s/your-brand?ref=YOUR-CODE) — create yours with just your name, no signup. Share it anywhere: Facebook, Telegram, WhatsApp. Every visit through your link automatically adds $1 to that brand\u2019s total (counted once per friend per day), and your name climbs the Top Referrers board and the brand\u2019s Top Supporters list.' },
   { q: 'Can I boost a spot I like?', a: 'Yes! Anyone can contribute to any spot to push it higher. It\'s the fastest way to help a friend — or a brand you love — reach #1.' },
   { q: 'Is there a fee?', a: 'Claiming starts at $1 and 100% of your boost counts toward your ranking. There are no hidden fees to join or appear on the leaderboard.' },
 ];

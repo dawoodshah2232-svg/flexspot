@@ -6,7 +6,7 @@ import ShareButtons from '../components/ShareButtons';
 import CountUp from '../components/CountUp';
 import { money, compact, timeAgo, copyText } from '../lib/format';
 import { REWARDS } from '../lib/data';
-import { recordClick, recordReferralClick, getReferralStats, refCodeFor, getContributions } from '../lib/store';
+import { recordClick, recordReferralClick, getContributions, createReferralIdentity, myReferralCode, creditReferralVisit, getSpotReferrers } from '../lib/store';
 import Flee from '../components/Flee';
 import CelebrationBurst from '../components/CelebrationBurst';
 
@@ -32,24 +32,39 @@ function Sparkline({ data }) {
   );
 }
 
-export default function SpotProfile({ spots, onClaim, onBoost }) {
+export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
   const { slug } = useParams();
   const [params] = useSearchParams();
   const [copiedRef, setCopiedRef] = useState(false);
+  const [refName, setRefName] = useState('');
+  const [myCode, setMyCode] = useState(null);
+  const [refCredit, setRefCredit] = useState(null);
   const spot = spots.find((s) => s.slug === slug);
 
+  // Incoming referral visit: +$1 to this spot's total, once per visitor per day.
+  // creditReferralVisit is idempotent per day, so re-runs are harmless.
   useEffect(() => {
+    setMyCode(spot ? myReferralCode(spot.slug) : null);
+    setRefCredit(null);
+    if (!spot) return;
     const ref = params.get('ref');
-    if (ref) recordReferralClick(ref);
-  }, [params]);
+    if (!ref) return;
+    const res = creditReferralVisit(ref, spot.slug);
+    if (res.ok && !res.already) {
+      setRefCredit({ name: res.name });
+      if (refresh) refresh();
+    } else if (!res.ok) {
+      recordReferralClick(ref); // legacy spot-level codes still count clicks
+    }
+  }, [spot?.slug]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (spot) document.title = `${spot.name} — #${spot.rank} on FlexSpot.LOL`;
     return () => { document.title = 'FlexSpot.LOL — Claim Your Spot On The Internet'; };
   }, [spot]);
 
-  const myRef = useMemo(() => (spot ? refCodeFor(spot.slug) : ''), [spot]);
-  const refStats = useMemo(() => getReferralStats(myRef), [myRef, spots]);
+  const supporters = useMemo(() => (spot ? getSpotReferrers(spot.slug, 5) : []), [spot?.slug, refCredit, myCode]); // eslint-disable-line react-hooks/exhaustive-deps
+  const myStats = useMemo(() => supporters.find((r) => r.code === myCode) || { visits: 0, earned: 0 }, [supporters, myCode]);
   const contribs = useMemo(() => (spot ? getContributions(spot.slug) : []), [spot, spots]);
   const badges = useMemo(() => REWARDS.filter((r) => { try { return r.check(spots) === spot?.slug; } catch { return false; } }), [spots, spot]);
   const neighbors = useMemo(() => {
@@ -69,9 +84,16 @@ export default function SpotProfile({ spots, onClaim, onBoost }) {
   }
 
   const visit = (url) => { recordClick(spot.slug); window.open(url, '_blank', 'noopener'); };
+  const refLink = myCode ? `${window.location.origin}/s/${spot.slug}?ref=${myCode}` : '';
   const copyRef = async () => {
-    const ok = await copyText(`${window.location.origin}/s/${spot.slug}?ref=${myRef}`);
+    if (!refLink) return;
+    const ok = await copyText(refLink);
     if (ok) { setCopiedRef(true); setTimeout(() => setCopiedRef(false), 1800); }
+  };
+  const makeRefCode = () => {
+    if (!spot) return;
+    const code = createReferralIdentity(spot.slug, refName);
+    if (code) { setMyCode(code); setRefName(''); }
   };
 
   return (
@@ -122,6 +144,17 @@ export default function SpotProfile({ spots, onClaim, onBoost }) {
               <div>
                 <div className="font-bold text-snow text-sm">Surprise gift from {spot.gift.from}</div>
                 {spot.gift.message && <p className="text-mist text-sm mt-1 leading-relaxed">“{spot.gift.message}”</p>}
+              </div>
+            </motion.div>
+          )}
+          {refCredit && (
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-6 rounded-2xl bg-gradient-to-r from-[#F59E0B]/25 via-[#F59E0B]/10 to-transparent border border-[#F59E0B]/50 p-4 sm:p-5 flex items-start gap-3">
+              <span className="text-2xl">🎉</span>
+              <div>
+                <div className="font-bold text-snow text-sm">You arrived through {refCredit.name}'s link!</div>
+                <p className="text-mist text-sm mt-1 leading-relaxed">
+                  {refCredit.name} just earned <b className="text-[#FCD34D]">$1</b> for {spot.name} — every visit through a referral link adds $1 to the total.
+                </p>
               </div>
             </motion.div>
           )}
@@ -236,29 +269,51 @@ export default function SpotProfile({ spots, onClaim, onBoost }) {
           <div className="bg-card border border-line/5 rounded-3xl p-6">
             <h2 className="font-display font-bold text-lg text-snow mb-1">📣 Help {spot.name} reach #1</h2>
             <p className="text-mist text-sm mb-4">Share this page — every visit and boost pushes them higher.</p>
-            <ShareButtons spot={spot} />
+            <ShareButtons spot={spot} refCode={myCode} />
           </div>
 
-          {/* referral */}
+          {/* referral rewards */}
           <div className="rounded-3xl bg-gradient-to-br from-[var(--blaze-soft)] to-card border border-[var(--blaze)] p-6">
-            <h2 className="font-display font-bold text-lg text-snow mb-1">🔗 Your referral hub</h2>
-            <p className="text-mist text-sm mb-4">Invite friends with your link. Joins through your code grow your referral stats and unlock rewards.</p>
-            <button onClick={copyRef} className="w-full font-mono text-sm bg-ink/60 border border-line/10 rounded-xl px-4 py-3 text-[var(--blaze)] hover:border-[var(--blaze)] transition-colors break-all">
-              {window.location.origin}/s/{spot.slug}?ref={myRef}
-            </button>
-            <div className="text-xs text-mist mt-2 mb-4">{copiedRef ? '✓ Referral link copied!' : 'Tap to copy your referral link'}</div>
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { l: 'Link clicks', v: refStats.clicks },
-                { l: 'Friends joined', v: refStats.joined },
-                { l: 'Rank right now', v: '#' + spot.rank },
-              ].map((s) => (
-                <div key={s.l} className="bg-ink/50 rounded-2xl p-3 text-center">
-                  <div className="font-display font-bold text-xl text-snow">{s.v}</div>
-                  <div className="text-[10px] text-mist uppercase tracking-wider font-semibold mt-0.5">{s.l}</div>
+            <h2 className="font-display font-bold text-lg text-snow mb-1">🔗 Refer & earn $1 per visit</h2>
+            <p className="text-mist text-sm mb-4">
+              Create your personal link and share it anywhere — Facebook, Telegram, WhatsApp.
+              Every visit through it adds <b className="text-snow">$1</b> to {spot.name}'s total
+              and puts your name on the supporters board. Counts once per friend per day.
+            </p>
+            {myCode ? (
+              <>
+                <button onClick={copyRef} className="w-full font-mono text-sm bg-ink/60 border border-line/10 rounded-xl px-4 py-3 text-[var(--blaze)] hover:border-[var(--blaze)] transition-colors break-all">
+                  {refLink}
+                </button>
+                <div className="text-xs text-mist mt-2 mb-4">{copiedRef ? '✓ Referral link copied!' : 'Tap to copy your referral link'}</div>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { l: 'Visits brought', v: myStats.visits },
+                    { l: '$ earned', v: '$' + myStats.earned },
+                    { l: 'Rank right now', v: '#' + spot.rank },
+                  ].map((s) => (
+                    <div key={s.l} className="bg-ink/50 rounded-2xl p-3 text-center">
+                      <div className="font-display font-bold text-xl text-snow">{s.v}</div>
+                      <div className="text-[10px] text-mist uppercase tracking-wider font-semibold mt-0.5">{s.l}</div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </>
+            ) : (
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  value={refName}
+                  onChange={(e) => setRefName(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') makeRefCode(); }}
+                  placeholder="Your name — shown on the board"
+                  maxLength={30}
+                  className="flex-1 bg-ink/60 border border-line/10 rounded-xl px-4 py-3 text-sm text-snow placeholder:text-mist/60 outline-none focus:border-[var(--blaze)]"
+                />
+                <button onClick={makeRefCode} disabled={!refName.trim()} className="btn-gold px-6 py-3 text-sm disabled:opacity-40">
+                  Get my link
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -269,6 +324,28 @@ export default function SpotProfile({ spots, onClaim, onBoost }) {
             <h3 className="font-display font-bold text-snow">Want the crown?</h3>
             <p className="text-mist text-sm mt-1 mb-4">Claim your own spot and challenge #{spot.rank}.</p>
             <button onClick={onClaim} className="btn-gold w-full py-3 text-sm">⚡ Claim your spot</button>
+          </div>
+          <div className="bg-card border border-line/5 rounded-3xl p-5">
+            <h3 className="font-display font-bold text-snow mb-1">⭐ Top supporters</h3>
+            <p className="text-mist text-xs mb-3">Their links brought visitors — each visit added $1.</p>
+            {supporters.length ? (
+              <div className="space-y-2">
+                {supporters.map((r, i) => (
+                  <div key={r.code} className="flex items-center gap-3 p-2 rounded-xl bg-line/5">
+                    <span className={`grid place-items-center w-7 h-7 rounded-lg text-xs font-black shrink-0 ${
+                      i === 0 ? 'bg-[#F59E0B]/20 text-[#FCD34D]' : 'bg-line/10 text-mist'
+                    }`}>{i + 1}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-bold text-snow truncate">{r.name}</div>
+                      <div className="text-[11px] text-mist">{r.visits} visit{r.visits === 1 ? '' : 's'} brought</div>
+                    </div>
+                    <div className="font-black text-[#FCD34D] text-sm shrink-0">+${r.earned}</div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-mist text-sm">No supporters yet — share your link and be the first.</p>
+            )}
           </div>
           <div className="bg-card border border-line/5 rounded-3xl p-5">
             <h3 className="font-display font-bold text-snow mb-3">🔥 Also trending</h3>

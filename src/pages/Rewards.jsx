@@ -16,9 +16,10 @@ const PERKS = [
 
 const STEPS = [
   { n: 1, icon: '🎯', t: 'Claim your spot', d: 'Grab a place on the board from just $1. One cent more overtakes your rival.' },
-  { n: 2, icon: '📈', t: 'Climb & get seen', d: 'Boost your amount, stack views and referral clicks. Rankings update live.' },
-  { n: 3, icon: '🏅', t: 'Earn badges', d: 'Hit the criteria and the badge lands on your profile, the homepage and share cards.' },
-  { n: 4, icon: '🛡️', t: 'Defend the crown', d: 'Badges are re-evaluated weekly — keep your rank or watch someone steal it.' },
+  { n: 2, icon: '📈', t: 'Climb & get seen', d: 'Boost your amount, stack views and referral visits. Rankings update live.' },
+  { n: 3, icon: '🔗', t: 'Refer & earn $1', d: 'Share your personal link anywhere — every visit through it adds $1 to the brand and your name hits the Top Referrers board.' },
+  { n: 4, icon: '🏅', t: 'Earn badges', d: 'Hit the criteria and the badge lands on your profile, the homepage and share cards.' },
+  { n: 5, icon: '🛡️', t: 'Defend the crown', d: 'Badges are re-evaluated weekly — keep your rank or watch someone steal it.' },
 ];
 
 function HolderRow({ holder, compact = false }) {

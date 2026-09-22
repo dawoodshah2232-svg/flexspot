@@ -7,6 +7,7 @@ import Podium from '../components/Podium';
 import Floaties from '../components/Floaties';
 import { SpotRow, BrandAvatar, useRaceCycle } from '../components/SpotCard';
 import Flee from '../components/Flee';
+import TopReferrers from '../components/TopReferrers';
 import { compact, money } from '../lib/format';
 import { LIVE_FEED_POOL, IS_PREVIEW_DATA } from '../lib/data';
 import { IS_LIVE } from '../lib/store';
@@ -370,6 +371,8 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
       </div>
 
       <LeaderboardSection spots={spots} onBoost={onBoost} onClaim={onClaim} />
+
+      <TopReferrers spots={spots} />
 
       <FooterStats />
 

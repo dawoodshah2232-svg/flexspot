@@ -407,6 +407,142 @@ export function refCodeFor(slug) {
   return 'FS-' + String(slug).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
 }
 
+// --- Referral rewards: named referrers, $1 per visit -----------------------
+// Anyone can create a personal referral link for any spot by entering their
+// name: /s/<slug>?ref=<CODE>. Every visit through that link automatically
+// adds $1 to the spot's total (counted once per visitor per day, so refresh
+// farming doesn't work). The referrer's name appears on the spot's page
+// ("Top supporters") and on the global Top Referrers board.
+// NOTE: demo-mode engine (localStorage). Live Supabase wiring for the $1
+// credit needs the 20260923_referral_rewards migration + a server-side
+// credit; until then live mode keeps the legacy click counting.
+const LS_REF_ID = 'flexspot_ref_identities_v1';   // { code: { name, spotSlug, createdAt } }
+const LS_REF_STATS = 'flexspot_ref_stats_v1';     // { code: { visits, earned } }
+const LS_REF_COUNTED = 'flexspot_ref_counted_v1'; // { "<code>:<yyyy-mm-dd>": true }
+const LS_MY_REFS = 'flexspot_my_refs_v1';         // { spotSlug: code } created on this browser
+const LS_REF_SEED = 'flexspot_ref_seed_v1';
+// Earning events ledger — every $1 credit is an immutable event. This is the
+// foundation the future affiliate wallet builds on (balances, withdrawals).
+const LS_REF_EVENTS = 'flexspot_ref_events_v1'; // [{ code, spotSlug, at, amount, kind }]
+
+const rand4 = () => Math.random().toString(36).slice(2, 6).toUpperCase().replace(/[^A-Z0-9]/g, 'X').padEnd(4, 'X').slice(0, 4);
+
+export function createReferralIdentity(spotSlug, name) {
+  const clean = String(name || '').trim().slice(0, 30);
+  if (!clean || !spotSlug) return null;
+  const ids = readLS(LS_REF_ID, {});
+  // reuse the code this browser already made for this name+spot
+  const mine = readLS(LS_MY_REFS, {});
+  if (mine[spotSlug]) {
+    const existing = ids[mine[spotSlug]];
+    if (existing && existing.name.toLowerCase() === clean.toLowerCase()) return mine[spotSlug];
+  }
+  const slugPart = String(spotSlug).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4).padEnd(4, 'X');
+  let code = `FS-${slugPart}-${rand4()}`;
+  while (ids[code]) code = `FS-${slugPart}-${rand4()}`;
+  ids[code] = { name: clean, spotSlug, createdAt: Date.now() };
+  writeLS(LS_REF_ID, ids);
+  const stats = readLS(LS_REF_STATS, {});
+  stats[code] = stats[code] || { visits: 0, earned: 0 };
+  writeLS(LS_REF_STATS, stats);
+  mine[spotSlug] = code;
+  writeLS(LS_MY_REFS, mine);
+  return code;
+}
+
+export function getReferralIdentity(code) {
+  if (!code) return null;
+  return readLS(LS_REF_ID, {})[String(code).toUpperCase()] || null;
+}
+
+export function myReferralCode(slug) {
+  if (!slug) return null;
+  return readLS(LS_MY_REFS, {})[slug] || null;
+}
+
+// Credit a visit: +$1 to the spot's total via the normal boost ledger, so
+// rankings update everywhere automatically. Idempotent per visitor per day.
+export function creditReferralVisit(code, spotSlug) {
+  const id = getReferralIdentity(code);
+  if (!id || id.spotSlug !== spotSlug) return { ok: false };
+  const day = new Date().toISOString().slice(0, 10);
+  const counted = readLS(LS_REF_COUNTED, {});
+  const key = `${String(code).toUpperCase()}:${day}`;
+  // legacy click counting keeps working for analytics
+  recordReferralClick(String(code).toUpperCase());
+  if (counted[key]) return { ok: true, already: true, name: id.name };
+  counted[key] = true;
+  writeLS(LS_REF_COUNTED, counted);
+  const boosts = readLS(LS_BOOSTS, {});
+  boosts[spotSlug] = (boosts[spotSlug] || 0) + 1;
+  writeLS(LS_BOOSTS, boosts);
+  const stats = readLS(LS_REF_STATS, {});
+  const s = stats[String(code).toUpperCase()] || { visits: 0, earned: 0 };
+  s.visits += 1; s.earned += 1;
+  stats[String(code).toUpperCase()] = s;
+  writeLS(LS_REF_STATS, stats);
+  const events = readLS(LS_REF_EVENTS, []);
+  events.push({ code: String(code).toUpperCase(), spotSlug, at: Date.now(), amount: 1, kind: 'visit_reward' });
+  writeLS(LS_REF_EVENTS, events.slice(-300));
+  return { ok: true, name: id.name, earned: 1 };
+}
+
+export function getReferralEvents(code, limit = 50) {
+  const events = readLS(LS_REF_EVENTS, []);
+  const c = String(code || '').toUpperCase();
+  return events.filter((e) => !c || e.code === c).slice(-limit).reverse();
+}
+
+export function getSpotReferrers(slug, limit = 5) {
+  const ids = readLS(LS_REF_ID, {});
+  const stats = readLS(LS_REF_STATS, {});
+  return Object.entries(ids)
+    .filter(([, v]) => v.spotSlug === slug)
+    .map(([code, v]) => ({ code, name: v.name, ...(stats[code] || { visits: 0, earned: 0 }) }))
+    .sort((a, b) => b.earned - a.earned || b.visits - a.visits)
+    .slice(0, limit);
+}
+
+export function getTopReferrers(limit = 8) {
+  const ids = readLS(LS_REF_ID, {});
+  const stats = readLS(LS_REF_STATS, {});
+  return Object.entries(ids)
+    .map(([code, v]) => ({ code, name: v.name, spotSlug: v.spotSlug, ...(stats[code] || { visits: 0, earned: 0 }) }))
+    .sort((a, b) => b.earned - a.earned || b.visits - a.visits)
+    .slice(0, limit);
+}
+
+// Demo seed so the boards are alive on first load. Boosts merge into the
+// normal boost ledger once, so displayed totals stay consistent.
+const DEMO_REFERRERS = [
+  { name: 'Ahmed R.', slug: 'brewline', visits: 14, earned: 14 },
+  { name: 'CryptoMama', slug: 'brewline', visits: 9, earned: 9 },
+  { name: 'DXB Hustle', slug: 'pixelforge', visits: 11, earned: 11 },
+  { name: 'Lena W.', slug: 'nomaddesk', visits: 7, earned: 7 },
+  { name: 'Sara K.', slug: 'lumennotes', visits: 6, earned: 6 },
+  { name: 'Omar F.', slug: 'voltathletics', visits: 5, earned: 5 },
+];
+
+function ensureReferralSeed() {
+  try {
+    if (localStorage.getItem(LS_REF_SEED) !== null) return;
+    const ids = readLS(LS_REF_ID, {});
+    const stats = readLS(LS_REF_STATS, {});
+    const boosts = readLS(LS_BOOSTS, {});
+    DEMO_REFERRERS.forEach((r, i) => {
+      const code = `FS-${r.slug.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4).padEnd(4, 'X')}-D${String(i).padStart(3, '0')}`;
+      if (!ids[code]) ids[code] = { name: r.name, spotSlug: r.slug, createdAt: Date.now() - (i + 1) * 86400e3, demo: true };
+      stats[code] = { visits: r.visits, earned: r.earned };
+      boosts[r.slug] = (boosts[r.slug] || 0) + r.earned;
+    });
+    writeLS(LS_REF_ID, ids);
+    writeLS(LS_REF_STATS, stats);
+    writeLS(LS_BOOSTS, boosts);
+    localStorage.setItem(LS_REF_SEED, '1');
+  } catch {}
+}
+ensureReferralSeed();
+
 // --- Contributions ("Boost squad") ----------------------------------------
 // Anyone can chip in $1+ on any brand. The contributor's name + handle shows
 // on the brand's page instantly (the boost amount itself lands after payment

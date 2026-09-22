@@ -4,7 +4,7 @@ import { FAQS } from '../lib/data';
 
 function Item({ f, open, onToggle }) {
   return (
-    <div className={`bg-card border rounded-2xl overflow-hidden transition-colors ${open ? 'border-electric/40' : 'border-white/5'}`}>
+    <div className={`bg-card border rounded-2xl overflow-hidden transition-colors ${open ? 'border-electric/40' : 'border-line/5'}`}>
       <button onClick={onToggle} className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left">
         <span className="font-display font-bold text-snow text-[15px]">{f.q}</span>
         <span className={`text-electric text-xl shrink-0 transition-transform ${open ? 'rotate-45' : ''}`}>＋</span>
@@ -28,7 +28,7 @@ export default function FAQ({ onClaim }) {
             <Item key={f.q} f={f} open={open === i} onToggle={() => setOpen(open === i ? -1 : i)} />
           ))}
         </div>
-        <div className="mt-12 rounded-3xl bg-card border border-white/5 p-8 text-center">
+        <div className="mt-12 rounded-3xl bg-card border border-line/5 p-8 text-center">
           <h2 className="font-display font-bold text-2xl text-snow">Still have questions?</h2>
           <p className="text-mist text-sm mt-2 mb-5">Or are you ready to stop reading and start climbing?</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">

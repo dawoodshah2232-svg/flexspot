@@ -18,7 +18,7 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
     <div className="pt-[68px]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14">
         <div className="text-center max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 text-xs font-semibold text-mist mb-5">
+          <div className="inline-flex items-center gap-2 bg-line/5 border border-line/10 rounded-full px-4 py-1.5 text-xs font-semibold text-mist mb-5">
             <span className="live-dot" /> Updated live — every contribution re-ranks instantly
           </div>
           <h1 className="font-display font-bold text-4xl sm:text-6xl text-snow tracking-tight">The <span className="grad-gold">Leaderboard</span></h1>
@@ -65,7 +65,7 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
           ) : (
             <motion.div layout className="space-y-2.5">
               {rest.map((s) => (
-                <SpotRow key={s.slug} spot={s} move={moves[s.slug]} onBoost={onBoost} />
+                <SpotRow key={s.slug} spot={s} move={moves[s.slug]} highlight onBoost={onBoost} />
               ))}
             </motion.div>
           )}

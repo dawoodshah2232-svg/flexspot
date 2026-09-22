@@ -25,7 +25,7 @@ export default function HowItWorks({ onClaim }) {
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 mt-12 space-y-4">
         {STEPS.map((s, i) => (
-          <div key={s.t} className="card-lift flex gap-5 bg-card border border-white/5 rounded-3xl p-6">
+          <div key={s.t} className="card-lift flex gap-5 bg-card border border-line/5 rounded-3xl p-6">
             <div className="shrink-0 w-14 h-14 rounded-2xl bg-electric/15 border border-electric/30 grid place-items-center text-3xl">{s.icon}</div>
             <div>
               <div className="text-[11px] font-bold text-electric uppercase tracking-[0.18em] mb-1">Step {i + 1}</div>
@@ -40,7 +40,7 @@ export default function HowItWorks({ onClaim }) {
         <h2 className="font-display font-bold text-3xl text-snow text-center">Who's it for?</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
           {AUDIENCES.map((a) => (
-            <div key={a.t} className="card-lift bg-card border border-white/5 rounded-3xl p-6">
+            <div key={a.t} className="card-lift bg-card border border-line/5 rounded-3xl p-6">
               <div className="text-4xl mb-3">{a.icon}</div>
               <h3 className="font-display font-bold text-snow mb-1.5">{a.t}</h3>
               <p className="text-mist text-sm leading-relaxed">{a.d}</p>

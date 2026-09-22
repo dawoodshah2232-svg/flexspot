@@ -22,13 +22,13 @@ export default function Rewards({ spots, onClaim }) {
         {REWARDS.map((r, i) => {
           const holder = holders[r.slug];
           return (
-            <div key={r.slug} className="card-lift relative overflow-hidden rounded-3xl bg-card border border-white/5 p-6">
+            <div key={r.slug} className="card-lift relative overflow-hidden rounded-3xl bg-card border border-line/5 p-6">
               <div className="absolute top-0 right-0 w-32 h-32 bg-gold/10 blur-3xl rounded-full" />
               <div className="text-5xl mb-4">{r.icon}</div>
               <h3 className="font-display font-bold text-xl text-snow">{r.name}</h3>
               <p className="text-mist text-sm mt-1.5 mb-5">{r.desc}</p>
               {holder ? (
-                <Link to={`/s/${holder.slug}`} className="flex items-center gap-3 bg-white/[0.04] border border-white/10 rounded-2xl p-3 hover:border-gold/40 transition-colors">
+                <Link to={`/s/${holder.slug}`} className="flex items-center gap-3 bg-line/5 border border-line/10 rounded-2xl p-3 hover:border-gold/40 transition-colors">
                   <BrandAvatar spot={holder} size={40} />
                   <div className="min-w-0">
                     <div className="text-[10px] uppercase tracking-widest text-gold font-bold">Current holder</div>
@@ -36,7 +36,7 @@ export default function Rewards({ spots, onClaim }) {
                   </div>
                 </Link>
               ) : (
-                <div className="text-xs font-bold text-mist bg-white/5 rounded-2xl p-3">⏳ Awaiting first champion</div>
+                <div className="text-xs font-bold text-mist bg-line/5 rounded-2xl p-3">⏳ Awaiting first champion</div>
               )}
               <div className="mt-4 text-[11px] font-bold text-mist/60 uppercase tracking-widest">Reward #{String(i + 1).padStart(2, '0')}</div>
             </div>

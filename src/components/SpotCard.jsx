@@ -24,7 +24,7 @@ export function RankBadge({ rank, size = 'md' }) {
     2: 'bg-gradient-to-br from-slate-200 to-slate-400 text-slate-900',
     3: 'bg-gradient-to-br from-amber-600 to-amber-800 text-white',
   };
-  const cls = styles[rank] || 'bg-white/10 text-mist border border-white/10';
+  const cls = styles[rank] || 'bg-line/10 text-mist border border-line/10';
   const sz = size === 'lg' ? 'w-12 h-12 text-xl' : 'w-9 h-9 text-sm';
   return (
     <span className={`grid place-items-center rounded-xl font-display font-bold ${sz} ${cls}`}>
@@ -39,12 +39,16 @@ export function MoveIndicator({ move }) {
   return <span className="text-red-400 text-xs font-bold">▼ {Math.abs(move)}</span>;
 }
 
-export function SpotRow({ spot, move, onBoost }) {
+export function SpotRow({ spot, move, onBoost, highlight }) {
   return (
-    <motion.div layout transition={{ type: 'spring', stiffness: 320, damping: 32 }}>
+    <motion.div
+      layout
+      transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+      className={highlight ? (move > 0 ? 'flash-up rounded-2xl' : move < 0 ? 'flash-down rounded-2xl' : '') : ''}
+    >
       <Link
         to={`/s/${spot.slug}`}
-        className="card-lift flex items-center gap-3 sm:gap-4 bg-card border border-white/5 rounded-2xl p-3 sm:p-4"
+        className="card-lift flex items-center gap-3 sm:gap-4 bg-card border border-line/5 rounded-2xl p-3 sm:p-4"
       >
         <RankBadge rank={spot.rank} />
         <BrandAvatar spot={spot} />
@@ -52,8 +56,9 @@ export function SpotRow({ spot, move, onBoost }) {
           <div className="flex items-center gap-2">
             <h3 className="font-display font-bold text-snow truncate text-[15px]">{spot.name}</h3>
             {spot.rank === 1 && <span className="text-sm">👑</span>}
+            {spot.gift && <span className="text-sm" title={`Surprised by ${spot.gift.from}`}>🎁</span>}
           </div>
-          <p className="text-mist text-xs truncate">{spot.tagline}</p>
+          <p className="text-mist text-xs truncate">{spot.gift ? `🎁 Surprised by ${spot.gift.from}` : spot.tagline}</p>
           <div className="flex items-center gap-3 mt-1 text-[11px] text-mist/80">
             <span>👁 {compact(spot.views)}</span>
             <span>🖱 {compact(spot.clicks)}</span>
@@ -84,7 +89,7 @@ export function TopSpotCard({ spot, place }) {
         className={`spotlight card-lift relative block rounded-3xl p-5 sm:p-6 border overflow-hidden ${
           isFirst
             ? 'gold-card bg-gradient-to-b from-[#2A2113] to-card border-gold/50'
-            : 'bg-card border-white/10'
+            : 'bg-card border-line/10'
         }`}
       >
         {isFirst && (

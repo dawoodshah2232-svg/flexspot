@@ -22,13 +22,13 @@ export default function ShareButtons({ spot, compact = false }) {
       <a href={links.facebook} target="_blank" rel="noopener" className={`${btn} ${size} bg-[#1877F2]/15 text-[#5b9dff] border border-[#1877F2]/30 hover:bg-[#1877F2]/25`}>
         <span>📘</span> Facebook
       </a>
-      <a href={links.x} target="_blank" rel="noopener" className={`${btn} ${size} bg-white/10 text-snow border border-white/15 hover:bg-white/15`}>
+      <a href={links.x} target="_blank" rel="noopener" className={`${btn} ${size} bg-line/10 text-snow border border-line/15 hover:bg-line/15`}>
         <span>𝕏</span> Post
       </a>
       <a href={links.telegram} target="_blank" rel="noopener" className={`${btn} ${size} bg-[#229ED9]/15 text-[#5cc8f5] border border-[#229ED9]/30 hover:bg-[#229ED9]/25`}>
         <span>✈️</span> Telegram
       </a>
-      <button onClick={doCopy} className={`${btn} ${size} ${copied ? 'bg-neon/20 text-neon border border-neon/40' : 'bg-white/5 text-mist border border-white/10 hover:text-snow'}`}>
+      <button onClick={doCopy} className={`${btn} ${size} ${copied ? 'bg-neon/20 text-neon border border-neon/40' : 'bg-line/5 text-mist border border-line/10 hover:text-snow'}`}>
         {copied ? '✓ Copied!' : '🔗 Copy link'}
       </button>
     </div>

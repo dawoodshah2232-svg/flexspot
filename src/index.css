@@ -13,6 +13,50 @@
   --gold: #ffc93c;
   --mist: #9aa4b2;
   --snow: #f5f7fa;
+  /* tailwind channel tokens (space-separated rgb) */
+  --c-ink: 10 12 16;
+  --c-coal: 16 20 26;
+  --c-card: 20 25 34;
+  --c-cardhi: 27 34 48;
+  --c-line: 255 255 255;
+  --c-mist: 154 164 178;
+  --c-snow: 245 247 250;
+  --glass-bg: rgba(20, 25, 34, 0.72);
+  --field-bg: #0d1117;
+  --field-ph: #5c6675;
+  --track-bg: #0a0c10;
+  --thumb-bg: #232b38;
+  --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  --lift-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  --backdrop: rgba(4, 6, 10, 0.7);
+}
+
+[data-theme="light"] {
+  --ink: #f3f5fa;
+  --coal: #ffffff;
+  --card: #ffffff;
+  --cardhi: #edf0f7;
+  --line: rgba(12, 18, 32, 0.1);
+  --electric: #2e7cf6;
+  --neon: #0e9f5d;
+  --gold: #b8860b;
+  --mist: #5a6478;
+  --snow: #0c1220;
+  --c-ink: 243 245 250;
+  --c-coal: 255 255 255;
+  --c-card: 255 255 255;
+  --c-cardhi: 237 240 247;
+  --c-line: 12 18 32;
+  --c-mist: 90 100 120;
+  --c-snow: 12 18 32;
+  --glass-bg: rgba(255, 255, 255, 0.78);
+  --field-bg: #f4f6fb;
+  --field-ph: #9aa4b8;
+  --track-bg: #e8ebf2;
+  --thumb-bg: #c3cad8;
+  --card-shadow: 0 8px 28px rgba(15, 23, 42, 0.1);
+  --lift-shadow: 0 16px 36px rgba(15, 23, 42, 0.14);
+  --backdrop: rgba(12, 18, 32, 0.45);
 }
 
 * { box-sizing: border-box; }
@@ -29,8 +73,8 @@ body {
 
 /* ---------- scrollbar ---------- */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: #0a0c10; }
-::-webkit-scrollbar-thumb { background: #232b38; border-radius: 8px; }
+::-webkit-scrollbar-track { background: var(--track-bg); }
+::-webkit-scrollbar-thumb { background: var(--thumb-bg); border-radius: 8px; }
 
 /* ---------- typography helpers ---------- */
 .font-display { font-family: "Space Grotesk", Inter, sans-serif; }
@@ -49,13 +93,13 @@ body {
 
 /* ---------- surfaces ---------- */
 .glass {
-  background: rgba(20, 25, 34, 0.72);
+  background: var(--glass-bg);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border: 1px solid var(--line);
 }
 .card-lift { transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.3, 1), box-shadow 0.25s; }
-.card-lift:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5); }
+.card-lift:hover { transform: translateY(-4px); box-shadow: var(--lift-shadow); }
 
 /* ---------- buttons ---------- */
 .btn-primary {
@@ -89,7 +133,7 @@ body {
 /* ---------- inputs ---------- */
 .field {
   width: 100%;
-  background: #0d1117;
+  background: var(--field-bg);
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 12px 14px;
@@ -99,7 +143,7 @@ body {
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 .field:focus { border-color: var(--electric); box-shadow: 0 0 0 3px rgba(46, 124, 246, 0.18); }
-.field::placeholder { color: #5c6675; }
+.field::placeholder { color: var(--field-ph); }
 label.lbl { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mist); margin-bottom: 6px; }
 
 /* ---------- animations ---------- */
@@ -163,7 +207,7 @@ label.lbl { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0
 /* modal + toast */
 .modal-backdrop {
   position: fixed; inset: 0; z-index: 90;
-  background: rgba(4, 6, 10, 0.7);
+  background: var(--backdrop);
   backdrop-filter: blur(8px);
   display: flex; align-items: flex-end; justify-content: center;
 }
@@ -182,6 +226,24 @@ label.lbl { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0
 .acc-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease; }
 .acc-open .acc-body { grid-template-rows: 1fr; }
 .acc-inner { overflow: hidden; }
+
+/* ---------- light-theme polish ---------- */
+[data-theme="light"] .blob { opacity: 0.22; }
+[data-theme="light"] .shine-text {
+  background: linear-gradient(110deg, #0c1220 30%, var(--gold) 50%, #0c1220 70%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+[data-theme="light"] .grad-text {
+  background: linear-gradient(92deg, #1b5fd0 0%, #2e7cf6 45%, #0e9f5d 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+[data-theme="light"] .gold-card { animation: none; box-shadow: var(--card-shadow); }
+[data-theme="light"] .card-lift:hover { box-shadow: var(--lift-shadow); }
 
 /* reduced motion */
 @media (prefers-reduced-motion: reduce) {

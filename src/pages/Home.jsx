@@ -9,7 +9,7 @@ import { IS_LIVE } from '../lib/store';
 
 function LiveStat({ icon, value, label, format }) {
   return (
-    <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
+    <div className="flex items-center gap-3 bg-line/5 border border-line/10 rounded-2xl px-4 py-3">
       <span className="text-2xl">{icon}</span>
       <div>
         <div className="font-display font-bold text-xl text-snow leading-none">
@@ -41,7 +41,7 @@ function HeroBoard({ spots }) {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -40 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className={`flex items-center gap-3 rounded-2xl p-2.5 border ${s.rank === 1 ? 'bg-gold/10 border-gold/40' : 'bg-white/[0.03] border-white/5'}`}
+                className={`flex items-center gap-3 rounded-2xl p-2.5 border ${s.rank === 1 ? 'bg-gold/10 border-gold/40' : 'bg-line/5 border-line/5'}`}
               >
                 <RankBadge rank={s.rank} />
                 <BrandAvatar spot={s} size={38} />
@@ -90,16 +90,10 @@ function FeedTicker() {
   );
 }
 
-export default function Home({ spots, onClaim }) {
-  const [online, setOnline] = useState(142);
-  useEffect(() => {
-    const t = setInterval(() => setOnline((v) => Math.max(96, Math.min(240, v + Math.floor(Math.random() * 21) - 10))), 5000);
-    return () => clearInterval(t);
-  }, []);
-
+export default function Home({ spots, onClaim, viewers }) {
   const totalRaised = useMemo(() => spots.reduce((a, s) => a + s.amount, 0), [spots]);
   const stats = [
-    { icon: '🟢', value: online, label: 'people online now', format: (n) => Math.round(n).toString() },
+    { icon: '🟢', value: viewers ?? 0, label: 'people here now', format: (n) => Math.round(n).toString() },
     { icon: '🔥', value: 5240 + spots.filter((s) => s.id?.startsWith('local-')).length, label: 'spots claimed', format: (n) => Math.round(n).toLocaleString() },
     { icon: '👀', value: 89000 + spots.reduce((a, s) => a + (s.views || 0), 0), label: 'visitors this month', format: (n) => compact(n) },
     { icon: '⚡', value: totalRaised, label: 'support contributed', format: (n) => '$' + compact(n) },
@@ -113,7 +107,7 @@ export default function Home({ spots, onClaim }) {
         <div className="blob w-[380px] h-[380px] bg-neon/20 top-40 right-[-120px]" style={{ animationDelay: '-6s' }} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-12 sm:pt-20 pb-14 grid lg:grid-cols-2 gap-12 items-center relative">
           <div>
-            <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 text-xs font-semibold text-mist mb-6">
+            <div className="inline-flex items-center gap-2 bg-line/5 border border-line/10 rounded-full px-4 py-1.5 text-xs font-semibold text-mist mb-6">
               <span className="live-dot" /> The internet's public spotlight marketplace
             </div>
             <h1 className="font-display font-bold text-[42px] sm:text-6xl lg:text-[68px] leading-[1.02] tracking-tight text-snow">
@@ -144,11 +138,11 @@ export default function Home({ spots, onClaim }) {
       </section>
 
       {/* marquee */}
-      <div className="border-y border-white/5 bg-coal/50 py-4 overflow-hidden">
+      <div className="border-y border-line/5 bg-coal/50 py-4 overflow-hidden">
         <div className="marquee-track gap-10 text-sm font-semibold text-mist">
           {[...spots.slice(0, 8), ...spots.slice(0, 8)].map((s, i) => (
             <span key={i} className="flex items-center gap-2 whitespace-nowrap">
-              <span className="text-gold">#{s.rank}</span> {s.name} <span className="text-neon font-bold">{money(s.amount)}</span> <span className="text-white/20">•</span>
+              <span className="text-gold">#{s.rank}</span> {s.name} <span className="text-neon font-bold">{money(s.amount)}</span> <span className="text-line/20">•</span>
             </span>
           ))}
         </div>
@@ -165,7 +159,7 @@ export default function Home({ spots, onClaim }) {
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {spots.slice(0, 4).map((s) => (
-            <Link key={s.slug} to={`/s/${s.slug}`} className={`card-lift rounded-3xl p-5 border ${s.rank === 1 ? 'bg-gold/[0.07] border-gold/40' : 'bg-card border-white/5'}`}>
+            <Link key={s.slug} to={`/s/${s.slug}`} className={`card-lift rounded-3xl p-5 border ${s.rank === 1 ? 'bg-gold/[0.07] border-gold/40' : 'bg-card border-line/5'}`}>
               <div className="flex items-center justify-between mb-4">
                 <RankBadge rank={s.rank} />
                 {s.rank === 1 && <span className="text-2xl crown-bob">👑</span>}
@@ -189,9 +183,9 @@ export default function Home({ spots, onClaim }) {
             { n: '2', icon: '🚀', t: 'Climb the board', d: 'Every dollar of support pushes you higher. Boost yourself or get friends to back you.' },
             { n: '3', icon: '👑', t: 'Own the spotlight', d: 'Hit #1 and take the crown. Share your rank everywhere and watch the clicks roll in.' },
           ].map((s) => (
-            <div key={s.n} className="card-lift bg-card border border-white/5 rounded-3xl p-6 relative overflow-hidden">
+            <div key={s.n} className="card-lift bg-card border border-line/5 rounded-3xl p-6 relative overflow-hidden">
               <div className="text-5xl mb-4">{s.icon}</div>
-              <div className="absolute top-4 right-5 font-display font-bold text-6xl text-white/5">{s.n}</div>
+              <div className="absolute top-4 right-5 font-display font-bold text-6xl text-line/5">{s.n}</div>
               <h3 className="font-display font-bold text-xl text-snow mb-2">{s.t}</h3>
               <p className="text-mist text-sm leading-relaxed">{s.d}</p>
             </div>
@@ -233,7 +227,7 @@ export default function Home({ spots, onClaim }) {
             { icon: '❤️', t: 'Community Favorite', d: 'Most loved this week' },
             { icon: '⚡', t: 'Early Adopter', d: 'First 100 spots ever' },
           ].map((r) => (
-            <div key={r.t} className="card-lift bg-card border border-white/5 rounded-3xl p-5 flex items-center gap-4">
+            <div key={r.t} className="card-lift bg-card border border-line/5 rounded-3xl p-5 flex items-center gap-4">
               <span className="text-4xl">{r.icon}</span>
               <div><h3 className="font-display font-bold text-snow">{r.t}</h3><p className="text-mist text-xs">{r.d}</p></div>
             </div>

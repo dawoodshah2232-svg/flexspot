@@ -113,6 +113,7 @@ export async function submitSpot(payload) {
     trend: [payload.amount],
     pending: !payload.autoApprove,
     email: payload.email,
+    gift: payload.gift || null,
   };
   // Boosts add to an existing spot's total instead of creating a duplicate entry
   if (payload.isBoost) {

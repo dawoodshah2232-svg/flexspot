@@ -10,7 +10,7 @@ const ITEMS = [
 export default function MobileNav({ onClaim }) {
   return (
     <nav className="lg:hidden fixed bottom-0 inset-x-0 z-50 pb-safe">
-      <div className="mx-3 mb-3 rounded-3xl glass border border-white/10 shadow-card overflow-hidden">
+      <div className="mx-3 mb-3 rounded-3xl glass border border-line/10 shadow-card overflow-hidden">
         <div className="grid grid-cols-5 items-stretch">
           {ITEMS.slice(0, 2).map((i) => (
             <NavLink key={i.to} to={i.to} end={i.to === '/'}

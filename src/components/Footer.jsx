@@ -3,7 +3,7 @@ import { Logo } from './Navbar';
 
 export default function Footer({ onClaim }) {
   return (
-    <footer className="border-t border-white/5 bg-coal/60 mt-20">
+    <footer className="border-t border-line/5 bg-coal/60 mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 grid gap-10 md:grid-cols-4">
         <div className="md:col-span-2">
           <Logo />
@@ -30,7 +30,7 @@ export default function Footer({ onClaim }) {
           </ul>
         </div>
       </div>
-      <div className="border-t border-white/5">
+      <div className="border-t border-line/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-mist">
           <span>© {new Date().getFullYear()} FlexSpot.LOL — Everyone wants a spot on this page.</span>
           <span className="flex items-center gap-2"><span className="live-dot" /> Live leaderboard</span>

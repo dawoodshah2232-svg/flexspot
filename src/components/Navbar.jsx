@@ -27,10 +27,10 @@ const LINKS = [
   { to: '/faq', label: 'FAQ' },
 ];
 
-export default function Navbar({ onClaim }) {
+export default function Navbar({ onClaim, theme, onToggleTheme, viewers }) {
   const { pathname } = useLocation();
   return (
-    <header className="fixed top-0 inset-x-0 z-50 glass border-b border-white/5">
+    <header className="fixed top-0 inset-x-0 z-50 glass border-b border-line/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-[68px] flex items-center justify-between gap-4">
         <Logo />
         <nav className="hidden lg:flex items-center gap-1">
@@ -40,7 +40,7 @@ export default function Navbar({ onClaim }) {
               to={l.to}
               className={({ isActive }) =>
                 `px-4 py-2 rounded-xl text-sm font-semibold transition-colors ${
-                  isActive || (l.to === '/' && pathname === '/') ? 'text-snow bg-white/10' : 'text-mist hover:text-snow hover:bg-white/5'
+                  isActive || (l.to === '/' && pathname === '/') ? 'text-snow bg-line/10' : 'text-mist hover:text-snow hover:bg-line/5'
                 }`
               }
             >
@@ -49,9 +49,17 @@ export default function Navbar({ onClaim }) {
           ))}
         </nav>
         <div className="flex items-center gap-2.5">
-          <span className="hidden md:flex items-center gap-2 text-xs font-semibold text-mist bg-white/5 border border-white/10 rounded-full px-3 py-1.5">
-            <span className="live-dot" /> LIVE
+          <span className="hidden md:flex items-center gap-2 text-xs font-semibold text-mist bg-line/5 border border-line/10 rounded-full px-3 py-1.5" title="People browsing right now">
+            <span className="live-dot" /> {viewers} here now
           </span>
+          <button
+            onClick={onToggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            className="w-10 h-10 grid place-items-center rounded-xl border border-line/10 bg-line/5 text-snow hover:bg-line/10 transition-colors text-lg"
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
           <button onClick={onClaim} className="btn-primary px-4 sm:px-5 py-2.5 text-sm">
             ⚡ Claim Your Spot
           </button>

@@ -52,7 +52,7 @@ export default function Admin({ spots, pending = [], refresh }) {
   if (!authed) {
     return (
       <div className="pt-[68px] min-h-screen grid place-items-center px-4">
-        <div className="w-full max-w-sm bg-card border border-white/10 rounded-3xl p-8 text-center">
+        <div className="w-full max-w-sm bg-card border border-line/10 rounded-3xl p-8 text-center">
           <div className="text-5xl mb-4">🔐</div>
           <h1 className="font-display font-bold text-2xl text-snow mb-2">Admin access</h1>
           <p className="text-mist text-sm mb-6">Enter the admin PIN to manage FlexSpot.</p>
@@ -94,7 +94,7 @@ export default function Admin({ spots, pending = [], refresh }) {
         <div className="flex gap-2 mb-8 overflow-x-auto no-scrollbar">
           {TABS.map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)}
-              className={`px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-colors ${tab === t.id ? 'bg-electric text-white' : 'bg-white/5 text-mist hover:text-snow'}`}>
+              className={`px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-colors ${tab === t.id ? 'bg-electric text-white' : 'bg-line/5 text-mist hover:text-snow'}`}>
               {t.label}
             </button>
           ))}
@@ -104,7 +104,7 @@ export default function Admin({ spots, pending = [], refresh }) {
           <div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
               {stats.map((s) => (
-                <div key={s.l} className="bg-card border border-white/5 rounded-2xl p-5">
+                <div key={s.l} className="bg-card border border-line/5 rounded-2xl p-5">
                   <div className="text-2xl mb-2">{s.icon}</div>
                   <div className="font-display font-bold text-2xl text-snow">{s.v}</div>
                   <div className="text-[11px] text-mist uppercase tracking-wider font-semibold mt-1">{s.l}</div>
@@ -114,7 +114,7 @@ export default function Admin({ spots, pending = [], refresh }) {
             <h2 className="font-display font-bold text-xl text-snow mb-4">Top 5 right now</h2>
             <div className="space-y-2">
               {live.slice(0, 5).map((s) => (
-                <div key={s.slug} className="flex items-center gap-3 bg-card border border-white/5 rounded-2xl p-3">
+                <div key={s.slug} className="flex items-center gap-3 bg-card border border-line/5 rounded-2xl p-3">
                   <RankBadge rank={s.rank} />
                   <BrandAvatar spot={s} size={38} />
                   <div className="flex-1 min-w-0"><div className="font-bold text-snow text-sm truncate">{s.name}</div><div className="text-xs text-mist">{compact(s.views)} views · {compact(s.clicks)} clicks</div></div>
@@ -129,7 +129,7 @@ export default function Admin({ spots, pending = [], refresh }) {
           <div>
             <h2 className="font-display font-bold text-xl text-snow mb-4">Pending review ({pending.length})</h2>
             {pending.length === 0 ? (
-              <div className="text-center py-14 text-mist bg-card border border-white/5 rounded-3xl">
+              <div className="text-center py-14 text-mist bg-card border border-line/5 rounded-3xl">
                 <div className="text-5xl mb-3">✅</div><p>All clear — no submissions waiting.</p>
               </div>
             ) : (
@@ -167,13 +167,13 @@ export default function Admin({ spots, pending = [], refresh }) {
             <h2 className="font-display font-bold text-xl text-snow mb-2">Payment verification</h2>
             <p className="text-mist text-sm mb-5">Phase 1: manual verification. Confirm each payment arrived before approving the spot.</p>
             {pending.length === 0 ? (
-              <div className="text-center py-14 text-mist bg-card border border-white/5 rounded-3xl">
+              <div className="text-center py-14 text-mist bg-card border border-line/5 rounded-3xl">
                 <div className="text-5xl mb-3">💳</div><p>No payments awaiting verification.</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {pending.map((s) => (
-                  <div key={s.slug} className="flex items-center gap-4 bg-card border border-white/5 rounded-2xl p-4">
+                  <div key={s.slug} className="flex items-center gap-4 bg-card border border-line/5 rounded-2xl p-4">
                     <BrandAvatar spot={s} size={44} />
                     <div className="flex-1 min-w-0">
                       <div className="font-bold text-snow truncate">{s.name}</div>
@@ -196,7 +196,7 @@ export default function Admin({ spots, pending = [], refresh }) {
             <h2 className="font-display font-bold text-xl text-snow mb-2">Fraud monitoring</h2>
             <p className="text-mist text-sm mb-5">Automated flags: duplicate URLs/names, high-value spots with no traffic.</p>
             {fraudFlags.length === 0 ? (
-              <div className="text-center py-14 text-mist bg-card border border-white/5 rounded-3xl">
+              <div className="text-center py-14 text-mist bg-card border border-line/5 rounded-3xl">
                 <div className="text-5xl mb-3">🛡️</div><p>No flags. The board looks clean.</p>
               </div>
             ) : (

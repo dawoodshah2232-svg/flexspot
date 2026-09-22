@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { BrandAvatar, RankBadge } from '../components/SpotCard';
 import ShareButtons from '../components/ShareButtons';
@@ -99,6 +100,15 @@ export default function SpotProfile({ spots, onClaim, onBoost }) {
               {spot.website && <button onClick={() => visit(spot.website)} className="btn-ghost px-6 py-3 text-sm flex-1 sm:flex-none">Visit ↗</button>}
             </div>
           </div>
+          {spot.gift?.from && (
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-6 rounded-2xl bg-gradient-to-r from-gold/20 via-gold/10 to-transparent border border-gold/40 p-4 sm:p-5 flex items-start gap-3">
+              <span className="text-2xl">🎁</span>
+              <div>
+                <div className="font-bold text-snow text-sm">Surprise gift from {spot.gift.from}</div>
+                {spot.gift.message && <p className="text-mist text-sm mt-1 leading-relaxed">“{spot.gift.message}”</p>}
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
 
@@ -112,14 +122,14 @@ export default function SpotProfile({ spots, onClaim, onBoost }) {
               { l: 'Outbound clicks', v: compact(spot.clicks), c: 'text-snow' },
               { l: 'Claimed', v: timeAgo(spot.joinedAt), c: 'text-snow' },
             ].map((s) => (
-              <div key={s.l} className="bg-card border border-white/5 rounded-2xl p-4">
+              <div key={s.l} className="bg-card border border-line/5 rounded-2xl p-4">
                 <div className={`font-display font-bold text-xl ${s.c}`}><CountUp to={parseFloat(String(s.v).replace(/[^0-9.]/g, '')) || 0} format={() => s.v} /></div>
                 <div className="text-[11px] text-mist uppercase tracking-wider font-semibold mt-1">{s.l}</div>
               </div>
             ))}
           </div>
 
-          <div className="bg-card border border-white/5 rounded-3xl p-6">
+          <div className="bg-card border border-line/5 rounded-3xl p-6">
             <h2 className="font-display font-bold text-lg text-snow mb-2">About</h2>
             <p className="text-mist text-sm leading-relaxed">{spot.description || spot.tagline}</p>
             <div className="flex gap-2 mt-4 flex-wrap">
@@ -129,7 +139,7 @@ export default function SpotProfile({ spots, onClaim, onBoost }) {
             </div>
           </div>
 
-          <div className="bg-card border border-white/5 rounded-3xl p-6">
+          <div className="bg-card border border-line/5 rounded-3xl p-6">
             <div className="flex items-center justify-between mb-2">
               <h2 className="font-display font-bold text-lg text-snow">Support momentum</h2>
               <span className="text-xs font-bold text-neon">▲ climbing</span>
@@ -138,7 +148,7 @@ export default function SpotProfile({ spots, onClaim, onBoost }) {
             <p className="text-xs text-mist mt-2">Last 7 days of verified support for this spot.</p>
           </div>
 
-          <div className="bg-card border border-white/5 rounded-3xl p-6">
+          <div className="bg-card border border-line/5 rounded-3xl p-6">
             <h2 className="font-display font-bold text-lg text-snow mb-1">📣 Help {spot.name} reach #1</h2>
             <p className="text-mist text-sm mb-4">Share this page — every visit and boost pushes them higher.</p>
             <ShareButtons spot={spot} />
@@ -148,7 +158,7 @@ export default function SpotProfile({ spots, onClaim, onBoost }) {
           <div className="rounded-3xl bg-gradient-to-br from-electric/15 to-card border border-electric/25 p-6">
             <h2 className="font-display font-bold text-lg text-snow mb-1">🔗 Your referral hub</h2>
             <p className="text-mist text-sm mb-4">Invite friends with your link. Joins through your code grow your referral stats and unlock rewards.</p>
-            <button onClick={copyRef} className="w-full font-mono text-sm bg-ink/60 border border-white/10 rounded-xl px-4 py-3 text-electric hover:border-electric/50 transition-colors break-all">
+            <button onClick={copyRef} className="w-full font-mono text-sm bg-ink/60 border border-line/10 rounded-xl px-4 py-3 text-electric hover:border-electric/50 transition-colors break-all">
               {window.location.origin}/s/{spot.slug}?ref={myRef}
             </button>
             <div className="text-xs text-mist mt-2 mb-4">{copiedRef ? '✓ Referral link copied!' : 'Tap to copy your referral link'}</div>
@@ -175,11 +185,11 @@ export default function SpotProfile({ spots, onClaim, onBoost }) {
             <p className="text-mist text-sm mt-1 mb-4">Claim your own spot and challenge #{spot.rank}.</p>
             <button onClick={onClaim} className="btn-gold w-full py-3 text-sm">⚡ Claim your spot</button>
           </div>
-          <div className="bg-card border border-white/5 rounded-3xl p-5">
+          <div className="bg-card border border-line/5 rounded-3xl p-5">
             <h3 className="font-display font-bold text-snow mb-3">🔥 Also trending</h3>
             <div className="space-y-2">
               {neighbors.map((n) => (
-                <Link key={n.slug} to={`/s/${n.slug}`} className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-colors">
+                <Link key={n.slug} to={`/s/${n.slug}`} className="flex items-center gap-3 p-2 rounded-xl hover:bg-line/5 transition-colors">
                   <RankBadge rank={n.rank} />
                   <BrandAvatar spot={n} size={36} />
                   <div className="flex-1 min-w-0">

@@ -14,6 +14,7 @@ import SpotProfile from './pages/SpotProfile';
 import Admin from './pages/Admin';
 import { fetchLeaderboard, fetchPendingSpots, rank, IS_LIVE } from './lib/store';
 import { LIVE_FEED_POOL } from './lib/data';
+import { useTheme, useLiveViewers } from './lib/theme';
 
 function ScrollTop() {
   const { pathname } = useLocation();
@@ -29,6 +30,8 @@ function Shell() {
   const [boostSpot, setBoostSpot] = useState(null);
   const [toasts, setToasts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { theme, toggle: toggleTheme } = useTheme();
+  const viewers = useLiveViewers();
   const navigate = useNavigate();
   const location = useLocation();
   const refParam = new URLSearchParams(location.search).get('ref');
@@ -108,10 +111,10 @@ function Shell() {
   return (
     <div className="min-h-screen bg-ink text-snow">
       <ScrollTop />
-      <Navbar onClaim={openClaim} />
+      <Navbar onClaim={openClaim} theme={theme} onToggleTheme={toggleTheme} viewers={viewers} />
       <main>
         <Routes>
-          <Route path="/" element={<Home spots={spots} onClaim={openClaim} />} />
+          <Route path="/" element={<Home spots={spots} onClaim={openClaim} viewers={viewers} />} />
           <Route path="/leaderboard" element={<LeaderboardPage spots={spots} moves={moves} onBoost={openBoost} onClaim={openClaim} />} />
           <Route path="/how-it-works" element={<HowItWorks onClaim={openClaim} />} />
           <Route path="/rewards" element={<Rewards spots={spots} onClaim={openClaim} />} />

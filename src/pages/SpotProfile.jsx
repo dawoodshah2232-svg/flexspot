@@ -6,7 +6,7 @@ import ShareButtons from '../components/ShareButtons';
 import CountUp from '../components/CountUp';
 import { money, compact, timeAgo, copyText, spotPath } from '../lib/format';
 import { REWARDS } from '../lib/data';
-import { recordClick, recordReferralClick, getContributions, createReferralIdentity, myReferralCode, creditReferralVisit, getSpotReferrers } from '../lib/store';
+import { recordClick, recordReferralClick, recordVisit, getContributions, createReferralIdentity, myReferralCode, creditReferralVisit, getSpotReferrers } from '../lib/store';
 import Flee from '../components/Flee';
 import CelebrationBurst from '../components/CelebrationBurst';
 
@@ -60,7 +60,7 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
 
   // Preview analytics: count real profile views (feeds the Admin analytics tab).
   useEffect(() => {
-    if (spot) recordVisit(`/s/${spot.slug}`, { source: document.referrer ? new URL(document.referrer).hostname : 'direct' });
+    if (spot) recordVisit(`/s/${spot.slug}`, { source: document.referrer ? 'referral' : 'direct' });
   }, [spot?.slug]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -69,7 +69,11 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
   }, [spot]);
 
   const supporters = useMemo(() => (spot ? getSpotReferrers(spot.slug, 5) : []), [spot?.slug, refCredit, myCode]); // eslint-disable-line react-hooks/exhaustive-deps
-  const myStats = useMemo(() => supporters.find((r) => r.code === myCode) || { visits: 0, earned: 0 }, [supporters, myCode]);
+  // Your own stats must search ALL referrers, not just the top 5 shown above.
+  const myStats = useMemo(() => {
+    if (!spot || !myCode) return { visits: 0, earned: 0 };
+    return getSpotReferrers(spot.slug, 1000).find((r) => r.code === myCode) || { visits: 0, earned: 0 };
+  }, [spot?.slug, refCredit, myCode]); // eslint-disable-line react-hooks/exhaustive-deps
   const contribs = useMemo(() => (spot ? getContributions(spot.slug) : []), [spot, spots]);
   const badges = useMemo(() => REWARDS.filter((r) => { try { return r.check(spots) === spot?.slug; } catch { return false; } }), [spots, spot]);
   const neighbors = useMemo(() => {

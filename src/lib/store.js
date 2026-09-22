@@ -17,7 +17,15 @@ const LS_VISITS = 'flexspot_visits_v2';
 const readLS = (k, fb) => {
   try { const v = JSON.parse(localStorage.getItem(k)); return v ?? fb; } catch { return fb; }
 };
-const writeLS = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+const writeLS = (k, v) => {
+  try { localStorage.setItem(k, JSON.stringify(v)); return true; }
+  catch { return false; }
+};
+// Throwing variant for operations the user must know actually persisted
+// (e.g. claim submissions) — never silently report success when nothing saved.
+const writeLSOrThrow = (k, v) => {
+  if (!writeLS(k, v)) throw new Error('Could not save — your browser storage is full or blocked. Free up space and try again.');
+};
 
 async function rpc(name, body) {
   const r = await fetch(`${SUPA_URL}/rest/v1/rpc/${name}`, {
@@ -143,7 +151,7 @@ export function createSubmission(payload) {
     contributorHandle: payload.contributorHandle || '',
   };
   const subs = readLS(LS_SUBMISSIONS, []);
-  writeLS(LS_SUBMISSIONS, [submission, ...subs]);
+  writeLSOrThrow(LS_SUBMISSIONS, [submission, ...subs]);
   return submission;
 }
 
@@ -465,7 +473,9 @@ export function myReferralCode(slug) {
 export function creditReferralVisit(code, spotSlug) {
   const id = getReferralIdentity(code);
   if (!id || id.spotSlug !== spotSlug) return { ok: false };
-  const day = new Date().toISOString().slice(0, 10);
+  // "Once per day" follows the VISITOR's local day, not UTC.
+  const d = new Date();
+  const day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   const counted = readLS(LS_REF_COUNTED, {});
   const key = `${String(code).toUpperCase()}:${day}`;
   // legacy click counting keeps working for analytics

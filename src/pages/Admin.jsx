@@ -101,7 +101,7 @@ export default function Admin({ spots, refresh }) {
     reload(); refresh && refresh();
     flash(decision === 'approved' ? '✓ Approved — spot is now live on the leaderboard.'
       : decision === 'rejected' ? 'Submission rejected.'
-      : 'Changes requested — submitter notified (preview).');
+      : 'Changes requested — saved on this submission (no email sent in preview).');
   };
 
   const addNote = (id) => {
@@ -138,7 +138,7 @@ export default function Admin({ spots, refresh }) {
   }, [spots, subs]);
 
   useEffect(() => { if (tab === 'content' && !cms) setCms(getCMS()); }, [tab, cms]);
-  const saveContent = () => { saveCMS(cms); setCmsMsg('Saved — applies to this preview.'); setTimeout(() => setCmsMsg(''), 2500); };
+  const saveContent = () => { saveCMS(cms); setCmsMsg('Saved to this browser\'s preview data (applies here only).'); setTimeout(() => setCmsMsg(''), 2500); };
 
   if (!authed) {
     return (

@@ -27,6 +27,30 @@ const normUrl = (v) => {
   return /^https?:\/\//i.test(t) ? t : 'https://' + t;
 };
 
+// Social fields accept "@handle" or a link. Handles become real profile URLs
+// so the profile page's Visit buttons always open a working destination.
+const SOCIAL_BASE = {
+  x: 'https://x.com/',
+  instagram: 'https://instagram.com/',
+  facebook: 'https://facebook.com/',
+  linkedin: 'https://linkedin.com/in/',
+};
+const normSocial = (platform, v) => {
+  const t = (v || '').trim();
+  if (!t) return '';
+  if (/^https?:\/\//i.test(t)) return t;
+  if (t.startsWith('@')) return SOCIAL_BASE[platform] + encodeURIComponent(t.slice(1));
+  return 'https://' + t;
+};
+
+// Strict custom-amount parse: up to 2 decimals, nothing else. Returns
+// null when empty (falls back to the quick-pick) or NaN when malformed.
+const parseCustomAmount = (custom) => {
+  if (custom === '') return null;
+  if (!/^\d+(\.\d{1,2})?$/.test(custom.trim())) return NaN;
+  return Math.round(parseFloat(custom) * 100) / 100;
+};
+
 // Claim page: Details → Amount → Crypto payment proof → Pending Approval.
 // Screenshot of the payment is REQUIRED. Transaction ID is optional.
 // Email is optional. Website OR a social link is required (one of them).
@@ -78,15 +102,16 @@ export default function ClaimPage({ spots, onSubmitted }) {
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   const finalAmount = () => {
-    const c = parseFloat(custom);
-    if (custom !== '' && Number.isFinite(c)) return Math.max(MIN_SPOT_AMOUNT, Math.round(c * 100) / 100);
-    return amount;
+    const c = parseCustomAmount(custom);
+    if (c === null) return amount;          // no custom entered → quick-pick amount
+    return Number.isFinite(c) ? c : NaN;    // malformed custom → fails validation, never silently clamped
   };
 
   // Projected rank: where this amount would land right now (same rule as the board).
   const projection = useMemo(() => {
     if (!spots.length) return null;
     const amt = finalAmount();
+    if (!Number.isFinite(amt) || amt < MIN_SPOT_AMOUNT) return null;
     if (isBoost && boostSpot) return projectedRank(spots, boostSpot.slug, amt);
     // Claim mode: brand-new spot joining the board with joinedAt = now.
     const ranked = rank([...spots, { slug: '__new__', amount: amt, joinedAt: Date.now() }]);
@@ -105,7 +130,7 @@ export default function ClaimPage({ spots, onSubmitted }) {
   // Projected rank for the custom amount (boost mode), live as they type.
   const customRank = useMemo(() => {
     if (!isBoost || !boostSpot || custom === '') return null;
-    const c = parseFloat(custom);
+    const c = parseCustomAmount(custom);
     if (!Number.isFinite(c) || c < MIN_SPOT_AMOUNT) return null;
     return projectedRank(spots, boostSpot.slug, Math.round(c * 100) / 100).rank;
   }, [spots, isBoost, boostSpot, custom]);
@@ -156,10 +181,10 @@ export default function ClaimPage({ spots, onSubmitted }) {
         socials: isBoost
           ? boostSpot.socials
           : {
-              ...(form.x.trim() ? { x: form.x.trim() } : {}),
-              ...(form.instagram.trim() ? { instagram: form.instagram.trim() } : {}),
-              ...(form.facebook.trim() ? { facebook: form.facebook.trim() } : {}),
-              ...(form.linkedin.trim() ? { linkedin: form.linkedin.trim() } : {}),
+              ...(form.x.trim() ? { x: normSocial('x', form.x) } : {}),
+              ...(form.instagram.trim() ? { instagram: normSocial('instagram', form.instagram) } : {}),
+              ...(form.facebook.trim() ? { facebook: normSocial('facebook', form.facebook) } : {}),
+              ...(form.linkedin.trim() ? { linkedin: normSocial('linkedin', form.linkedin) } : {}),
             },
         email: isBoost ? '' : form.email.trim(),
         logo: isBoost ? boostSpot.logo : form.logo || null,

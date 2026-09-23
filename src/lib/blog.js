@@ -46,11 +46,25 @@ export function parseFrontmatter(raw) {
 }
 
 // ---- Minimal markdown renderer (posts only need the basics) ---------------
+// NOTE: esc() runs on the raw line BEFORE the link/image regexes below, so
+// quotes in URLs arrive here as &quot; / &#39; — safe inside attributes.
 const esc = (s) =>
   String(s)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+// Only these URL shapes may become real links/images. Everything else
+// (javascript:, data:, vbscript:, backslash tricks, whitespace smuggling)
+// collapses to "#" so a hostile/typo'd markdown URL can never execute.
+const SAFE_URL = /^(https?:\/\/|mailto:|tel:|\/|#)/i;
+const safeUrl = (u) => {
+  const t = String(u || '').trim();
+  if (!t || /[\s"'<>\\]/.test(t)) return '#';
+  return SAFE_URL.test(t) ? t : '#';
+};
 
 function inline(md) {
   let s = esc(md);
@@ -60,8 +74,10 @@ function inline(md) {
     stash.push(`<code>${c}</code>`);
     return `\u0000${stash.length - 1}\u0000`;
   });
-  s = s.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" loading="lazy" class="blog-img" />');
-  s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  s = s.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, url) =>
+    `<img src="${safeUrl(url)}" alt="${alt}" loading="lazy" class="blog-img" />`);
+  s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, text, url) =>
+    `<a href="${safeUrl(url)}" target="_blank" rel="noopener noreferrer">${text}</a>`);
   s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   s = s.replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em>$2</em>');
   s = s.replace(/\u0000(\d+)\u0000/g, (_, i) => stash[Number(i)]);

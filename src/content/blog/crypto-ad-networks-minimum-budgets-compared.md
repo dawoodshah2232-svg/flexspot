@@ -1,6 +1,6 @@
 ---
 title: "Crypto Ad Networks Compared: Minimum Budgets, Honestly Listed"
-description: "Minimum deposits at crypto ad networks range from $0 to thousands. We compare published entry points — and where a $1 USDT bid lands."
+description: "Minimum deposits at crypto ad networks range from $0 to thousands. We compare published entry points, then show where a $1 USDT bid lands you visibility."
 date: 2026-09-23
 author: "FlexSpot Team"
 category: "Visibility Guides"

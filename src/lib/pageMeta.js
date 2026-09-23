@@ -66,6 +66,16 @@ export const META = {
     description:
       'FlexSpot rewards: earn your place with boosts, referral links that add $1 per visit, and the champion crown for the top spot.',
   },
+  '/compare': {
+    title: 'Spot vs Spot — Compare Brands Head-to-Head | FlexSpot.LOL',
+    description:
+      'Compare any FlexSpot spots side by side: rank, boosts, views, clicks and momentum with live numbers. Settle who really rules the leaderboard.',
+  },
+  '/calculator': {
+    title: 'Visibility Calculator — What Your Budget Buys | FlexSpot.LOL',
+    description:
+      'Estimate your FlexSpot spotlight: slide your budget and campaign length to project rank, profile views, clicks and cost per 1k views from live board data.',
+  },
   '/top-referrers': {
     title: 'Top Referrers — The People Behind the Traffic | FlexSpot.LOL',
     description:

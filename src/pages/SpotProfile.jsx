@@ -142,8 +142,9 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
               )}
             </div>
             <div className="flex sm:flex-col gap-2.5">
-              <button onClick={() => onBoost(spot)} className="btn-primary px-6 py-3 text-sm flex-1 sm:flex-none">⚡ Boost this spot</button>
-              {spot.website && <button onClick={() => visit(spot.website)} className="btn-ghost px-6 py-3 text-sm flex-1 sm:flex-none">Visit ↗</button>}
+              <button onClick={() => onBoost(spot)} className="btn-primary px-6 py-3 text-sm flex-1 sm:flex-none min-h-[48px]">⚡ Boost this spot</button>
+              {spot.website && <button onClick={() => visit(spot.website)} className="btn-ghost px-6 py-3 text-sm flex-1 sm:flex-none min-h-[48px]">Visit ↗</button>}
+              <Link to={`/compare?spots=${spot.slug}`} className="btn-ghost px-6 py-3 text-sm flex-1 sm:flex-none text-center min-h-[48px] inline-flex items-center justify-center">⚔️ Compare</Link>
             </div>
           </div>
           {spot.pending && (

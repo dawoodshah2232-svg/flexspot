@@ -60,6 +60,8 @@ const ROUTE_META = {
   '/explore':    ['daily',  '0.7'],
   '/how-it-works':['weekly','0.7'],
   '/rewards':    ['daily',  '0.7'],
+  '/compare':    ['daily',  '0.7'],
+  '/calculator': ['daily',  '0.7'],
   '/top-referrers':['daily','0.6'],
   '/faq':        ['weekly', '0.6'],
   '/claim':      ['weekly', '0.6'],

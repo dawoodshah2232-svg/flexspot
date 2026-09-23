@@ -1,9 +1,20 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Logo } from './Header';
 import Floaties from './Floaties';
 import { BLOG_CATEGORIES, categorySlug } from '../lib/blog';
 
 export default function Footer({ onClaim }) {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const replayTour = () => {
+    if (pathname !== '/') {
+      navigate('/');
+      // let Home mount before firing, so the tour listener exists
+      setTimeout(() => window.dispatchEvent(new CustomEvent('flexspot:tour')), 600);
+    } else {
+      window.dispatchEvent(new CustomEvent('flexspot:tour'));
+    }
+  };
   return (
     <footer className="relative overflow-hidden border-t border-[var(--line-soft)] bg-[var(--surface)] mt-20">
       <Floaties
@@ -35,6 +46,9 @@ export default function Footer({ onClaim }) {
             <li><Link className="hover:text-[var(--ink)] transition-colors" to="/top-referrers">Top Referrers</Link></li>
             <li><Link className="hover:text-[var(--ink)] transition-colors" to="/how-it-works">How It Works</Link></li>
             <li><Link className="hover:text-[var(--ink)] transition-colors" to="/faq">FAQ</Link></li>
+            <li><Link className="hover:text-[var(--ink)] transition-colors" to="/compare">⚔️ Compare Spots</Link></li>
+            <li><Link className="hover:text-[var(--ink)] transition-colors" to="/calculator">🧮 Visibility Calculator</Link></li>
+            <li><button onClick={replayTour} className="hover:text-[var(--ink)] transition-colors">🧭 Take the tour</button></li>
           </ul>
         </div>
         <div>

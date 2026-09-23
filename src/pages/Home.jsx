@@ -14,6 +14,7 @@ import { LIVE_FEED_POOL, IS_PREVIEW_DATA } from '../lib/data';
 import { IS_LIVE } from '../lib/store';
 import { allPosts } from '../lib/blog';
 import BlogCard from '../components/BlogCard';
+import OnboardingTour from '../components/OnboardingTour';
 import { useSiteSettings } from '../lib/siteSettings.jsx';
 import { useDisplayOnline, displayAmount } from '../lib/display';
 import { getOnlineCount } from '../lib/analytics';
@@ -225,7 +226,7 @@ function LeaderboardSection({ spots, onBoost, onClaim }) {
   const ranked = ordered.map((s, i) => ({ ...s, rank: i + 1, displayRank: i + 1 }));
 
   return (
-    <section className="relative max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
+    <section className="relative max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20" data-tour="board">
       <Floaties
         items={[
           { emoji: '🏁', left: '1%', top: '6%', size: 30, cls: 'hidden lg:block', opacity: 0.5 },
@@ -347,7 +348,7 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
         </div>
       )}
       {/* HERO */}
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden" data-tour="hero">
         <Floaties
           items={[
             { emoji: '🚀', left: '2%', top: '12%', size: 30, cls: 'hidden lg:block' },
@@ -472,7 +473,7 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
       )}
 
       {/* CTA BAND — premium dark */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-20">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-20" data-tour="claim">
         <div className="relative overflow-hidden rounded-[32px] p-8 sm:p-14 text-center text-white shadow-[var(--shadow-blaze)]"
           style={{
             background: 'radial-gradient(1200px 500px at 50% -10%, #7C3AED 0%, #4C1D95 45%, #1E1B4B 100%)',
@@ -510,6 +511,7 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
           </div>
         </div>
       </section>
+      <OnboardingTour />
     </div>
   );
 }

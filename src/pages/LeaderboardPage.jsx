@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { SpotRow, useRaceCycle } from '../components/SpotCard';
 import Flee from '../components/Flee';
 import Podium from '../components/Podium';
@@ -7,14 +8,23 @@ import DramaTicker from '../components/DramaTicker';
 import ClaimStrip from '../components/ClaimStrip';
 import { money, compact } from '../lib/format';
 import { displayAmount } from '../lib/display';
+import { CATEGORIES, categoryOf } from '../lib/data';
 
 const PAGE = 20;
+const SORTS = [
+  { id: 'rank', label: 'Rank' },
+  { id: 'momentum', label: 'Momentum' },
+  { id: 'newest', label: 'Newest' },
+  { id: 'views', label: 'Most viewed' },
+];
 
 export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
   // Deep/search-engine links may carry ?q= (see the SearchAction in index.html JSON-LD)
   const [q, setQ] = useState(() => {
     try { return new URLSearchParams(window.location.search).get('q') || ''; } catch { return ''; }
   });
+  const [cat, setCat] = useState('all');
+  const [sort, setSort] = useState('rank');
   const [visibleCount, setVisibleCount] = useState(PAGE);
   const [showJump, setShowJump] = useState(false);
   const [jumpPending, setJumpPending] = useState(false);
@@ -23,19 +33,25 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
   const { race, count } = useRaceCycle();
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
-    if (!query) return spots;
-    return spots.filter((s) => s.name.toLowerCase().includes(query) || s.tagline.toLowerCase().includes(query));
-  }, [spots, q]);
+    let list = spots;
+    if (cat !== 'all') list = list.filter((s) => categoryOf(s) === cat);
+    if (query) list = list.filter((s) => s.name.toLowerCase().includes(query) || (s.tagline || '').toLowerCase().includes(query));
+    if (sort === 'momentum') list = [...list].sort((a, b) => (b.move || 0) - (a.move || 0) || b.amount - a.amount);
+    else if (sort === 'newest') list = [...list].sort((a, b) => (b.joinedAt || 0) - (a.joinedAt || 0));
+    else if (sort === 'views') list = [...list].sort((a, b) => (b.views || 0) - (a.views || 0));
+    return list;
+  }, [spots, q, cat, sort]);
 
   const top3 = filtered.slice(0, 3).map((s) => ({ ...s, move: moves[s.slug] ?? s.move }));
-  // When the user searches, the top-3 must NOT be crowned a podium — the
-  // results keep their true ranks in a flat list instead.
+  // When the user searches, filters, or re-sorts, the top-3 must NOT be
+  // crowned a podium — the results keep their true order in a flat list.
   const isSearching = q.trim().length > 0;
-  const listRows = isSearching ? filtered : filtered.slice(3);
+  const isFlat = isSearching || cat !== 'all' || sort !== 'rank';
+  const listRows = isFlat ? filtered : filtered.slice(3);
   const visibleRows = listRows.slice(0, visibleCount);
 
   // infinite scroll: reset to the first page when the search query changes
-  useEffect(() => { setVisibleCount(PAGE); }, [q]);
+  useEffect(() => { setVisibleCount(PAGE); }, [q, cat, sort]);
 
   useEffect(() => {
     const el = sentinelRef.current;
@@ -76,7 +92,7 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
   // rows interleaved with a claim strip after every 30th row
   const cells = [];
   visibleRows.forEach((s, i) => {
-    const above = i === 0 ? (isSearching ? null : top3[top3.length - 1]) : visibleRows[i - 1];
+    const above = i === 0 ? (isFlat ? null : top3[top3.length - 1]) : visibleRows[i - 1];
     cells.push(
       <SpotRow
         key={s.slug}
@@ -86,9 +102,9 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
         onBoost={onBoost}
         race={race}
         count={count}
-        // In search mode the overtake meter is disabled (undefined) — it only
+        // In filtered/sorted mode the overtake meter is disabled (undefined) — it only
         // makes sense against the live top of the board, not a filtered list.
-        overtake={isSearching ? undefined : (above ? { amount: above.amount, rank: above.rank } : null)}
+        overtake={isFlat ? undefined : (above ? { amount: above.amount, rank: above.rank } : null)}
       />
     );
     if ((i + 1) % 30 === 0) cells.push(<ClaimStrip key={`claim-${s.slug}`} onClaim={onClaim} />);
@@ -131,10 +147,41 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
               onChange={(e) => setQ(e.target.value)}
             />
           </div>
+
+          {/* category filter + sort */}
+          <div className="mt-6 max-w-3xl mx-auto">
+            <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:justify-center" role="group" aria-label="Filter by category">
+              <button
+                onClick={() => setCat('all')}
+                className={`shrink-0 px-4 py-2 rounded-full text-sm font-semibold border min-h-[40px] ${cat === 'all' ? 'bg-[var(--gold)]/15 border-[var(--gold)] text-[var(--gold)]' : 'border-[var(--line)] text-[var(--ink-2)]'}`}
+              >All</button>
+              {CATEGORIES.map((c) => (
+                <button
+                  key={c.slug}
+                  onClick={() => setCat(cat === c.slug ? 'all' : c.slug)}
+                  className={`shrink-0 px-4 py-2 rounded-full text-sm font-semibold border min-h-[40px] ${cat === c.slug ? 'bg-[var(--gold)]/15 border-[var(--gold)] text-[var(--gold)]' : 'border-[var(--line)] text-[var(--ink-2)]'}`}
+                >{c.icon} {c.name}</button>
+              ))}
+            </div>
+            <div className="flex items-center justify-center gap-3 mt-3">
+              <label htmlFor="lb-sort" className="text-xs font-bold uppercase tracking-wider text-[var(--ink-3)]">Sort</label>
+              <select
+                id="lb-sort"
+                value={sort}
+                onChange={(e) => setSort(e.target.value)}
+                className="rounded-xl border border-[var(--line)] bg-[var(--surface)] px-4 py-2.5 text-sm font-semibold text-[var(--ink)] min-h-[44px]"
+              >
+                {SORTS.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
+              </select>
+              <Link to={`/compare?spots=${spots.slice(0, 2).map((s) => s.slug).join(',')}`} className="text-sm font-bold text-[var(--gold)] hover:underline min-h-[44px] inline-flex items-center">
+                ⚔️ Compare top 2
+              </Link>
+            </div>
+          </div>
         </div>
 
         {/* podium — hidden during search so filtered results keep their true ranks */}
-        {!isSearching && top3.length > 0 && (
+        {!isFlat && top3.length > 0 && (
           <div className="mt-12">
             <div className="text-center mb-2">
               <span className="inline-flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.2em] text-[var(--gold-deep)] bg-[var(--gold-soft)] border border-[var(--gold)]/30 rounded-full px-4 py-1.5">
@@ -148,7 +195,11 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
         {/* rest of board */}
         <div className="mt-10">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-display font-bold text-2xl text-snow">{isSearching ? <>Results for <span className="grad-gold">“{q.trim()}”</span></> : 'All spots'} <span className="text-mist text-base font-sans font-medium">({filtered.length} competing)</span></h2>
+            <h2 className="font-display font-bold text-2xl text-snow">
+              {isFlat
+                ? <>{cat !== 'all' ? `${CATEGORIES.find((c) => c.slug === cat)?.name || ''} spots` : 'Results'} <span className="text-mist text-base font-sans font-medium">({filtered.length}{isSearching ? <> for <span className="grad-gold">“{q.trim()}”</span></> : ' competing'})</span></>
+                : <>All spots <span className="text-mist text-base font-sans font-medium">({filtered.length} competing)</span>}
+            </h2>
             <span className="text-xs text-mist font-semibold">Total buzz: <b className="text-[var(--blaze)]">{money(displayAmount(spots.reduce((a, s) => a + s.amount, 0)))}</b></span>
           </div>
           <p className="hidden md:block text-[11px] text-mist mt-1 mb-2" aria-hidden="true">

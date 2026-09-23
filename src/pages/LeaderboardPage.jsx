@@ -80,6 +80,9 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
     setVisibleCount(listRows.length);
     setJumpPending(true);
   };
+  const boardTitle = !isFlat ? 'All spots'
+    : cat !== 'all' ? `${CATEGORIES.find((c) => c.slug === cat)?.name || 'Category'} spots`
+    : 'Results';
   useEffect(() => {
     if (!jumpPending) return;
     const raf = requestAnimationFrame(() => {
@@ -196,9 +199,7 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
         <div className="mt-10">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-display font-bold text-2xl text-snow">
-              {isFlat
-                ? <>{cat !== 'all' ? `${CATEGORIES.find((c) => c.slug === cat)?.name || ''} spots` : 'Results'} <span className="text-mist text-base font-sans font-medium">({filtered.length}{isSearching ? <> for <span className="grad-gold">“{q.trim()}”</span></> : ' competing'})</span></>
-                : <>All spots <span className="text-mist text-base font-sans font-medium">({filtered.length} competing)</span>}
+              {boardTitle} <span className="text-mist text-base font-sans font-medium">({filtered.length}{isSearching ? <> for <span className="grad-gold">“{q.trim()}”</span></> : ' competing'})</span>
             </h2>
             <span className="text-xs text-mist font-semibold">Total buzz: <b className="text-[var(--blaze)]">{money(displayAmount(spots.reduce((a, s) => a + s.amount, 0)))}</b></span>
           </div>

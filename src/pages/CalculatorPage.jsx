@@ -82,7 +82,7 @@ export default function CalculatorPage({ spots, onClaim }) {
               <label htmlFor="calc-budget" className="font-semibold text-[var(--ink)]">Total budget</label>
               <span className="font-display font-extrabold text-2xl text-[var(--gold)]">{money(budget)}</span>
             </div>
-            <input id="calc-budget" type="range" min={10} max={500} step={5} value={budget}
+            <input id="calc-budget" type="range" min={10} max={1500} step={10} value={budget}
               onChange={(e) => setBudget(Number(e.target.value))} className={slider} aria-label="Total budget in dollars" />
             <div className="flex gap-2 mt-3 flex-wrap">
               {PRESETS.map((p) => (

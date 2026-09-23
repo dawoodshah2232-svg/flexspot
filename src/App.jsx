@@ -10,8 +10,9 @@ import ClaimPage from './pages/ClaimPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import HowItWorks from './pages/HowItWorks';
 import Rewards from './pages/Rewards';
-import ComparePage from './pages/ComparePage';
-import CalculatorPage from './pages/CalculatorPage';
+// Compare + Calculator are code-split like the blog — they never touch first paint.
+const ComparePage = React.lazy(() => import('./pages/ComparePage'));
+const CalculatorPage = React.lazy(() => import('./pages/CalculatorPage'));
 import FAQ from './pages/FAQ';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
@@ -173,8 +174,8 @@ function Shell() {
           <Route path="/winners" element={<DiscoveryPage mode="winners" spots={spots} moves={moves} onBoost={openBoost} onClaim={openClaim} />} />
           <Route path="/new" element={<DiscoveryPage mode="new" spots={spots} moves={moves} onBoost={openBoost} onClaim={openClaim} />} />
           <Route path="/how-it-works" element={<HowItWorks onClaim={openClaim} />} />
-          <Route path="/compare" element={<ComparePage spots={spots} />} />
-          <Route path="/calculator" element={<CalculatorPage spots={spots} onClaim={openClaim} />} />
+          <Route path="/compare" element={<React.Suspense fallback={<BlogFallback />}><ComparePage spots={spots} /></React.Suspense>} />
+          <Route path="/calculator" element={<React.Suspense fallback={<BlogFallback />}><CalculatorPage spots={spots} onClaim={openClaim} /></React.Suspense>} />
           <Route path="/rewards" element={<Rewards spots={spots} onClaim={openClaim} />} />
           <Route path="/faq" element={<FAQ onClaim={openClaim} />} />
           <Route path="/blog" element={<React.Suspense fallback={<BlogFallback />}><Blog /></React.Suspense>} />

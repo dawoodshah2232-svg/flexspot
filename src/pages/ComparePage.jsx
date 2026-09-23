@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { BrandAvatar, RankBadge } from '../components/SpotCard';
-import { money, compact } from '../lib/format';
+import { money, compact, copyText } from '../lib/format';
 import { displayAmount } from '../lib/display';
 import { categoryOf, categoryMeta } from '../lib/data';
 import { trackEvent } from '../lib/analytics';
@@ -133,12 +133,12 @@ export default function ComparePage({ spots }) {
 
   const shareUrl = `${window.location.origin}${window.location.pathname}?spots=${selected.join(',')}`;
   const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
+    const ok = await copyText(shareUrl);
+    if (ok) {
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
       trackEvent('compare_shared', { count: selected.length });
-    } catch { /* clipboard unavailable */ }
+    }
   };
 
   const quickPick = (slugs) => setSelected(slugs);

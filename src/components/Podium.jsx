@@ -22,7 +22,9 @@ export default function Podium({ spots, onBoost }) {
       <motion.div
         layout
         key={s.slug}
-        className={`relative flex flex-col ${orderCls}`}
+        // Champion is scaled up with its base anchored, so it reads clearly
+        // bigger; #2/#3 keep identical sizing so they sit perfectly level.
+        className={`relative flex flex-col ${orderCls} ${isFirst ? 'sm:scale-[1.07] sm:origin-bottom z-10' : ''}`}
       >
         {/* crown for the champion — with a little rocket hovering by, ready to launch */}
         {isFirst && (
@@ -90,11 +92,10 @@ export default function Podium({ spots, onBoost }) {
                 ⏳ Pending review
               </span>
             )}
-            {s.description && (
-              <p className={`text-xs mt-2 leading-relaxed line-clamp-2 max-w-[26rem] mx-auto ${isFirst ? 'text-white/60' : 'text-[var(--ink-3)]'}`}>
-                {s.description}
-              </p>
-            )}
+            {/* fixed two-line description slot so #2/#3 always measure identically */}
+            <p className={`text-xs mt-2 leading-relaxed line-clamp-2 max-w-[26rem] mx-auto min-h-[2.5rem] ${isFirst ? 'text-white/60' : 'text-[var(--ink-3)]'}`}>
+              {s.description || '\u00A0'}
+            </p>
           </Link>
 
           {/* animated flourish fills the middle space */}
@@ -158,8 +159,9 @@ export default function Podium({ spots, onBoost }) {
           </button>
         </div>
 
-        {/* the physical 3D step */}
-        <div className="relative mx-8 sm:mx-10" style={{ height: isFirst ? 96 : rank === 2 ? 62 : 46 }} aria-hidden="true">
+        {/* the physical 3D step: champion stands tallest; #2/#3 are identical
+            height so they sit perfectly level with each other */}
+        <div className="relative mx-8 sm:mx-10" style={{ height: isFirst ? 112 : 56 }} aria-hidden="true">
           {/* top face */}
           <div className={`absolute -top-2 left-2 right-2 h-2 rounded-t-md ${stepTopClass(rank)}`} />
           {/* front face */}
@@ -185,7 +187,7 @@ export default function Podium({ spots, onBoost }) {
       <div className="absolute inset-x-0 -top-8 bottom-0 pointer-events-none" aria-hidden="true">
         <div className="absolute left-1/2 -translate-x-1/2 top-0 w-[300px] sm:w-[560px] h-[280px] bg-[var(--gold)]/15 blur-[100px] rounded-full" />
       </div>
-      <div className="relative grid sm:grid-cols-3 gap-4 sm:gap-5 items-end max-w-4xl mx-auto pt-10">
+      <div className="relative grid sm:grid-cols-3 gap-4 sm:gap-5 items-end max-w-4xl mx-auto pt-14">
         {step(second, 2, '2nd · Silver', 'order-2 sm:order-1')}
         {step(first, 1, 'Champion', 'order-1 sm:order-2')}
         {step(third, 3, '3rd · Bronze', 'order-3 sm:order-3')}

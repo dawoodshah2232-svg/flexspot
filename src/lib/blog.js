@@ -154,7 +154,7 @@ export function renderMarkdown(markdown) {
 }
 
 // ---- Load all posts --------------------------------------------------------
-const modules = import.meta.glob('../content/blog/*.md', { as: 'raw', eager: true });
+const modules = import.meta.glob('../content/blog/*.md', { query: '?raw', import: 'default', eager: true });
 
 export const readingTime = (markdown) => {
   const words = String(markdown).split(/\s+/).filter(Boolean).length;

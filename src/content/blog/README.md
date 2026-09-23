@@ -63,7 +63,7 @@ image: "/og-cover.png"    # optional: social/OG image path
 ## How the engine consumes posts
 
 - `src/lib/blog.js` parses frontmatter with a tiny zero-dependency parser and
-  loads every post at build time via Vite's `import.meta.glob('./content/blog/*.md', { as: 'raw' })`.
+  loads every post at build time via Vite's `import.meta.glob('../content/blog/*.md', { query: '?raw', import: 'default', eager: true })`.
 - Exposed helpers: `allPosts`, `getPost(slug)`, `postsByCategory`, `relatedPosts`,
   `searchPosts`, `paginate`, `publicPosts` (samples excluded — for sitemap/related).
 - Routes: `/blog` (paginated index, 12/page, `?cat=` filter, search) and

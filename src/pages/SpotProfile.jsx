@@ -56,7 +56,7 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
       setRefCredit({ name: res.name });
       if (refresh) refresh();
     } else if (!res.ok) {
-      recordReferralClick(refParam); // legacy spot-level codes still count clicks
+      recordReferralClick(String(refParam).toUpperCase()); // legacy spot-level codes still count clicks
     }
   }, [spot?.slug, refParam]); // eslint-disable-line react-hooks/exhaustive-deps
 

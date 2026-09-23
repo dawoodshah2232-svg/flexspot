@@ -1,4 +1,5 @@
 import { DEMO_SPOTS } from './data';
+import { getVisitorId } from './analytics';
 
 const SUPA_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const SUPA_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
@@ -426,7 +427,7 @@ export function refCodeFor(slug) {
 // credit; until then live mode keeps the legacy click counting.
 const LS_REF_ID = 'flexspot_ref_identities_v1';   // { code: { name, spotSlug, createdAt } }
 const LS_REF_STATS = 'flexspot_ref_stats_v1';     // { code: { visits, earned } }
-const LS_REF_COUNTED = 'flexspot_ref_counted_v1'; // { "<code>:<yyyy-mm-dd>": true }
+const LS_REF_COUNTED = 'flexspot_ref_counted_v1'; // { "<code>:<yyyy-mm-dd>:<visitorId>": true }
 const LS_MY_REFS = 'flexspot_my_refs_v1';         // { spotSlug: code } created on this browser
 const LS_REF_SEED = 'flexspot_ref_seed_v1';
 // Earning events ledger — every $1 credit is an immutable event. This is the
@@ -477,7 +478,10 @@ export function creditReferralVisit(code, spotSlug) {
   const d = new Date();
   const day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   const counted = readLS(LS_REF_COUNTED, {});
-  const key = `${String(code).toUpperCase()}:${day}`;
+  // "Once per day" follows the VISITOR's local day. The key includes the
+  // visitor id so a second person on a shared device/browser still counts —
+  // without it, their visit would be swallowed as `already:true`.
+  const key = `${String(code).toUpperCase()}:${day}:${getVisitorId()}`;
   // legacy click counting keeps working for analytics
   recordReferralClick(String(code).toUpperCase());
   if (counted[key]) return { ok: true, already: true, name: id.name };

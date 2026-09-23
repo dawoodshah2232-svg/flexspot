@@ -22,8 +22,12 @@ import { CATEGORIES } from '../lib/data';
 import { useLiveOnline, getAnalyticsSummary, getVisitorTrail, clearAnalyticsData } from '../lib/analytics';
 import { getDisplayTuning, saveDisplayTuning, displayOnlineCount, displayAmount } from '../lib/display';
 import { useSiteSettings, IMAGE_HINTS } from '../lib/siteSettings.jsx';
+import { getPendingClaim, clearPendingClaim, saveMember } from '../lib/member';
 
-const ADMIN_PIN = import.meta.env.VITE_ADMIN_PIN || '1234';
+// Fail closed: a static SPA cannot hold a real secret, and silently falling
+// back to '1234' would ship an open admin gate. No PIN configured → the
+// unlock form refuses to render (see the gate below).
+const ADMIN_PIN = import.meta.env.VITE_ADMIN_PIN || '';
 
 const TABS = [
   { id: 'overview', label: '📊 Overview' },
@@ -118,7 +122,15 @@ export default function Admin({ spots, refresh }) {
     const note = (notes[id] || '').trim();
     if (decision !== 'approved' && !note) { flash('Add a note explaining the decision first.'); return; }
     if (decision === 'rejected' && !confirm('Reject this submission?')) return;
-    reviewSubmission(id, decision, note);
+    const updated = reviewSubmission(id, decision, note);
+    if (decision === 'approved' && updated && !updated.isBoost) {
+      // Close the two-step member loop: the dashboard was showing
+      // "Payment under review" from the staged pending claim — clear it now
+      // and activate the member account so the member dashboard appears.
+      const pc = getPendingClaim();
+      if (pc && pc.slug === updated.slug) clearPendingClaim();
+      saveMember({ name: updated.brandName, email: updated.email || '', spotSlug: updated.slug, createdAt: Date.now() });
+    }
     setNotes((n) => ({ ...n, [id]: '' }));
     reload(); refresh && refresh();
     flash(decision === 'approved' ? '✓ Approved — spot is now live on the leaderboard.'
@@ -186,16 +198,25 @@ export default function Admin({ spots, refresh }) {
         <div className="w-full max-w-sm card p-8 text-center">
           <div className="text-5xl mb-4">🔐</div>
           <h1 className="font-display font-bold text-2xl text-[var(--ink)] mb-2">Admin access</h1>
-          <p className="text-[var(--ink-2)] text-sm mb-6">Enter the admin PIN to manage FlexSpot.</p>
-          <input
-            type="password" maxLength={64} autoComplete="current-password"
-            className="field text-center text-2xl tracking-[0.4em] mb-4"
-            placeholder="••••" value={pin}
-            onChange={(e) => setPin(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && (pin === ADMIN_PIN ? unlock() : flash('Wrong PIN.'))}
-          />
-          <button onClick={() => (pin === ADMIN_PIN ? unlock() : flash('Wrong PIN.'))} className="btn-primary w-full py-3">Unlock dashboard</button>
-          {msg && <p className="text-red-500 text-sm mt-3">{msg}</p>}
+          {!ADMIN_PIN ? (
+            <p className="text-[var(--ink-2)] text-sm leading-relaxed">
+              Admin access isn't configured for this build — no PIN was set at build time.
+              Rebuild with <span className="font-mono">VITE_ADMIN_PIN</span> to enable it.
+            </p>
+          ) : (
+            <>
+              <p className="text-[var(--ink-2)] text-sm mb-6">Enter the admin PIN to manage FlexSpot.</p>
+              <input
+                type="password" maxLength={64} autoComplete="current-password"
+                className="field text-center text-2xl tracking-[0.4em] mb-4"
+                placeholder="••••" value={pin}
+                onChange={(e) => setPin(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && (pin === ADMIN_PIN ? unlock() : flash('Wrong PIN.'))}
+              />
+              <button onClick={() => (pin === ADMIN_PIN ? unlock() : flash('Wrong PIN.'))} className="btn-primary w-full py-3">Unlock dashboard</button>
+              {msg && <p className="text-red-500 text-sm mt-3">{msg}</p>}
+            </>
+          )}
           <p className="text-[11px] text-[var(--ink-3)] mt-4">Client-side gate only — not real authentication. Set VITE_ADMIN_PIN before any production use.</p>
         </div>
       </div>

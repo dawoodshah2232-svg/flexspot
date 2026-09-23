@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
 import { slugify, money2 } from '../lib/format';
-import { createSubmission, getSpot, IS_LIVE, addContribution, projectedRank, rank } from '../lib/store';
+import { createSubmission, submitSpot, getSpot, IS_LIVE, addContribution, projectedRank, rank } from '../lib/store';
 import { USDT_NETWORKS, MIN_SPOT_AMOUNT } from '../lib/payments';
 import { CATEGORIES } from '../lib/data';
 import Celebration from '../components/Celebration';
@@ -161,7 +161,11 @@ export default function ClaimPage({ spots, onSubmitted }) {
     if (!file) return;
     if (file.size > maxKb * 1024) { setError(`Image must be under ${maxKb >= 1024 ? `${maxKb / 1024}MB` : `${maxKb}KB`}.`); return; }
     setError('');
-    setter(await fileToDataUrl(file));
+    try {
+      setter(await fileToDataUrl(file));
+    } catch {
+      setError('Could not read that image — try a different file.');
+    }
   };
 
   const isValidAmount = (v) =>
@@ -174,13 +178,15 @@ export default function ClaimPage({ spots, onSubmitted }) {
     if (!validStep3()) return;
     setBusy(true);
     try {
+      // slugify('—') etc. can return '' — never ship a degenerate slug.
       const slug = isBoost
         ? boostSpot.slug
-        : slugify(form.name) + '-' + Math.random().toString(36).slice(2, 6);
+        : (slugify(form.name) || 'spot') + '-' + Math.random().toString(36).slice(2, 6);
       const link = normUrl(form.website) || normUrl(form.socialLink);
-      const submission = createSubmission({
+      const name = isBoost ? boostSpot.name : form.name.trim();
+      const payload = {
         slug,
-        name: isBoost ? boostSpot.name : form.name.trim(),
+        name,
         tagline: isBoost ? boostSpot.tagline : form.tagline.trim().slice(0, 100) || 'On FlexSpot.LOL',
         description: isBoost ? boostSpot.description : form.description.trim().slice(0, 1000),
         website: isBoost ? boostSpot.website : link,
@@ -200,22 +206,33 @@ export default function ClaimPage({ spots, onSubmitted }) {
         paymentTxId: txId.trim(),
         paymentScreenshot: screenshot,
         ...(isBoost ? { isBoost: true, boostSlug: boostSpot.slug, contributorName: contribName.trim(), contributorHandle: contribHandle.trim() } : {}),
-      });
-      if (isBoost) {
+      };
+      let submission;
+      if (IS_LIVE) {
+        // Live path: the edge function owns the record. createSubmission is
+        // localStorage-only and the admin queue reads nothing in live mode —
+        // using it here would make the claim silently disappear.
+        const liveRes = await submitSpot(payload);
+        submission = { id: (liveRes && liveRes.data && liveRes.data.id) || 'live-' + Date.now().toString(36), slug, live: true };
+      } else {
+        submission = createSubmission(payload);
+      }
+      if (isBoost && !IS_LIVE) {
         // Your name goes on their page the moment you chip in — the boost
-        // amount itself lands after payment verification.
+        // amount itself lands after payment verification. (Demo-mode ledger
+        // only; in live mode the backend owns contribution records.)
         addContribution(boostSpot.slug, {
           name: contribName.trim() || 'Anonymous booster',
           handle: contribHandle.trim(),
           amount: amt,
         });
       }
-      setResult({ submission, amount: amt, name: isBoost ? boostSpot.name : form.name.trim() });
+      setResult({ submission, amount: amt, name });
       trackEvent('deposit_submit', { amount: amt, isBoost, spotSlug: slug });
       if (!isBoost) {
         // Stage the account: payment under review → member access activates
         // after admin approval. The dashboard gate shows this two-step state.
-        stagePendingClaim({ name: form.name.trim(), email: form.email.trim(), amount: amt, slug });
+        stagePendingClaim({ name, email: form.email.trim(), amount: amt, slug });
       }
       setStep(doneStep);
       onSubmitted && onSubmitted();
@@ -263,7 +280,9 @@ export default function ClaimPage({ spots, onSubmitted }) {
               {isBoost ? 'boost' : 'new spot'}
               <br />
               {isBoost
-                ? 'Your name is already showing in their Boost squad. The boost amount lands on the board once we verify your payment.'
+                ? (IS_LIVE
+                    ? 'Your boost is received — it lands on the board once we verify your payment.'
+                    : 'Your name is already showing in their Boost squad. The boost amount lands on the board once we verify your payment.')
                 : 'Our team is reviewing your payment proof. Most submissions are reviewed within 24 hours.'}
               {!IS_LIVE && !isBoost && ' This is preview mode — approve it in the admin dashboard to see it go live.'}
             </p>
@@ -527,8 +546,8 @@ export default function ClaimPage({ spots, onSubmitted }) {
               </div>
             )}
             <div className="flex gap-2.5">
-              {!isBoost && <button onClick={() => setStep(1)} className="btn-ghost px-5 py-3.5 text-sm">← Back</button>}
-              <button onClick={() => setStep(payStep)} className="btn-primary flex-1 py-3.5 text-[15px]">Continue → Payment proof</button>
+              {!isBoost && <button onClick={() => { setError(''); setStep(1); }} className="btn-ghost px-5 py-3.5 text-sm">← Back</button>}
+              <button onClick={() => { if (isValidAmount(finalAmount())) { setError(''); setStep(payStep); } else { setError(`Amount must be at least $${MIN_SPOT_AMOUNT}, with up to two decimal places.`); } }} className="btn-primary flex-1 py-3.5 text-[15px]">Continue → Payment proof</button>
             </div>
           </div>
         )}
@@ -661,7 +680,7 @@ export default function ClaimPage({ spots, onSubmitted }) {
             </p>
 
             <div className="flex gap-2.5">
-              <button onClick={() => setStep(amountStep)} className="btn-ghost px-5 py-3.5 text-sm">← Back</button>
+              <button onClick={() => { setError(''); setStep(amountStep); }} className="btn-ghost px-5 py-3.5 text-sm">← Back</button>
               <button onClick={submit} disabled={busy} className="btn-gold flex-1 py-3.5 text-[15px]">
                 {busy ? 'Submitting…' : `Submit for review — ${money2(finalAmount())}`}
               </button>

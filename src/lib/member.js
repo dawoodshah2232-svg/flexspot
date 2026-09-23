@@ -210,9 +210,9 @@ export function ensureMemberDemo() {
       usdt: { network: 'TRC-20', address: 'TJk8vQm2xR4pL9nW3sDf6hJz1cVb5N' },
       notify: { payouts: true, rankAlerts: true, referrals: true },
       referrals: [
-        { name: 'Jon D.', at: Date.now() - 3 * 86400e3, spend: 1, commission: 0.01 },
-        { name: 'Priya S.', at: Date.now() - 4 * 86400e3, spend: 15, commission: 3 },
-        { name: 'Leo M.', at: Date.now() - 8 * 86400e3, spend: 5, commission: 1 },
+        { id: 'ref-jon', name: 'Jon D.', at: Date.now() - 3 * 86400e3, spend: 1, commission: 0.01 },
+        { id: 'ref-priya', name: 'Priya S.', at: Date.now() - 4 * 86400e3, spend: 15, commission: 3 },
+        { id: 'ref-leo', name: 'Leo M.', at: Date.now() - 8 * 86400e3, spend: 5, commission: 1 },
       ],
       createdAt: Date.now() - 20 * 86400e3, demo: true,
     };

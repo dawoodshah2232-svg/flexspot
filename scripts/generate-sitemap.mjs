@@ -12,8 +12,9 @@
 //      - posts with `sample: true` are EXCLUDED
 //      - slug = filename (per blog-engine convention), lastmod = post date
 //
-// Canonical URL convention: VITE_SITE_URL at build time, falling back to
-// https://flexspot.lol (same convention as src/lib/pageMeta.js).
+// Canonical URL convention: VITE_SITE_URL at build time (required). When it
+// is unset the script exits without writing, so local builds never clobber
+// the committed sitemap/robots.txt with a fallback domain.
 // Do NOT hardcode a different domain here.
 
 import { readdirSync, readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
@@ -21,7 +22,15 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const SITE_URL = (process.env.VITE_SITE_URL || process.env.VITE_APP_URL || 'https://flexspot.lol').replace(/\/+$/, '');
+// Only write when the canonical site URL is explicitly provided. A local
+// `npm run build` (no env) must NOT rewrite the committed sitemap/robots.txt
+// with the fallback domain — that dirties the diff on every local build.
+const ENV_SITE_URL = (process.env.VITE_SITE_URL || process.env.VITE_APP_URL || '').replace(/\/+$/, '');
+if (!ENV_SITE_URL) {
+  console.log('[sitemap] VITE_SITE_URL not set — skipping sitemap/robots.txt rewrite (committed files left untouched).');
+  process.exit(0);
+}
+const SITE_URL = ENV_SITE_URL;
 const TODAY = new Date().toISOString().slice(0, 10);
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -30,9 +39,15 @@ const appJsx = readFileSync(join(root, 'src', 'App.jsx'), 'utf8');
 const routePaths = [...appJsx.matchAll(/<Route\s+path="([^"]+)"/g)].map((m) => m[1]);
 
 const dataJs = readFileSync(join(root, 'src', 'lib', 'data.js'), 'utf8');
-const categorySlugs = [...dataJs.matchAll(/\{ slug: '([a-z0-9-]+)', name:/g)].map((m) => m[1]);
-const allSlugs = [...new Set([...dataJs.matchAll(/slug: '([a-z0-9-]+)'/g)].map((m) => m[1]))];
-const spotSlugs = allSlugs.filter((s) => !categorySlugs.includes(s));
+// Category slugs come ONLY from the CATEGORIES array block. A naive
+// /\{ slug: '…', name:/ regex also matches the BADGES array (badges render
+// the 404 page under /explore/<badge>), feeding search engines soft-404s.
+const categoriesBlock = (dataJs.match(/export const CATEGORIES = \[([\s\S]*?)\];/) || [])[1] || '';
+const categorySlugs = [...categoriesBlock.matchAll(/slug: '([a-z0-9-]+)'/g)].map((m) => m[1]);
+// Spot slugs come ONLY from the DEMO_SPOTS array block — never from BADGES
+// or any other slug-bearing array in data.js.
+const spotsBlock = (dataJs.match(/export const DEMO_SPOTS = \[([\s\S]*?)\];/) || [])[1] || '';
+const spotSlugs = [...new Set([...spotsBlock.matchAll(/slug: '([a-z0-9-]+)'/g)].map((m) => m[1]))];
 
 // changefreq/priority defaults per static route (tuned for a live leaderboard)
 const ROUTE_META = {
@@ -57,7 +72,8 @@ const urls = new Map(); // path -> [lastmod, changefreq, priority]
 const add = (path, lastmod, cf, pr) => { if (!urls.has(path)) urls.set(path, [lastmod, cf, pr]); };
 
 for (const p of routePaths) {
-  if (p.includes(':') || p.includes('*') || p === '/admin') continue; // dynamic, wildcard, admin
+  // dynamic, wildcard, admin, and the login-walled member dashboard are excluded
+  if (p.includes(':') || p.includes('*') || p === '/admin' || p === '/dashboard') continue;
   const [cf, pr] = ROUTE_META[p] || ['weekly', '0.5'];
   add(p, TODAY, cf, pr);
 }

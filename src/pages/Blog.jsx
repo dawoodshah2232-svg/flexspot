@@ -104,7 +104,7 @@ export default function Blog() {
         {/* Results */}
         <p className="mt-8 text-sm text-[var(--ink-3)] font-semibold" role="status">
           {total} article{total === 1 ? '' : 's'}
-          {activeCat ? ` in ${BLOG_CATEGORIES.find((c) => categorySlug(c) === activeCat)}` : ''}
+          {(() => { const catName = activeCat ? BLOG_CATEGORIES.find((c) => categorySlug(c) === activeCat) : null; return catName ? ` in ${catName}` : ''; })()}
           {query ? ` matching “${query}”` : ''}
         </p>
 

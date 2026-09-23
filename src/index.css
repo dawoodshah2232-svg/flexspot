@@ -581,3 +581,16 @@ table.admin-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; 
 .blog-takeaways ul { margin: 0; padding-left: 1.35em; list-style: disc; }
 .blog-takeaways li { margin: 0.35em 0; color: var(--ink-2); }
 .blog-takeaways li::marker { color: var(--blaze); }
+
+/* ============ Mobile hardening (mobile-first mandate) ============ */
+img { max-width: 100%; }
+/* iOS Safari zooms on focus when inputs are < 16px — keep 16px on phones */
+@media (max-width: 640px) {
+  input:not([type='checkbox']):not([type='radio']),
+  textarea,
+  select { font-size: 16px; }
+  /* never let cards bleed past the screen */
+  .card, .field, .btn { max-width: 100%; }
+}
+/* minimum touch target for small icon buttons */
+.touch-44 { min-width: 44px; min-height: 44px; }

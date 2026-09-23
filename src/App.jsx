@@ -15,11 +15,11 @@ import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import Disclaimers from './pages/Disclaimers';
 import SpotProfile from './pages/SpotProfile';
-import Admin from './pages/Admin';
+const Admin = React.lazy(() => import('./pages/Admin'));
 import { fetchLeaderboard, fetchPendingSpots, rank, saveRankSnapshot, IS_LIVE } from './lib/store';
 import { LIVE_FEED_POOL } from './lib/data';
 
-import { SiteSettingsProvider } from './lib/siteSettings';
+import { SiteSettingsProvider } from './lib/siteSettings.jsx';
 import { trackPageView, writeHeartbeat, useLiveOnline } from './lib/analytics';
 import DiscoveryPage from './pages/DiscoveryPage';
 import Explore from './pages/Explore';
@@ -159,7 +159,7 @@ function Shell() {
       <Header onClaim={openClaim} />
       <main>
         <Routes>
-          <Route path="/" element={<Home spots={spots} onClaim={openClaim} onBoost={openBoost} viewers={online} />} />
+          <Route path="/" element={<Home spots={spots} onClaim={openClaim} onBoost={openBoost} viewers={online.length} />} />
           <Route path="/claim" element={<ClaimPage spots={spots} onSubmitted={onSubmitted} />} />
           <Route path="/leaderboard" element={<LeaderboardPage spots={spots} moves={moves} onBoost={openBoost} onClaim={openClaim} />} />
           <Route path="/explore" element={<Explore spots={spots} onBoost={openBoost} onClaim={openClaim} />} />
@@ -177,7 +177,7 @@ function Shell() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/disclaimers" element={<Disclaimers />} />
           <Route path="/s/:slug" element={<SpotProfile spots={spots} onClaim={openClaim} onBoost={openBoost} refresh={load} />} />
-          <Route path="/admin" element={<Admin spots={spots} pending={pending} refresh={load} />} />
+          <Route path="/admin" element={<React.Suspense fallback={<BlogFallback />}><Admin spots={spots} pending={pending} refresh={load} /></React.Suspense>} />
           {/* Root profiles — static routes always win over /:slug in React Router ranking */}
           <Route path="/:slug" element={<RootProfile spots={spots} onClaim={openClaim} onBoost={openBoost} />} />
           <Route path="*" element={<NotFound onClaim={openClaim} />} />

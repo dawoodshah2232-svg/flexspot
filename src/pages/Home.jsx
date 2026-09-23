@@ -14,7 +14,7 @@ import { LIVE_FEED_POOL, IS_PREVIEW_DATA } from '../lib/data';
 import { IS_LIVE } from '../lib/store';
 import { allPosts } from '../lib/blog';
 import BlogCard from '../components/BlogCard';
-import { useSiteSettings } from '../lib/siteSettings';
+import { useSiteSettings } from '../lib/siteSettings.jsx';
 import { useDisplayOnline, displayAmount } from '../lib/display';
 import { getOnlineCount } from '../lib/analytics';
 

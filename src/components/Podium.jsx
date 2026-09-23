@@ -183,7 +183,7 @@ export default function Podium({ spots, onBoost }) {
     <div className="relative">
       {/* arena glow behind the podium */}
       <div className="absolute inset-x-0 -top-8 bottom-0 pointer-events-none" aria-hidden="true">
-        <div className="absolute left-1/2 -translate-x-1/2 top-0 w-[560px] h-[280px] bg-[var(--gold)]/15 blur-[100px] rounded-full" />
+        <div className="absolute left-1/2 -translate-x-1/2 top-0 w-[300px] sm:w-[560px] h-[280px] bg-[var(--gold)]/15 blur-[100px] rounded-full" />
       </div>
       <div className="relative grid sm:grid-cols-3 gap-4 sm:gap-5 items-end max-w-4xl mx-auto pt-10">
         {step(second, 2, '2nd · Silver', 'order-2 sm:order-1')}

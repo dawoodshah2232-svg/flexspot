@@ -503,6 +503,41 @@ export function getReferralEvents(code, limit = 50) {
   return events.filter((e) => !c || e.code === c).slice(-limit).reverse();
 }
 
+// Full referral ledger for the admin Referrals tab.
+export function getAllReferrals() {
+  ensureReferralSeed();
+  const ids = readLS(LS_REF_ID, {});
+  const stats = readLS(LS_REF_STATS, {});
+  const events = readLS(LS_REF_EVENTS, []);
+  return Object.entries(ids)
+    .map(([code, v]) => ({ code, name: v.name, spotSlug: v.spotSlug, createdAt: v.createdAt, demo: !!v.demo, ...(stats[code] || { visits: 0, earned: 0 }) }))
+    .sort((a, b) => b.earned - a.earned || b.visits - a.visits);
+}
+
+export function getReferralEventCount(code) {
+  return readLS(LS_REF_EVENTS, []).filter((e) => e.code === String(code).toUpperCase()).length;
+}
+
+// --- Demo data reset (admin "reset demo data") --------------------------------
+// Clears every local preview/user data key EXCEPT theme + visitor id + the
+// admin-editable site settings. Demo brand seed lives in code, not storage,
+// so the board repopulates with clean demo data after refresh.
+const DEMO_RESET_KEYS = [
+  LS_SPOTS, LS_SUBMISSIONS, LS_CLICKS, LS_REFS, LS_BOOSTS, LS_RANKS,
+  LS_CMS, LS_ANALYTICS, LS_VISITS,
+  LS_REF_ID, LS_REF_STATS, LS_REF_COUNTED, LS_MY_REFS, LS_REF_SEED, LS_REF_EVENTS,
+  'flexspot_contributions_v2', 'flexspot_heartbeats_v1', 'flexspot_pageviews_v1', 'flexspot_events_v1',
+  'flexspot_display_tuning_v1', 'flexspot_local_spots',
+];
+
+export function resetDemoData() {
+  DEMO_RESET_KEYS.forEach((k) => { try { localStorage.removeItem(k); } catch {} });
+  try {
+    // re-seed referral + contribution demo data so boards aren't empty
+    localStorage.removeItem(LS_REF_SEED);
+    localStorage.removeItem(LS_CONTRIB);
+  } catch {}
+}
 export function getSpotReferrers(slug, limit = 5) {
   ensureReferralSeed();
   const ids = readLS(LS_REF_ID, {});

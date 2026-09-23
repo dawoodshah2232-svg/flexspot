@@ -135,3 +135,28 @@ actually see your brand, measure what happens, and let the data — not the
 visitor counter — decide where the next dollar goes.
 
 Related reading: [How to Get Traffic to Your Website](/blog/how-to-get-traffic-to-your-website) for the full free+paid playbook, and [Cheap Ways to Advertise a Small Business](/blog/cheap-ways-to-advertise-a-small-business) for budget-friendly paid options.
+
+## Questions to ask any traffic vendor (before you pay)
+
+Whether it's an ad platform, a sponsorship, or a placement marketplace, run
+every paid traffic option through these questions:
+
+1. **Who exactly will see my brand?** Vague answers ("targeted visitors,"
+   "real human traffic") are red flags. You want specifics: newsletter
+   subscribers in X niche, visitors browsing Y category, searchers typing Z.
+2. **Why would they care?** What's the context of the encounter — are they
+   browsing for solutions, reading trusted recommendations, or just existing
+   near an ad?
+3. **How is it measured?** Can you track with your own UTM parameters and
+   analytics, or do you have to trust the vendor's dashboard alone?
+4. **What's the smallest test?** Legitimate vendors let you start small. Anyone
+   pushing a large minimum upfront is selling you risk, not traffic.
+5. **Can I see examples?** Real placements, real advertisers, real creative —
+   not just testimonials about visitor counts.
+6. **What happens after the click?** Do visitors land on your page in a normal
+   browser session (good), or through pop-unders, redirects, and forced tabs
+   (walk away)?
+
+A vendor who answers all six clearly is selling attention. One who dodges them
+is selling numbers. The entire paid-traffic decision reduces to that
+distinction.

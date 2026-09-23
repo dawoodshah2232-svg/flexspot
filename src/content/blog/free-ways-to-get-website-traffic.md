@@ -1,6 +1,6 @@
 ---
 title: "21 Free Ways to Get More Website Traffic That Actually Work"
-description: "21 free ways to get website traffic that actually move the needle in 2026 — SEO quick wins, communities, partnerships, and repurposing tactics."
+description: "21 free ways to get website traffic that actually move the needle — SEO quick wins, community tactics, partnerships, and repurposing strategies for 2026."
 date: 2026-09-23
 author: "FlexSpot Editorial"
 category: "Visibility Guides"
@@ -160,3 +160,23 @@ channel sent the most engaged visitors, cut the rest.
 
 For the bigger picture — how free tactics combine with paid ones — see the
 pillar: [How to Get Traffic to Your Website: The 2026 Playbook](/blog/how-to-get-traffic-to-your-website).
+
+## Putting it together: the weekly free-traffic routine
+
+Twenty-one tactics are useless without a routine. Here's a sustainable weekly
+rhythm that combines the highest-leverage ones in about 6–8 hours:
+
+- **Monday (90 min):** write and publish this week's answer-piece; submit it
+  to one relevant community.
+- **Tuesday–Thursday (30 min/day):** community presence — answer questions,
+  engage genuinely, one standout answer per day.
+- **Friday (60 min):** repurpose the week's piece (thread + short video script
+  + newsletter section); send one partnership or pitch email.
+- **Monthly (2 hrs):** refresh your best-performing page, review analytics by
+  channel, and double down on whatever sent the most engaged visitors.
+
+The compounding math: after 12 weeks you'll have 12 solid content pieces, ~60
+community answers, a growing email list, and real data on what works. Almost
+no small site that sustains this for a year stays invisible. The tactic matters
+less than the streak — pick the ones you'll actually do, and do them until
+they compound.

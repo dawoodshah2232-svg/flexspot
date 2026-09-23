@@ -1,6 +1,6 @@
 ---
 title: "How to Advertise Your Small Business Online for Free"
-description: "How to advertise a small business online for free: directories, Google Business Profile, communities, partnerships, and content tactics that cost $0."
+description: "How to advertise a small business online for free: directories, Google Business Profile, communities, partnerships, and content tactics at $0. Start this week."
 date: 2026-09-23
 author: "FlexSpot Editorial"
 category: "Small Business Marketing"
@@ -193,3 +193,19 @@ Then repeat monthly, doubling down on whatever sent real prospects.
 When you're ready to add a small budget, the [cheap advertising pillar](/blog/cheap-ways-to-advertise-a-small-business)
 picks up where this leaves off — and [25 free places to list your business](/blog/where-can-i-advertise-my-business-for-free)
 gives you the directory hit-list.
+
+## When free isn't enough: the $1 upgrade path
+
+Free tactics build your foundation, but there comes a point where a tiny spend
+unlocks disproportionate results — usually when you need speed (a launch, an
+event) or data (which message converts?). The smart upgrade path:
+
+1. **First $1–$10:** a bid-for-visibility spot or micro-sponsorship to test
+   messaging in front of a real audience.
+2. **First $25–$50:** boost your best organic content or run a one-week
+   targeted ad test with strict tracking.
+3. **Ongoing:** reinvest a fixed percentage of revenue (5–10% is the common
+   growth-stage rule) into whatever the tests proved.
+
+The key: free taught you the message; paid amplifies it. Spending before
+you've learned the message is the most common way small budgets get wasted.

@@ -1,6 +1,6 @@
 ---
 title: "How to Drive Traffic to a Brand-New Website (First 90 Days)"
-description: "How to drive traffic to a new website from day one: the 90-day launch plan covering quick wins, partnerships, and building organic momentum."
+description: "How to drive traffic to a new website from day one: the 90-day launch plan with weekly actions, quick wins, compounding tactics, and a launch checklist."
 date: 2026-09-23
 author: "FlexSpot Editorial"
 category: "Visibility Guides"
@@ -144,3 +144,24 @@ clicks, and — most importantly — one channel you can name as "the thing that
 works." From there, it's scaling, not searching.
 
 Next reads: the full menu of tactics in [How to Get Traffic to Your Website](/blog/how-to-get-traffic-to-your-website), and the deep list of [21 Free Ways to Get More Website Traffic](/blog/free-ways-to-get-website-traffic).
+
+## Launch-day checklist
+
+When the site goes live, run this checklist in order — it's the difference
+between a launch that fizzles and one that starts your traffic engine:
+
+- [ ] Analytics, Search Console, and Bing Webmaster Tools installed and verified
+- [ ] 5–10 core pages published (no "coming soon" pages)
+- [ ] Email capture live with a real lead magnet
+- [ ] Google Business Profile claimed (if local) + key directories submitted
+- [ ] Social profiles complete with working links
+- [ ] Announcement drafted for your network (email + personal social + group chats)
+- [ ] 3 communities identified with your first genuinely useful posts ready
+- [ ] 5 podcast/newsletter pitches sent
+- [ ] 1 partner outreach email sent
+- [ ] Sitemap submitted to search consoles; site submitted for indexing
+- [ ] One small paid visibility test planned (even $10–$25 teaches you what converts)
+
+Launch day isn't about traffic volume — it's about starting every engine at
+once so data starts flowing. The visitors come in weeks 2–12; launch day buys
+you the feedback to earn them.

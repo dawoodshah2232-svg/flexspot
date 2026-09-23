@@ -146,3 +146,37 @@ sends 200 perfect-fit visitors beats a bulk traffic package sending 20,000
 bots. Judge sources by buyers, not browsers.
 
 Keep exploring: the pillar [How to Get Traffic to Your Website](/blog/how-to-get-traffic-to-your-website) for the full playbook, or [Should You Buy Website Traffic?](/blog/should-you-buy-website-traffic) before spending on paid visitors.
+
+## Building your source portfolio over 12 months
+
+You don't need all five sources on day one. Here's a realistic sequencing:
+
+**Months 1–3: referral + one more.** Referral (communities, directories,
+partnerships) for immediate visitors, plus whichever of search-content or
+social fits your strengths for the long game. Set up email capture from day
+one so every source feeds the direct/repeat bucket.
+
+**Months 4–6: deepen the winner.** By now the data shows which source pulls
+its weight. Pour effort there; keep the other on maintenance. If you have
+budget and a converting page, add a small paid test — it also teaches you
+which messages work, improving everything else.
+
+**Months 7–12: add the missing piece.** If you're organic-heavy, add paid for
+speed and testing. If you're paid-heavy, invest in search content to reduce
+dependence on ad spend. The goal by month 12: a primary source (40–60%), a
+real secondary (20–30%), and a growing direct/repeat base from your email list.
+
+The portfolio mindset matters because sources fail: algorithms change, ad
+costs spike, platforms fade. A business with two working sources survives
+shocks that kill a single-source business. Diversification isn't a luxury —
+it's the difference between a traffic dip and a traffic disaster.
+
+## A final note on "other" and "unknown" traffic
+
+Your analytics will always show some traffic from sources you can't identify —
+messaging apps, dark social (links shared in DMs and private groups), and
+privacy-stripped referrals. Don't obsess over attributing every visit. What
+matters is the trend per known source and, above all, the conversion trend.
+Dark social is real and growing; the practical response is making sharing easy
+(copyable links, share buttons, quotable snippets) rather than trying to track
+the untrackable.

@@ -1,6 +1,6 @@
 ---
 title: "Small Business Advertising Ideas: 30 Tactics Under $50"
-description: "30 small business advertising ideas under $50 — micro-sponsorships, guerrilla tactics, partnerships, and paid tests, each with cost and effort notes."
+description: "30 small business advertising ideas under $50 — micro-sponsorships, guerrilla tactics, partnerships, and paid tests, each with cost notes., updated for 2026."
 date: 2026-09-23
 author: "FlexSpot Editorial"
 category: "Small Business Marketing"
@@ -161,3 +161,24 @@ forever.
 
 Related: [Cheap Ways to Advertise a Small Business](/blog/cheap-ways-to-advertise-a-small-business) for the strategy,
 [How Much It Really Costs](/blog/how-much-does-it-cost-to-advertise-a-small-business) for the numbers.
+
+## Tracking your $50 tests (so they actually teach you)
+
+Cheap ideas only compound if you learn from them. For each idea you test,
+spend five minutes on setup:
+
+- **One conversion goal.** Not "awareness" — a signup, a booking, a purchase,
+  a call. If you can't name it, you can't measure it.
+- **One tracking link.** UTM parameters (free) on every link, or a dedicated
+  landing page per idea. This separates "the newsletter sent 40 visitors" from
+  "social sent 400" in your analytics.
+- **One time box.** 2–4 weeks, decided in advance. Open-ended tests drift
+  forever.
+- **One kill/scale rule.** Written before you start: "10+ qualified prospects
+  → double the spend; fewer → drop it." Decide with data, not hope.
+
+Keep a one-page log: idea, cost, dates, visitors, conversions, verdict. After
+ten ideas you'll have a personal playbook no competitor can copy — because
+it's built from *your* numbers, not generic advice. The businesses that win at
+cheap advertising aren't the ones with the best ideas; they're the ones with
+the best notes.

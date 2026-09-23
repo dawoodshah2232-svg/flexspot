@@ -81,7 +81,7 @@ End where you began: restate the offer in one line, repeat the primary button, a
 - **Mobile-first.** Design for the phone screen first, desktop second. Most local-business traffic is mobile; a page that's merely "okay" on phones loses most of its visitors.
 - **Speed.** Every second of load time costs conversions. Compress images, skip the video background, avoid plugin bloat. Test on a mid-range phone on mobile data, not your office wifi.
 - **One goal, minimal exits.** Navigation menu? Either skip it or keep it to anchor links within the page. Every external link is a visitor you may never get back.
-- **Analytics from day one.** Basic analytics plus conversion tracking on the main button. You can't improve what you don't measure — the same discipline as our [experiment framework](/blog/measuring-roi-of-one-dollar-ad-experiments).
+- **Analytics from day one.** Basic analytics plus conversion tracking on the main button. You can't improve what you don't measure — the same discipline as our experiment framework.
 - **HTTPS, obviously.** Browsers flag non-secure sites; customers bounce.
 
 ## What the one-pager isn't

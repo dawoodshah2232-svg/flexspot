@@ -50,7 +50,7 @@ Your physical locations are list-building machines if you give people a reason t
 - **Receipt codes:** "Scan to get your receipt + join VIP perks." Digital receipts are a natural, useful exchange.
 - **Packaging inserts:** every shipped or bagged order carries a code: "Scan to reorder in one tap" or "Scan for care tips + a surprise." Packaging is media — see our [packaging-as-marketing guide](/blog/packaging-as-marketing-unboxing-experience).
 
-Keep the consent clear: label what they're signing up for and on which channel. (The rules for messaging are stricter than for email — our [compliance guide](/blog/sms-whatsapp-broadcast-compliance-uae) has the details.)
+Keep the consent clear: label what they're signing up for and on which channel. (The rules for messaging are stricter than for email — our compliance guide has the details.)
 
 ## Tactic 3: Menus, catalogs, and the "endless shelf"
 
@@ -83,7 +83,7 @@ One caution: free QR generators sometimes monetize by expiring dynamic codes or 
 
 ## Tracking: learn what actually gets scanned
 
-Append UTM parameters to your destinations (or use your generator's analytics) and track scans per placement: counter vs. receipt vs. window vs. packaging. You'll discover patterns — the receipt code might outperform the counter card 5-to-1, or the window code might only work on weekends. Reallocate print budget to winners, redesign or drop losers. This is the same measurement discipline as our [$1-experiment ROI guide](/blog/measuring-roi-of-one-dollar-ad-experiments): small tests, honest numbers, decisions based on data.
+Append UTM parameters to your destinations (or use your generator's analytics) and track scans per placement: counter vs. receipt vs. window vs. packaging. You'll discover patterns — the receipt code might outperform the counter card 5-to-1, or the window code might only work on weekends. Reallocate print budget to winners, redesign or drop losers. This is the same measurement discipline as our $1-experiment ROI guide: small tests, honest numbers, decisions based on data.
 
 ## Design rules that determine scan rates
 

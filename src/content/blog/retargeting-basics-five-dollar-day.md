@@ -46,7 +46,7 @@ Why it's perfect for small budgets: you're not paying to find strangers. You're 
 
 **Google (Display & YouTube).** Google's tag powers display retargeting (banner ads across websites) and YouTube retargeting. Display inventory is vast and cheap; creative quality matters more because the formats are less native. Good for: businesses with visual products, longer consideration cycles.
 
-**TikTok.** If your audience lives on TikTok and your content fits the format, its pixel enables retargeting to video viewers and site visitors. More setup friction than Meta, but the audience attention is real — see our [TikTok advertising guide](/blog/how-to-advertise-on-tiktok-with-a-small-budget).
+**TikTok.** If your audience lives on TikTok and your content fits the format, its pixel enables retargeting to video viewers and site visitors. More setup friction than Meta, but the audience attention is real — see our TikTok advertising guide.
 
 Start with one platform — the one where your customers actually spend time. You can expand later; divided attention across three half-built retargeting setups helps no one.
 
@@ -68,7 +68,7 @@ Retargeting creative should answer the question "why didn't they buy?" — not r
 - **The reminder.** Simple product/brand reminder with clear branding. Sometimes people just forgot. Don't overthink the top of the funnel.
 - **The objection-handler.** Address the likely hesitation: shipping info, return policy, "how it works," pricing clarity, FAQ. If analytics show drop-off at shipping costs, say "free delivery over AED 100" in the ad.
 - **The social proof.** Reviews, testimonials, "2,000+ happy customers," press mentions. Hesitation is often trust-shaped; proof is the antidote. (Your [review system](/blog/review-generation-system-small-business) feeds this.)
-- **The nudge.** A time-limited incentive for abandoners: "Your cart is waiting — 10% off for the next 48 hours." Use sparingly; permanent discounts train waiting (see [pricing psychology](/blog/pricing-psychology-for-small-brands)).
+- **The nudge.** A time-limited incentive for abandoners: "Your cart is waiting — 10% off for the next 48 hours." Use sparingly; permanent discounts train waiting (see pricing psychology).
 - **The new angle.** Show the product in a different context — a use case, a customer story, a behind-the-scenes look. Different creative for different visits keeps it fresh.
 
 Rotate creative every few weeks. Ad fatigue is real, and a stale retargeting ad shown for the 40th time generates annoyance, not sales.

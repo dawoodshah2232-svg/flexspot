@@ -68,7 +68,7 @@ Don't propose a joint festival on day one. Climb the ladder:
 Even friendly partnerships need clarity. Before spending money together, agree in writing (an email summary counts) on:
 
 - **Costs:** who pays for what — printing, event space, ads, product for tastings. Default to 50/50 unless contributions clearly differ.
-- **Revenue and leads:** if a joint offer generates sales, does each business keep its own revenue? If you collect emails jointly, who owns the list and can both sides message it? (Consent rules apply — see our [messaging compliance guide](/blog/sms-whatsapp-broadcast-compliance-uae).)
+- **Revenue and leads:** if a joint offer generates sales, does each business keep its own revenue? If you collect emails jointly, who owns the list and can both sides message it? (Consent rules apply — see our messaging compliance guide.)
 - **Effort:** who does the design, who posts on social, who staffs the event. Unequal effort breeds resentment faster than unequal money.
 - **Brand rules:** how each brand is presented — logo usage, photography, tone. Neither side should look like the other's afterthought.
 - **Duration and exit:** "We'll try the joint offer for two months, then review." And either side can exit with two weeks' notice, no hard feelings. Knowing the exit is clean makes starting easy.

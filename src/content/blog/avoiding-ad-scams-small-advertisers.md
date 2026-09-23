@@ -45,7 +45,7 @@ Scammers follow the money-to-effort ratio, and small businesses are the sweet sp
 
 **7. The listing hijack.** Someone claims your business listings (Google, directories) and demands payment to release them. Claim and verify all your own listings *now*, before someone else does — prevention is the whole defense.
 
-**8. Grey-market bulk messaging tools.** "Send unlimited WhatsApp messages, no API needed!" — violates platform terms, gets your number banned, and the seller keeps your money. Covered in our [messaging compliance guide](/blog/sms-whatsapp-broadcast-compliance-uae).
+**8. Grey-market bulk messaging tools.** "Send unlimited WhatsApp messages, no API needed!" — violates platform terms, gets your number banned, and the seller keeps your money. Covered in our messaging compliance guide.
 
 ## The red-flag checklist (apply to every offer)
 

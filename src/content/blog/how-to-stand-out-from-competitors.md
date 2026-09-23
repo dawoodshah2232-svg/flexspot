@@ -97,3 +97,11 @@ Standing out isn't a campaign — it's a commitment to being specifically, visib
 ## Keep the edge: differentiation decays
 
 One warning: every difference erodes. Competitors copy features, markets shift, and today's bold stance becomes tomorrow's table stakes. Treat differentiation as maintenance, not a milestone: re-run the audit every six months, keep one experiment always live (a new guarantee, a new format, a new arena), and listen to customers — they notice your edge dulling before you do. The brands that stay distinctive aren't the ones that found one difference; they're the ones that keep finding the next one.
+
+## Differentiation on a zero budget
+
+No money for rebrands or campaigns? The cheapest differentiators are behavioral: answer faster than anyone else in your market (speed is free), write your website like a human instead of a corporation (voice is free), publish your pricing when competitors hide theirs (transparency is free), and show up consistently in one community your competitors ignore (presence is free). None of these cost anything but discipline — and they're exactly the things big, comfortable competitors are too slow or too cautious to copy. Start there this week; the expensive differentiation can wait until the free kind is working.
+
+## Steal this: the one-page differentiation brief
+
+Put your differentiation on a single page the whole team can use: the one-sentence positioning ("We're the ___ for ___ who ___"), the three proof points (specific, verifiable), the personality notes (how we sound, what we'd never say), and the competitive contrasts (where we win, where we honestly don't — and why that trade-off serves our customer). Sales uses it in pitches, marketing uses it in copy, support uses it in conversations. Differentiation that lives in one person's head is a hope; differentiation on one page the whole company repeats is a strategy.

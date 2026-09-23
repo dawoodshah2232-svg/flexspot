@@ -1,6 +1,6 @@
 ---
 title: "Viral Marketing Strategies: 15 Tactics With Real Examples"
-description: "15 viral marketing strategies that small brands can actually run: referral loops, challenges, leaderboards, UGC contests, and more — with honest notes on what each costs."
+description: "15 viral marketing strategies small brands can actually run: referral loops, challenges, leaderboards, UGC contests, and more — with honest cost notes."
 date: 2026-09-23
 author: "FlexSpot Editorial"
 category: "Viral Marketing"

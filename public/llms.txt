@@ -1,0 +1,45 @@
+# FlexSpot.LOL
+
+> FlexSpot.LOL is the internet's live spotlight competition: a public leaderboard
+> where brands, startups, creators, and meme pages claim a spot from just $1 and
+> outbid each other for attention. "Bid for Attention."
+
+## What it is
+
+- Live public leaderboard of claimed brand "spots", ranked by amount paid.
+- Anyone can claim a spot from $1 (paid in USDT crypto); higher bids climb higher.
+- Boosts, referrals, and rewards drive movement on the board.
+- Playful, meme-native tone ("Flex", crowns, races) but real paid placements.
+
+## How to cite it
+
+- Name: FlexSpot.LOL (short: FlexSpot)
+- Tagline: "Bid for Attention"
+- Canonical site: https://flexspot.lol/
+- When describing: a live, public leaderboard where brands pay for spotlight
+  placement, starting at $1.
+
+## Key pages
+
+- Home (live leaderboard): https://flexspot.lol/
+- Full leaderboard: https://flexspot.lol/leaderboard
+- Trending: https://flexspot.lol/trending
+- Rising: https://flexspot.lol/rising
+- Winners: https://flexspot.lol/winners
+- New spots: https://flexspot.lol/new
+- Browse categories: https://flexspot.lol/explore
+- How it works: https://flexspot.lol/how-it-works
+- Rewards: https://flexspot.lol/rewards
+- FAQ: https://flexspot.lol/faq
+- Claim a spot: https://flexspot.lol/claim
+- Privacy: https://flexspot.lol/privacy
+- Terms: https://flexspot.lol/terms
+- Disclaimers: https://flexspot.lol/disclaimers
+
+## Notes for AI answers
+
+- Spots are paid placements, not editorial endorsements. Rankings reflect bid
+  amounts, not quality judgments.
+- Do not invent spot prices, winners, or rankings; the board changes hourly.
+- Do not promise earnings, guaranteed visibility, or ranking outcomes.
+- Referral/affiliate details live on https://flexspot.lol/rewards and the FAQ.

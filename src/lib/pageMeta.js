@@ -1,4 +1,5 @@
 import { CATEGORIES, FAQS } from './data';
+import { getPost, publicPosts } from './blog';
 
 // Central route -> SEO/GEO metadata map. One source of truth, applied
 // client-side by <PageHead/> in App.jsx's Shell (useLocation-driven).
@@ -79,6 +80,12 @@ export const META = {
       })),
     }),
   },
+  '/blog': {
+    title: 'The Spotlight Blog — Visibility Guides & Bidding Tactics | FlexSpot.LOL',
+    description:
+      'The FlexSpot blog: guides on brand visibility, bidding strategy, small-business marketing, viral growth, and winning the spotlight — from $1.',
+    jsonLd: (path) => breadcrumb([{ name: 'Home', path: '/' }, { name: 'Blog', path }]),
+  },
   '/privacy': {
     title: 'Privacy Policy | FlexSpot.LOL',
     description:
@@ -154,13 +161,55 @@ function spotMeta(spot, path) {
   };
 }
 
-// Resolve meta for any pathname. Returns { title, description, path, robots?, canonicalPath?, jsonLd? }
+function blogPostMeta(post) {
+  const path = `/blog/${post.slug}`;
+  const img = post.image ? url(post.image.startsWith('/') ? post.image : `/${post.image}`) : OG_IMAGE;
+  return {
+    title: `${post.title} | FlexSpot.LOL Blog`,
+    description: post.description,
+    canonicalPath: path,
+    ogImage: img,
+    // Sample posts are engine demos — keep them out of the index.
+    robots: post.sample ? 'noindex, follow' : undefined,
+    jsonLd: () => [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: post.title,
+        description: post.description,
+        datePublished: post.date,
+        author: { '@type': 'Person', name: post.author },
+        image: img,
+        mainEntityOfPage: { '@type': 'WebPage', '@id': url(path) },
+        publisher: {
+          '@type': 'Organization',
+          name: 'FlexSpot.LOL',
+          logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo-crown-180.png` },
+        },
+      },
+      breadcrumb([
+        { name: 'Home', path: '/' },
+        { name: 'Blog', path: '/blog' },
+        { name: post.title, path },
+      ]),
+    ],
+  };
+}
+
+// Resolve meta for any pathname. Returns { title, description, path, robots?, canonicalPath?, ogImage?, jsonLd? }
 // `spots` is the loaded leaderboard; `categoryOf` resolves /explore/:category.
 // `categoryOf` resolves /explore/:category slugs -> { name, icon, blurb }
 // (data.js `categoryMeta` fits: (slug) => category object)
 export function metaForPath(pathname, { spots = [], categoryOf } = {}) {
   const path = pathname.split('?')[0].replace(/\/+$/, '') || '/';
   if (META[path]) return { ...META[path], path };
+
+  // Blog article pages must resolve before the generic /:slug spot lookup.
+  const blogMatch = path.match(/^\/blog\/([^/]+)$/);
+  if (blogMatch) {
+    const post = getPost(blogMatch[1]);
+    if (post) return { ...blogPostMeta(post), path };
+  }
 
   const exploreMatch = path.match(/^\/explore\/([^/]+)$/);
   if (exploreMatch && categoryOf) {

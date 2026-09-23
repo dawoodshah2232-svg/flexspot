@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FAQS } from '../lib/data';
+import { getPost } from '../lib/blog';
 
 function Item({ f, open, onToggle }) {
+  const post = f.blog ? getPost(f.blog) : null;
   return (
     <div className={`bg-card border rounded-2xl overflow-hidden transition-colors ${open ? 'border-[var(--blaze)]' : 'border-line/5'}`}>
       <button onClick={onToggle} className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left">
@@ -10,7 +12,19 @@ function Item({ f, open, onToggle }) {
         <span className={`text-[var(--blaze)] text-xl shrink-0 transition-transform ${open ? 'rotate-45' : ''}`}>＋</span>
       </button>
       <div className={`acc-body ${open ? 'acc-open' : ''}`}>
-        <div className="acc-inner"><p className="px-5 pb-5 text-mist text-sm leading-relaxed">{f.a}</p></div>
+        <div className="acc-inner">
+          <p className="px-5 pb-5 text-mist text-sm leading-relaxed">{f.a}</p>
+          {post && (
+            <div className="px-5 pb-5">
+              <Link
+                to={post.url}
+                className="inline-flex items-center gap-2 text-sm font-bold text-[var(--blaze)] hover:underline"
+              >
+                📖 Read the full guide: {post.title} →
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

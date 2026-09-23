@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Logo } from './Header';
 import Floaties from './Floaties';
+import { BLOG_CATEGORIES, categorySlug } from '../lib/blog';
 
 export default function Footer({ onClaim }) {
   return (
@@ -14,7 +15,7 @@ export default function Footer({ onClaim }) {
           { emoji: '✨', left: '50%', top: '8%', size: 20, cls: 'hidden md:block', opacity: 0.3 },
         ]}
       />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 grid gap-10 md:grid-cols-5 relative">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 grid gap-10 md:grid-cols-6 relative">
         <div className="md:col-span-2">
           <Logo />
           <p className="text-[var(--ink-2)] text-sm mt-4 max-w-sm leading-relaxed">
@@ -33,6 +34,19 @@ export default function Footer({ onClaim }) {
             <li><Link className="hover:text-[var(--ink)] transition-colors" to="/rewards">Rewards</Link></li>
             <li><Link className="hover:text-[var(--ink)] transition-colors" to="/how-it-works">How It Works</Link></li>
             <li><Link className="hover:text-[var(--ink)] transition-colors" to="/faq">FAQ</Link></li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="font-display font-bold text-sm tracking-wide mb-4 text-[var(--ink)]">RESOURCES</h4>
+          <ul className="space-y-2.5 text-sm text-[var(--ink-2)]">
+            <li><Link className="hover:text-[var(--ink)] transition-colors" to="/blog">Blog</Link></li>
+            {BLOG_CATEGORIES.slice(0, 4).map((c) => (
+              <li key={c}>
+                <Link className="hover:text-[var(--ink)] transition-colors" to={`/blog?cat=${categorySlug(c)}`}>
+                  {c}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
         <div>

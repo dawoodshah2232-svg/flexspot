@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { CATEGORIES, categoryOf, IS_PREVIEW_DATA } from '../lib/data';
 import { SpotRow } from '../components/SpotCard';
 import Flee from '../components/Flee';
+import { allPosts } from '../lib/blog';
+import BlogCard from '../components/BlogCard';
 
 // Explore — category index + discovery links. /explore
 export default function Explore({ spots, onBoost, onClaim }) {
@@ -77,6 +79,18 @@ export default function Explore({ spots, onBoost, onClaim }) {
           {hot.map((s) => (
             <SpotRow key={s.slug} spot={s} move={s.move} onBoost={onBoost} highlight />
           ))}
+        </div>
+
+        <div className="mt-12 mb-2 flex items-end justify-between gap-4">
+          <h2 className="font-display font-bold text-2xl text-[var(--ink)]">
+            📖 Guides worth reading
+          </h2>
+          <Link to="/blog" className="text-sm font-bold text-[var(--blaze)] hover:underline shrink-0">
+            All articles →
+          </Link>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-4 mb-4">
+          {allPosts.slice(0, 2).map((p) => <BlogCard key={p.slug} post={p} />)}
         </div>
 
         <div className="card mt-10 p-8 text-center">

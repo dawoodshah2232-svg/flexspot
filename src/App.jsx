@@ -27,6 +27,21 @@ import NotFound from './pages/NotFound';
 import SecurityGuard from './components/SecurityGuard';
 import PageHead from './components/PageHead';
 
+// Blog engine — code-split so the markdown bundle never touches first paint.
+const Blog = React.lazy(() => import('./pages/Blog'));
+const BlogPost = React.lazy(() => import('./pages/BlogPost'));
+
+function BlogFallback() {
+  return (
+    <div className="pt-[92px]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-16 pb-24 text-center">
+        <div className="text-5xl mb-4 anim-floaty">📝</div>
+        <div className="font-display font-bold text-[var(--ink)] text-lg">Loading the article…</div>
+      </div>
+    </div>
+  );
+}
+
 function ScrollTop() {
   const { pathname } = useLocation();
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
@@ -138,6 +153,8 @@ function Shell() {
           <Route path="/how-it-works" element={<HowItWorks onClaim={openClaim} />} />
           <Route path="/rewards" element={<Rewards spots={spots} onClaim={openClaim} />} />
           <Route path="/faq" element={<FAQ onClaim={openClaim} />} />
+          <Route path="/blog" element={<React.Suspense fallback={<BlogFallback />}><Blog /></React.Suspense>} />
+          <Route path="/blog/:slug" element={<React.Suspense fallback={<BlogFallback />}><BlogPost /></React.Suspense>} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/disclaimers" element={<Disclaimers />} />

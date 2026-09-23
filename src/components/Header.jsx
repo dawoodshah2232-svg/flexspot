@@ -6,6 +6,7 @@ const LINKS = [
   { to: '/leaderboard', label: 'Leaderboard' },
   { to: '/how-it-works', label: 'How It Works' },
   { to: '/rewards', label: 'Rewards' },
+  { to: '/blog', label: 'Blog' },
   { to: '/faq', label: 'FAQ' },
 ];
 

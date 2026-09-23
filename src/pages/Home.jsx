@@ -12,6 +12,8 @@ import TopReferrers from '../components/TopReferrers';
 import { compact, money } from '../lib/format';
 import { LIVE_FEED_POOL, IS_PREVIEW_DATA } from '../lib/data';
 import { IS_LIVE } from '../lib/store';
+import { allPosts } from '../lib/blog';
+import BlogCard from '../components/BlogCard';
 
 /* ---------------- Floating live-stats pill ---------------- */
 // Total volume is REAL: $1,603 seed base + every actual claim/boost on the board.
@@ -120,14 +122,10 @@ function ChampionStage({ leader, onClaim }) {
             <span>👑</span> Reigning champion <span>👑</span>
           </div>
         </div>
-        {/* floating chips over the photo */}
+        {/* floating chip over the photo */}
         <div className="absolute bottom-3.5 left-4 bg-white/10 backdrop-blur border border-white/25 rounded-2xl px-3 py-2 text-center anim-floaty">
           <div className="text-[10px] font-bold text-white/60 uppercase tracking-wider">#1 spot</div>
           <div className="text-sm font-extrabold text-white truncate max-w-[130px]">{leader?.name ?? '—'}</div>
-        </div>
-        <div className="absolute bottom-3.5 right-4 bg-[#12B76A]/20 backdrop-blur border border-[#12B76A]/40 rounded-2xl px-3 py-2 text-center anim-floaty" style={{ animationDelay: '-0.6s' }}>
-          <div className="text-xs font-extrabold text-[#34D399]">▲ trending</div>
-          <div className="text-[10px] font-bold text-white/60 uppercase tracking-wider">right now</div>
         </div>
       </div>
 
@@ -419,6 +417,31 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
           </button>
         </div>
       </section>
+
+      {/* FROM THE BLOG */}
+      {allPosts.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 py-14">
+          <div className="flex items-end justify-between gap-4 mb-8">
+            <div>
+              <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--ink)]">
+                From the <span className="grad-text">blog</span>
+              </h2>
+              <p className="text-[var(--ink-2)] mt-2 max-w-xl">
+                Playbooks for getting seen — bidding tactics, marketing guides, and winner stories.
+              </p>
+            </div>
+            <Link to="/blog" className="btn-ghost px-5 py-2.5 text-sm shrink-0 hidden sm:inline-block">
+              All articles →
+            </Link>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {allPosts.slice(0, 3).map((p) => <BlogCard key={p.slug} post={p} />)}
+          </div>
+          <div className="text-center mt-6 sm:hidden">
+            <Link to="/blog" className="btn-ghost px-6 py-3 text-sm">All articles →</Link>
+          </div>
+        </section>
+      )}
 
       {/* CTA BAND — premium dark */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-20">

@@ -26,16 +26,17 @@ export default function PageHead({ spots = [] }) {
     const meta = metaForPath(pathname, { spots, categoryOf: categoryBySlug });
     const { pageUrl, canonicalUrl } = metaUrls(meta.path, meta.canonicalPath);
     const jsonLdData = typeof meta.jsonLd === 'function' ? meta.jsonLd(meta.path) : null;
+    const ogImage = meta.ogImage || OG_IMAGE;
 
     document.title = meta.title;
     setTag('meta[name="description"]', 'content', meta.description);
     setTag('meta[property="og:title"]', 'content', meta.title);
     setTag('meta[property="og:description"]', 'content', meta.description);
     setTag('meta[property="og:url"]', 'content', pageUrl);
-    setTag('meta[property="og:image"]', 'content', OG_IMAGE);
+    setTag('meta[property="og:image"]', 'content', ogImage);
     setTag('meta[name="twitter:title"]', 'content', meta.title);
     setTag('meta[name="twitter:description"]', 'content', meta.description);
-    setTag('meta[name="twitter:image"]', 'content', OG_IMAGE);
+    setTag('meta[name="twitter:image"]', 'content', ogImage);
 
     // Canonical
     let link = document.querySelector('link[rel="canonical"]');

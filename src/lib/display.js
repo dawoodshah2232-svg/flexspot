@@ -12,8 +12,9 @@ export function getDisplayTuning() {
   let t = null;
   try { t = JSON.parse(localStorage.getItem(DISPLAY_KEY)); } catch {}
   return {
-    // online viewers
-    onlineFloor: 29,            // never show fewer than this
+    // online viewers — owner wants a LIVELY number that visibly moves up and
+    // down every few seconds (e.g. 21, 28, 35…), not one stuck value.
+    onlineFloor: 21,            // it may dip this low, then climbs again
     onlineSmallCap: 15,         // real <= this uses the "small" multiplier range
     onlineSmallMult: 5,         // x5..x8 for small real counts
     onlineSmallJitter: 3,
@@ -23,8 +24,8 @@ export function getDisplayTuning() {
     amountMult: 1.06,           // +6%
     amountAdd: 3,               // +$3 flat
     // seed when there's no real data at all (fresh browser)
-    seedOnlineMin: 29,
-    seedOnlineMax: 61,
+    seedOnlineMin: 21,
+    seedOnlineMax: 44,
     ...(t || {}),
   };
 }
@@ -40,8 +41,8 @@ function rand(a, b) {
 }
 
 // Compute a displayed "online now" count from the REAL count.
-// Guarantees the owner-requested 29–61 style floor with natural variation:
-// 29/31/32 when quiet, climbing proportionally with real traffic.
+// Rolls a lively 21–44 style number that drifts up and down, climbing
+// proportionally when real traffic grows.
 export function displayOnlineCount(real, tuning) {
   const t = tuning || getDisplayTuning();
   const r = Math.max(0, Number(real) || 0);
@@ -63,28 +64,24 @@ export function displayAmount(real, tuning) {
   return Math.round((r * t.amountMult + t.amountAdd) * 100) / 100;
 }
 
-// React hook: displayed online count that re-jitters gently every 4s.
-// Never jumps wildly — the jitter walks the number by ±1..3 around the
-// target derived from the real count.
+// React hook: displayed online count that visibly drifts up and down every
+// ~3s, so the site feels alive (21, 28, 35…). Walks in small steps toward a
+// freshly rolled target — never jumps wildly, never sits still.
 export function useDisplayOnline(real) {
   const [shown, setShown] = useState(() => displayOnlineCount(real));
   useEffect(() => {
-    const target = displayOnlineCount(real);
-    setShown((prev) => {
-      if (!prev) return target;
-      // walk toward the new target in small steps instead of jumping
-      const diff = target - prev;
-      if (Math.abs(diff) <= 3) return target;
-      return prev + (diff > 0 ? 1 : -1) * Math.ceil(Math.abs(diff) / 3);
-    });
-    const t = setInterval(() => {
+    const tick = () => {
       const tgt = displayOnlineCount(real);
       setShown((prev) => {
+        if (!prev) return tgt;
         const diff = tgt - prev;
-        if (Math.abs(diff) <= 2) return tgt;
-        return Math.max(29, prev + (diff > 0 ? 1 : -1) * (1 + Math.floor(Math.random() * 3)));
+        if (Math.abs(diff) <= 4) return tgt;
+        const step = 1 + Math.floor(Math.random() * 4); // 1..4
+        return Math.max(21, prev + (diff > 0 ? step : -step));
       });
-    }, 4000);
+    };
+    tick();
+    const t = setInterval(tick, 3000);
     return () => clearInterval(t);
   }, [real]);
   return shown;

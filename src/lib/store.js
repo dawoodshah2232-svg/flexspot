@@ -4,20 +4,20 @@ const SUPA_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const SUPA_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 export const IS_LIVE = !!(SUPA_URL && SUPA_KEY);
 
-const LS_SPOTS = 'flexspot_local_spots_v2';
+export const LS_SPOTS = 'flexspot_local_spots_v2';
 const LS_SUBMISSIONS = 'flexspot_submissions_v2';
 const LS_CLICKS = 'flexspot_local_clicks';
 const LS_REFS = 'flexspot_local_refs';
-const LS_BOOSTS = 'flexspot_local_boosts';
+export const LS_BOOSTS = 'flexspot_local_boosts';
 const LS_RANKS = 'flexspot_rank_snapshot';
 const LS_CMS = 'flexspot_cms_v2';
 const LS_ANALYTICS = 'flexspot_analytics_v2';
 const LS_VISITS = 'flexspot_visits_v2';
 
-const readLS = (k, fb) => {
+export const readLS = (k, fb) => {
   try { const v = JSON.parse(localStorage.getItem(k)); return v ?? fb; } catch { return fb; }
 };
-const writeLS = (k, v) => {
+export const writeLS = (k, v) => {
   try { localStorage.setItem(k, JSON.stringify(v)); return true; }
   catch { return false; }
 };
@@ -528,6 +528,8 @@ const DEMO_RESET_KEYS = [
   LS_REF_ID, LS_REF_STATS, LS_REF_COUNTED, LS_MY_REFS, LS_REF_SEED, LS_REF_EVENTS,
   'flexspot_contributions_v2', 'flexspot_heartbeats_v1', 'flexspot_pageviews_v1', 'flexspot_events_v1',
   'flexspot_display_tuning_v1', 'flexspot_local_spots',
+  'flexspot_member_v1', 'flexspot_wallet_v1', 'flexspot_member_seed_v1',
+  'flexspot_pending_claim_v1', 'flexspot_referrer_board_v2',
 ];
 
 export function resetDemoData() {
@@ -568,6 +570,12 @@ const DEMO_REFERRERS = [
   { name: 'Lena W.', slug: 'nomaddesk', visits: 7, earned: 7 },
   { name: 'Sara K.', slug: 'lumennotes', visits: 6, earned: 6 },
   { name: 'Omar F.', slug: 'voltathletics', visits: 5, earned: 5 },
+  { name: 'Umar', slug: 'casaverde', visits: 4, earned: 4 },
+  { name: 'Fatima A.', slug: 'orbitpay', visits: 4, earned: 4 },
+  { name: 'Raj P.', slug: 'fernandfable', visits: 3, earned: 3 },
+  { name: 'Nina S.', slug: 'pixelforge', visits: 3, earned: 3 },
+  { name: 'Khalid M.', slug: 'nomaddesk', visits: 2, earned: 2 },
+  { name: 'Zoe T.', slug: 'brewline', visits: 2, earned: 2 },
 ];
 
 function ensureReferralSeed() {

@@ -32,6 +32,7 @@ export default function Footer({ onClaim }) {
             <li><Link className="hover:text-[var(--ink)] transition-colors" to="/explore">Explore</Link></li>
             <li><Link className="hover:text-[var(--ink)] transition-colors" to="/leaderboard">Leaderboard</Link></li>
             <li><Link className="hover:text-[var(--ink)] transition-colors" to="/rewards">Rewards</Link></li>
+            <li><Link className="hover:text-[var(--ink)] transition-colors" to="/top-referrers">Top Referrers</Link></li>
             <li><Link className="hover:text-[var(--ink)] transition-colors" to="/how-it-works">How It Works</Link></li>
             <li><Link className="hover:text-[var(--ink)] transition-colors" to="/faq">FAQ</Link></li>
           </ul>

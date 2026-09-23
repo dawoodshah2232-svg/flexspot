@@ -66,6 +66,16 @@ export const META = {
     description:
       'FlexSpot rewards: earn your place with boosts, referral links that add $1 per visit, and the champion crown for the top spot.',
   },
+  '/top-referrers': {
+    title: 'Top Referrers — The People Behind the Traffic | FlexSpot.LOL',
+    description:
+      'Meet FlexSpot’s top referrers: every visit through their personal link adds $1 to the brand they back. Get your own referral link from $1.',
+  },
+  '/dashboard': {
+    title: 'Member Dashboard — Wallet, Referrals & My Spot | FlexSpot.LOL',
+    description:
+      'Your FlexSpot member dashboard: wallet balance and USDT withdrawals, referral earnings, and full control of your public spot.',
+  },
   '/faq': {
     title: 'FAQ — Frequently Asked Questions | FlexSpot.LOL',
     description:

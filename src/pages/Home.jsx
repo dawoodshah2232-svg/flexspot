@@ -19,16 +19,20 @@ import { useDisplayOnline, displayAmount } from '../lib/display';
 import { getOnlineCount } from '../lib/analytics';
 
 /* ---------------- Floating live-stats pill ---------------- */
-// Total volume: REAL board volume passed through display.js lift.
-// Online now: REAL analytics online count passed through display.js
-// (never below 29, grows with real traffic). Admin shows the real numbers.
-const VOLUME_BASE = 1603;
+// Total revenue: owner-pinned public figure ($1,201).
+// Referral bonus generated: owner-pinned public figure ($131).
+// Online now: REAL analytics online count passed through display.js — drifts
+// up and down every few seconds so the site feels alive. Brands live is real.
+// Admin always shows the real numbers.
+const REVENUE_DISPLAY = 1201;
+const REFERRAL_BONUS_DISPLAY = 131;
 
-function LiveStatsPill({ realViewers, totalVolume, brandCount }) {
+function LiveStatsPill({ realViewers, brandCount }) {
   const viewers = useDisplayOnline(realViewers);
   const stats = [
     { icon: '🟢', value: <CountUp to={viewers ?? 0} format={(n) => Math.round(n).toString()} />, label: 'online now' },
-    { icon: '💰', value: <>{money(totalVolume)}</>, label: 'total volume' },
+    { icon: '💰', value: <>{money(REVENUE_DISPLAY)}</>, label: 'total revenue' },
+    { icon: '🎁', value: <>{money(REFERRAL_BONUS_DISPLAY)}</>, label: 'referral bonus generated' },
     { icon: '⚡', value: <CountUp to={brandCount} format={(n) => Math.round(n).toString()} />, label: 'brands live' },
   ];
   return (
@@ -328,11 +332,6 @@ const BENEFITS = [
 export default function Home({ spots, onClaim, onBoost, viewers }) {
   const { settings } = useSiteSettings();
   const { hero, announcement, ctaBand } = settings;
-  // Display-lifted public numbers; admin shows the real ones.
-  const totalVolume = useMemo(
-    () => displayAmount(VOLUME_BASE + spots.reduce((a, s) => a + s.amount, 0)),
-    [spots]
-  );
   const leader = useMemo(() => [...spots].sort((a, b) => b.amount - a.amount || (a.joinedAt || 0) - (b.joinedAt || 0))[0], [spots]);
 
   return (
@@ -405,7 +404,7 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
 
       {/* live stats — between hero and leaderboard */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 -mt-4 pb-2">
-        <LiveStatsPill realViewers={viewers} totalVolume={totalVolume} brandCount={spots.length} />
+        <LiveStatsPill realViewers={viewers} brandCount={spots.length} />
       </div>
 
       <LeaderboardSection spots={spots} onBoost={onBoost} onClaim={onClaim} />

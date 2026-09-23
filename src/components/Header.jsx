@@ -1,5 +1,7 @@
 import { Link, NavLink, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { useTheme } from '../lib/theme';
+import { getMember } from '../lib/member';
 
 const LINKS = [
   { to: '/', label: 'Home', end: true },
@@ -37,6 +39,13 @@ export default function Header({ onClaim }) {
   const loc = useLocation();
   const { theme, toggle } = useTheme();
   const dark = theme === 'dark';
+  // Member login state drives the profile icon: member avatar when logged
+  // in, a person icon when logged out. Refreshed on every route change.
+  const [member, setMember] = useState(null);
+  useEffect(() => {
+    try { setMember(getMember()); } catch { setMember(null); }
+  }, [loc.pathname]);
+  const avatar = member && (member.logoUrl || member.avatarUrl);
   return (
     <header className="fixed top-3 inset-x-3 sm:inset-x-6 z-40">
       <div className="header-glass max-w-7xl mx-auto bg-[var(--surface)]/80 backdrop-blur-2xl border border-[var(--line)] rounded-2xl shadow-[var(--shadow-lift)]">
@@ -89,6 +98,21 @@ export default function Header({ onClaim }) {
                 </svg>
               )}
             </button>
+            <Link
+              to="/dashboard"
+              className="grid place-items-center w-10 h-10 rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--ink-2)] hover:text-[var(--ink)] hover:border-[var(--ink-3)] transition-colors overflow-hidden shrink-0"
+              title={member ? 'My dashboard' : 'Log in / My account'}
+              aria-label={member ? 'My dashboard' : 'Log in / My account'}
+            >
+              {avatar ? (
+                <img src={avatar} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="8" r="4" />
+                  <path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" />
+                </svg>
+              )}
+            </Link>
             <button onClick={onClaim} className="btn-primary whitespace-nowrap px-4 sm:px-6 py-2.5 text-sm shrink-0">
               <span className="hidden min-[420px]:inline">Claim Your Spot From $1</span>
               <span className="min-[420px]:hidden">Claim $1</span>

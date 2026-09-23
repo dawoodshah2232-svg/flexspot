@@ -15,6 +15,8 @@ import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import Disclaimers from './pages/Disclaimers';
 import SpotProfile from './pages/SpotProfile';
+import TopReferrersPage from './pages/TopReferrersPage';
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Admin = React.lazy(() => import('./pages/Admin'));
 import { fetchLeaderboard, fetchPendingSpots, rank, saveRankSnapshot, IS_LIVE } from './lib/store';
 import { LIVE_FEED_POOL } from './lib/data';
@@ -177,6 +179,8 @@ function Shell() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/disclaimers" element={<Disclaimers />} />
           <Route path="/s/:slug" element={<SpotProfile spots={spots} onClaim={openClaim} onBoost={openBoost} refresh={load} />} />
+          <Route path="/top-referrers" element={<TopReferrersPage />} />
+          <Route path="/dashboard" element={<React.Suspense fallback={<BlogFallback />}><Dashboard spots={spots} onClaim={openClaim} /></React.Suspense>} />
           <Route path="/admin" element={<React.Suspense fallback={<BlogFallback />}><Admin spots={spots} pending={pending} refresh={load} /></React.Suspense>} />
           {/* Root profiles — static routes always win over /:slug in React Router ranking */}
           <Route path="/:slug" element={<RootProfile spots={spots} onClaim={openClaim} onBoost={openBoost} />} />

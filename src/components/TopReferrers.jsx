@@ -1,51 +1,15 @@
 import { Link } from 'react-router-dom';
-import { getTopReferrers } from '../lib/store';
+import { topReferrers } from '../lib/referral';
 import { money } from '../lib/format';
 
-// Global Top Referrers board — the names behind the visits. Every visit
-// through a referral link adds $1 to the backed spot's total.
-// Layout: #1 gets a full-width featured row, #2–#5 pair up two-per-row,
-// everyone else lands in a compact scoreboard list. Names stay small and
-// left-aligned; the only numbers shown are visits and earnings.
-function medal(i) {
-  return i === 0
-    ? 'bg-[#F59E0B]/20 text-[#B45309] border-[#F59E0B]/50'
-    : i === 1
-      ? 'bg-slate-400/20 text-slate-500 border-slate-400/40'
-      : i === 2
-        ? 'bg-[#C47F3D]/20 text-[#9A5B22] border-[#C47F3D]/50'
-        : 'bg-[var(--surface-2)] text-[var(--ink-2)] border-[var(--line)]';
-}
-
-function ReferrerRow({ r, rank, spot, featured }) {
-  return (
-    <div className={`rounded-2xl border border-[var(--line)] bg-[var(--surface)] flex items-center gap-3 text-left ${featured ? 'px-4 py-3.5 sm:px-5' : 'px-3.5 py-2.5'}`}>
-      <div className={`grid place-items-center w-8 h-8 rounded-xl font-black text-xs shrink-0 border ${medal(rank)}`}>
-        {rank + 1}
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className={`font-extrabold text-[var(--ink)] truncate ${featured ? 'text-lg' : 'text-sm'}`}>{r.name}</div>
-        <div className="text-[11px] text-[var(--ink-3)] truncate">
-          backing {spot ? (
-            <Link to={`/s/${spot.slug}`} className="font-bold text-[var(--ink-2)] hover:underline">{spot.name}</Link>
-          ) : r.spotSlug}
-        </div>
-      </div>
-      <div className="text-right shrink-0">
-        <div className={`font-display font-black text-[#B45309] ${featured ? 'text-xl' : 'text-sm'}`}>+{money(r.earned)}</div>
-        <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--ink-3)]">{r.visits} visits</div>
-      </div>
-    </div>
-  );
-}
-
-export default function TopReferrers({ spots }) {
-  const leaders = getTopReferrers(10);
+// Homepage Top Referrers — the names behind the visits. Every visit through
+// a referral link adds $1 to the backed spot's total.
+// #1 gets a premium VIP row, #2/#3 get elite top-referrer cards, #4–#10 stay
+// compact. "See more" opens the full /top-referrers board.
+export default function TopReferrers() {
+  const leaders = topReferrers().slice(0, 10);
   if (!leaders.length) return null;
-  const spotBySlug = Object.fromEntries((spots || []).map((s) => [s.slug, s]));
-  const [first, ...rest] = leaders;
-  const pairRows = [rest.slice(0, 2), rest.slice(2, 4)].filter((p) => p.length);
-  const board = rest.slice(4);
+  const [first, second, third, ...rest] = leaders;
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
@@ -60,44 +24,71 @@ export default function TopReferrers({ spots }) {
       </div>
 
       <div className="max-w-3xl mx-auto space-y-3">
-        {/* #1 — full-width featured row */}
-        <ReferrerRow r={first} rank={0} spot={spotBySlug[first.spotSlug]} featured />
-
-        {/* #2–#5 — two per row */}
-        {pairRows.map((pair, pi) => (
-          <div key={pi} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {pair.map((r, i) => (
-              <ReferrerRow key={r.code} r={r} rank={1 + pi * 2 + i} spot={spotBySlug[r.spotSlug]} />
-            ))}
+        {/* #1 — VIP featured row */}
+        <div className="relative rounded-2xl p-[2px]" style={{ background: 'linear-gradient(135deg,#FDE68A,#F59E0B,#B45309)' }}>
+          <div className="rounded-[calc(1rem-2px)] bg-[var(--surface)] flex items-center gap-3.5 px-4 py-3.5 sm:px-5">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#FCD34D] to-[#B45309] grid place-items-center text-2xl shrink-0 shadow-[0_6px_18px_rgba(245,158,11,0.4)]">
+              👑
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span className="font-extrabold text-lg text-[var(--ink)] truncate">{first.name}</span>
+                <span className="text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-[#F59E0B] to-[#B45309] text-white px-2.5 py-0.5 rounded-full">
+                  👑 VIP · #1 referrer
+                </span>
+              </div>
+              <div className="text-[11px] text-[var(--ink-3)] truncate">Most trusted traffic source on FlexSpot</div>
+            </div>
+            <div className="text-right shrink-0">
+              <div className="font-display font-black text-xl text-[#B45309]">+{money(first.earned)}</div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--ink-3)]">{first.visits} visits</div>
+            </div>
           </div>
-        ))}
+        </div>
 
-        {/* #6+ — compact scoreboard list */}
-        {board.length > 0 && (
-          <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] divide-y divide-[var(--line-soft)] overflow-hidden">
-            {board.map((r, i) => {
-              const spot = spotBySlug[r.spotSlug];
-              const rank = 5 + i;
-              return (
-                <div key={r.code} className="flex items-center gap-3 px-3.5 py-2 text-left">
-                  <div className={`grid place-items-center w-7 h-7 rounded-lg font-black text-[11px] shrink-0 border ${medal(rank)}`}>
-                    {rank + 1}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <span className="font-bold text-[13px] text-[var(--ink)] truncate">{r.name}</span>
-                    <span className="text-[11px] text-[var(--ink-3)] truncate">
-                      {' '}· backing {spot ? (
-                        <Link to={`/s/${spot.slug}`} className="font-bold text-[var(--ink-2)] hover:underline">{spot.name}</Link>
-                      ) : r.spotSlug}
-                    </span>
-                  </div>
-                  <div className="text-[11px] font-bold text-[var(--ink-3)] shrink-0">{r.visits} visits</div>
-                  <div className="font-display font-black text-[13px] text-[#B45309] shrink-0 w-16 text-right">+{money(r.earned)}</div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        {/* #2 / #3 — elite cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {[second, third].filter(Boolean).map((r, i) => (
+            <div key={r.name} className="rounded-2xl border-2 border-[var(--line)] bg-[var(--surface)] flex items-center gap-3 px-4 py-3">
+              <div className={`grid place-items-center w-9 h-9 rounded-xl font-black text-sm shrink-0 ${
+                i === 0 ? 'bg-slate-300/30 text-slate-500 border border-slate-400/40' : 'bg-[#C47F3D]/20 text-[#9A5B22] border border-[#C47F3D]/50'
+              }`}>
+                {i + 2}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="font-extrabold text-[var(--ink)] truncate">{r.name}</div>
+                <span className="text-[10px] font-black uppercase tracking-widest bg-[var(--surface-2)] border border-[var(--line)] text-[var(--ink-2)] px-2 py-0.5 rounded-full">
+                  ⭐ Top referrer
+                </span>
+              </div>
+              <div className="text-right shrink-0">
+                <div className="font-display font-black text-[#B45309]">+{money(r.earned)}</div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--ink-3)]">{r.visits} visits</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* #4–#10 — compact list */}
+        <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] divide-y divide-[var(--line)]/60 overflow-hidden">
+          {rest.map((r) => (
+            <div key={r.name} className="flex items-center gap-3 px-4 py-2.5">
+              <span className="font-display font-black text-[var(--ink-3)] w-7 text-center shrink-0 text-sm">#{r.rank}</span>
+              <span className="font-bold text-sm text-[var(--ink)] flex-1 truncate">{r.name}</span>
+              <span className="text-[11px] font-bold text-[var(--ink-3)] shrink-0">{r.visits} visits</span>
+              <span className="font-display font-black text-sm text-[#B45309] shrink-0 w-14 text-right">+{money(r.earned)}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="text-center pt-1">
+          <Link
+            to="/top-referrers"
+            className="inline-block text-sm font-bold text-[var(--ink)] border border-[var(--line)] bg-[var(--surface)] rounded-full px-6 py-2.5 hover:border-[var(--gold)] transition-colors"
+          >
+            See all top referrers →
+          </Link>
+        </div>
       </div>
     </section>
   );

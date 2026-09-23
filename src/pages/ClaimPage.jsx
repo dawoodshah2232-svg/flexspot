@@ -11,6 +11,7 @@ import Flee from '../components/Flee';
 import { useUnofficialHost } from '../components/SecurityGuard';
 import { currentHost } from '../lib/security';
 import { trackEvent } from '../lib/analytics';
+import { stagePendingClaim } from '../lib/member';
 
 const AMOUNTS = [1, 5, 10, 25, 50, 100];
 
@@ -211,6 +212,11 @@ export default function ClaimPage({ spots, onSubmitted }) {
       }
       setResult({ submission, amount: amt, name: isBoost ? boostSpot.name : form.name.trim() });
       trackEvent('deposit_submit', { amount: amt, isBoost, spotSlug: slug });
+      if (!isBoost) {
+        // Stage the account: payment under review → member access activates
+        // after admin approval. The dashboard gate shows this two-step state.
+        stagePendingClaim({ name: form.name.trim(), email: form.email.trim(), amount: amt, slug });
+      }
       setStep(doneStep);
       onSubmitted && onSubmitted();
     } catch (e) {

@@ -72,3 +72,8 @@ Convinced enough to test it? Here's the low-risk way in: claim a spot at the min
 First-timers in bid-for-attention tend to make the same three errors: **bidding without a destination** — driving leaderboard traffic to a generic homepage instead of a page built to convert the curious; **treating it as set-and-forget** — claiming a spot, never boosting or sharing, then concluding "it didn't work" (the format rewards participation, and passive entries sink); and **ignoring the referral lever** — bidding solo while competitors rally supporters through personal links, effectively bringing a knife to a team fight. Avoid those three and you're already ahead of most newcomers: link to a sharp landing page, stay active through the ranking period, and give your supporters their links on day one.
 
 FlexSpot is the clearest live example of the model: a public homepage leaderboard where brands claim spots from $1, boost their way up the rankings, and rally supporters through personal referral links that add to their total. If the concept clicks for you, there's no cheaper way to try it than claiming a spot and entering the race.
+
+## Keep reading
+
+- [How to Claim Your FlexSpot Spot](/blog/how-to-claim-your-flexspot-spot) — try the model yourself, starting from $1.
+- [How to Negotiate a Website Sponsorship Deal](/blog/how-to-negotiate-a-website-sponsorship-deal) — for bigger fixed-price placements beyond bidding.

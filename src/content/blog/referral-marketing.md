@@ -146,3 +146,9 @@ If you want to launch a basic referral loop this week: define one trigger action
 ## Where referral mechanics shine brightest
 
 Referral marketing works anywhere customers are happy, but it compounds fastest on platforms where advocacy is visible — where a supporter's referral link doesn't just earn them credit but visibly moves something: a ranking, a total, a leaderboard position. When referring a friend also climbs you toward a goal everyone can see, the social reward stacks on top of the material one. That's the dynamic behind referral-driven visibility platforms like FlexSpot, where every visit through a personal link adds to a public total. Whether you build your own program or plug into a competitive arena, the principle is the same: make advocacy visible, make it rewarding, and make it effortless.
+
+## Keep reading
+
+- [How to Ask Customers for Referrals (Without Being Pushy)](/blog/how-to-ask-customers-for-referrals) — timing, scripts, and systems for the ask.
+- [9 Referral Program Mistakes That Kill Participation](/blog/referral-program-mistakes-that-kill-participation) — diagnose why your program underperforms.
+- [Referral Program KPIs](/blog/referral-program-kpis-how-to-know-its-working) — the eight metrics that tell you if it's working.

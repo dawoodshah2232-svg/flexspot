@@ -274,3 +274,8 @@ money — they teach you the messaging that makes future paid spend efficient.
 **New market or location:** local directories, community groups, and
 micro-sponsorships in that specific area first. National tactics waste money
 when your buyers are all in one neighborhood.
+
+## Keep reading
+
+- [Your First $100 in Advertising: Exactly How to Spend It](/blog/your-first-100-dollars-in-advertising) — a concrete spending plan for a tiny budget.
+- [Facebook Ads vs Google Ads on a Small Budget](/blog/facebook-ads-vs-google-ads-on-a-small-budget) — which platform wins depends on how your customers buy.

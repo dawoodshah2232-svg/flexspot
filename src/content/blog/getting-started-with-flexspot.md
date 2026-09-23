@@ -106,3 +106,8 @@ Leaderboard](/blog/how-boosting-moves-you-up-the-leaderboard) for the full
 breakdown of ranking mechanics and bidding strategy. And if you haven't claimed
 yet — [it takes a minute and starts at
 $1](https://flexspot.lol/claim).
+
+## Keep reading
+
+- [How to Claim Your FlexSpot Spot: Step-by-Step](/blog/how-to-claim-your-flexspot-spot) — the minute-long walkthrough with launch tips.
+- [How to Write a Spot Profile That Gets Clicks](/blog/how-to-write-a-spot-profile-that-gets-clicks) — turn leaderboard views into clicks.

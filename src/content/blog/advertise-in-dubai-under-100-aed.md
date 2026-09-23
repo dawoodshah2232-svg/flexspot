@@ -140,3 +140,9 @@ Yes. Community groups, WhatsApp broadcasts, Google Business Profile, and
 consistent short video content have launched countless Dubai micro-businesses
 with zero ad spend. Paid placements just speed up what the free channels
 start.
+
+## Keep reading
+
+- [Ramadan Marketing Guide for Dubai Small Businesses](/blog/ramadan-marketing-guide-for-dubai-small-businesses) — the month that transforms Dubai's commercial rhythm.
+- [WhatsApp Business Marketing in the UAE](/blog/whatsapp-business-marketing-uae) — the channel where UAE buying actually happens.
+- [How to Get Your First 100 Customers in Dubai](/blog/how-to-get-your-first-100-customers-in-dubai) — the expat-founder playbook for early traction.

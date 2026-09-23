@@ -81,3 +81,7 @@ Generally no — crypto payments are irreversible. That's why it pays to start s
 
 **Do mainstream platforms like Google Ads or Meta accept USDT?**
 Not directly. Crypto advertisers typically use crypto-native networks, or convert USDT to fiat (via exchange or crypto-funded card) to pay mainstream platforms — with conversion fees at each step.
+
+## Keep reading
+
+- [USDT vs Credit Card Fees for Advertising](/blog/usdt-vs-card-fees-for-advertising) — an honest comparison of the two payment rails for ad spend.

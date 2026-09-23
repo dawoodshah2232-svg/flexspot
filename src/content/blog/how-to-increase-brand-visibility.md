@@ -291,3 +291,8 @@ multiplies output on your winning channel; the wrong hire burns budget
 "experimenting" with things you could have tested free. A useful rule: if you
 can't explain your visibility strategy in two sentences, you're not ready to
 outsource it.
+
+## Keep reading
+
+- [How to Measure Brand Visibility](/blog/how-to-measure-brand-visibility) — the metrics dashboard that tells you whether your visibility work is paying off.
+- [The Brand Visibility Audit: A 40-Point Checklist](/blog/brand-visibility-audit-checklist) — find exactly where your brand is invisible.

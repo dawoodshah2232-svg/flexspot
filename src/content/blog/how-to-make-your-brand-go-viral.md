@@ -138,3 +138,9 @@ Start with one loop — one hook, one participation step, one visible result —
 ## Where engineered visibility fits
 
 Once you understand the mechanics, you'll notice that most small brands don't lack creativity — they lack a stage. A public, competitive visibility format gives your loop somewhere to run: your supporters can boost you, share their personal link, and watch you climb in real time. Platforms built around bid-for-attention mechanics, like FlexSpot's public leaderboard, exist precisely to give small brands that stage without an ad-platform budget. The tactics in this guide work anywhere; a visible arena just makes them work faster.
+
+## Keep reading
+
+- [How to Go Viral on TikTok](/blog/how-to-go-viral-on-tiktok) — the platform-specific playbook: hooks, signals, and formats.
+- [Meme Marketing for Small Businesses](/blog/meme-marketing-for-small-businesses) — the cheapest reach available, used tastefully.
+- [User-Generated Content Contests That Actually Work](/blog/user-generated-content-contests-that-work) — turn customers into your content team.

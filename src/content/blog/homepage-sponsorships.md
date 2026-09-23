@@ -139,3 +139,9 @@ If you've never bought a homepage placement, here's the low-risk path: first, li
 ## Sponsorship formats for every budget tier
 
 Not every brand needs the homepage hero slot. A quick menu by budget: **under $50** — bid-based leaderboard spots, newsletter classifieds, community sponsorships, and directory features; **$50–$500** — niche blog homepage features, newsletter dedicated sends, podcast mid-roll on small shows, local site takeovers; **$500–$5,000** — established niche publications, category sponsorships on directories, multi-week homepage features on mid-size sites; **$5,000+** — major media homepages, exclusivity deals, integrated campaigns. The key insight: attention quality doesn't scale linearly with price. A $50 placement on the exact right niche site routinely outperforms a $5,000 placement on the wrong big one. Buy fit first, fame second.
+
+## Keep reading
+
+- [How to Negotiate a Website Sponsorship Deal](/blog/how-to-negotiate-a-website-sponsorship-deal) — evaluate placements, negotiate terms, and protect yourself.
+- [Newsletter Sponsorships for Small Brands](/blog/newsletter-sponsorships-for-small-brands) — high-trust attention inside inboxes people chose.
+- [Podcast Sponsorships on a Small Budget](/blog/podcast-sponsorships-on-a-small-budget) — host-read ads on niche shows you can afford.

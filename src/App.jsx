@@ -18,7 +18,9 @@ import SpotProfile from './pages/SpotProfile';
 import Admin from './pages/Admin';
 import { fetchLeaderboard, fetchPendingSpots, rank, saveRankSnapshot, IS_LIVE } from './lib/store';
 import { LIVE_FEED_POOL } from './lib/data';
-import { useLiveViewers } from './lib/theme';
+
+import { SiteSettingsProvider } from './lib/siteSettings';
+import { trackPageView, writeHeartbeat, useLiveOnline } from './lib/analytics';
 import DiscoveryPage from './pages/DiscoveryPage';
 import Explore from './pages/Explore';
 import CategoryPage from './pages/CategoryPage';
@@ -48,13 +50,28 @@ function ScrollTop() {
   return null;
 }
 
+// Real visitor analytics: page views on every route change + heartbeat
+// every 10s so the admin "online now" count is genuinely live.
+function AnalyticsTracker() {
+  const { pathname, search } = useLocation();
+  useEffect(() => {
+    const path = pathname + search;
+    trackPageView(path, document.title);
+    writeHeartbeat(path);
+    const t = setInterval(() => writeHeartbeat(path), 10000);
+    return () => clearInterval(t);
+  }, [pathname, search]);
+  return null;
+}
+
 function Shell() {
   const [spots, setSpots] = useState([]);
   const [pending, setPending] = useState([]);
   const [moves, setMoves] = useState({});
   const [toasts, setToasts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const viewers = useLiveViewers();
+  // REAL online count (analytics heartbeats). Public pages multiply it via display.js.
+  const online = useLiveOnline(5000);
   const navigate = useNavigate();
 
   const load = useCallback(async () => {
@@ -134,14 +151,15 @@ function Shell() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--ink)]">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--ink)] overflow-x-clip">
       <ScrollTop />
+      <AnalyticsTracker />
       <PageHead spots={spots} />
       <SecurityGuard />
       <Header onClaim={openClaim} />
       <main>
         <Routes>
-          <Route path="/" element={<Home spots={spots} onClaim={openClaim} onBoost={openBoost} viewers={viewers} />} />
+          <Route path="/" element={<Home spots={spots} onClaim={openClaim} onBoost={openBoost} viewers={online} />} />
           <Route path="/claim" element={<ClaimPage spots={spots} onSubmitted={onSubmitted} />} />
           <Route path="/leaderboard" element={<LeaderboardPage spots={spots} moves={moves} onBoost={openBoost} onClaim={openClaim} />} />
           <Route path="/explore" element={<Explore spots={spots} onBoost={openBoost} onClaim={openClaim} />} />
@@ -191,7 +209,9 @@ function Shell() {
 export default function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
-      <Shell />
+      <SiteSettingsProvider>
+        <Shell />
+      </SiteSettingsProvider>
     </BrowserRouter>
   );
 }

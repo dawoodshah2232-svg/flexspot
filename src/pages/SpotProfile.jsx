@@ -5,6 +5,8 @@ import { BrandAvatar, RankBadge } from '../components/SpotCard';
 import ShareButtons from '../components/ShareButtons';
 import CountUp from '../components/CountUp';
 import { money, compact, timeAgo, copyText, spotPath } from '../lib/format';
+import { displayAmount } from '../lib/display';
+import { trackEvent } from '../lib/analytics';
 import { REWARDS } from '../lib/data';
 import { recordClick, recordReferralClick, recordVisit, getContributions, createReferralIdentity, myReferralCode, creditReferralVisit, getSpotReferrers } from '../lib/store';
 import Flee from '../components/Flee';
@@ -109,6 +111,7 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
   const makeRefCode = () => {
     if (!spot) return;
     const code = createReferralIdentity(spot.slug, refName);
+    if (code) trackEvent('referral_created', { spotSlug: spot.slug, code });
     if (code) { setMyCode(code); setRefName(''); }
   };
 
@@ -201,7 +204,7 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
         <div className="lg:col-span-2 space-y-5">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { l: 'Total buzz', v: money(spot.amount), c: 'text-[var(--blaze)]' },
+              { l: 'Total buzz', v: money(displayAmount(spot.amount)), c: 'text-[var(--blaze)]' },
               { l: 'Views', v: compact(spot.views), c: 'text-snow' },
               { l: 'Outbound clicks', v: compact(spot.clicks), c: 'text-snow' },
               { l: 'Claimed', v: timeAgo(spot.joinedAt), c: 'text-snow' },

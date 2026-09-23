@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
@@ -10,6 +10,7 @@ import Celebration from '../components/Celebration';
 import Flee from '../components/Flee';
 import { useUnofficialHost } from '../components/SecurityGuard';
 import { currentHost } from '../lib/security';
+import { trackEvent } from '../lib/analytics';
 
 const AMOUNTS = [1, 5, 10, 25, 50, 100];
 
@@ -66,6 +67,10 @@ export default function ClaimPage({ spots, onSubmitted }) {
   const doneStep = isBoost ? 3 : 4;
 
   const [step, setStep] = useState(1);
+  useEffect(() => {
+    trackEvent(isBoost ? 'boost_open' : 'claim_open', isBoost ? { boost: boostSlug } : {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
@@ -205,6 +210,7 @@ export default function ClaimPage({ spots, onSubmitted }) {
         });
       }
       setResult({ submission, amount: amt, name: isBoost ? boostSpot.name : form.name.trim() });
+      trackEvent('deposit_submit', { amount: amt, isBoost, spotSlug: slug });
       setStep(doneStep);
       onSubmitted && onSubmitted();
     } catch (e) {

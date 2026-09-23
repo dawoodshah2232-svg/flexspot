@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { BrandAvatar, MoveIndicator } from './SpotCard';
 import Flee from './Flee';
 import { money, compact } from '../lib/format';
+import { displayAmount } from '../lib/display';
 
 // Royal Podium — a literal winner's podium, now extra premium.
 // #1: dark champion card, glowing bobbing crown, gold shine sweep, twinkling
@@ -130,7 +131,7 @@ export default function Podium({ spots, onBoost }) {
           <div className={`flex items-center justify-center gap-3 sm:gap-4 mt-4 ${isFirst ? 'text-white' : ''}`}>
             <div>
               <div className={`font-display font-extrabold ${isFirst ? 'text-3xl text-[#FCD34D]' : 'text-2xl text-[var(--blaze)]'}`}>
-                {money(s.amount)}
+                {money(displayAmount(s.amount))}
               </div>
               <div className={`text-[10px] uppercase tracking-widest font-bold ${isFirst ? 'text-white/60' : 'text-[var(--ink-3)]'}`}>spot value</div>
             </div>

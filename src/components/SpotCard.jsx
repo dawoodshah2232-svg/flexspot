@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { money, money2, compact, gradientFor, initials } from '../lib/format';
+import { displayAmount } from '../lib/display';
 import Flee from './Flee';
 
 export function BrandAvatar({ spot, size = 44, ring = false }) {
@@ -220,7 +221,7 @@ export function SpotRow({ spot, move, onBoost, highlight, race, count = null, ov
         )}
         <div className="text-right shrink-0">
           {/* the amount they paid to hold this rank — given pride of place */}
-          <div className="font-display font-black text-[var(--blaze-deep)] dark:text-[#FF8A66] text-xl sm:text-2xl tracking-tight whitespace-nowrap">🏆 {money(spot.amount)}</div>
+          <div className="font-display font-black text-[var(--blaze-deep)] dark:text-[#FF8A66] text-xl sm:text-2xl tracking-tight whitespace-nowrap">🏆 {money(displayAmount(spot.amount))}</div>
           <div className="text-[10px] text-[var(--ink-3)] uppercase tracking-wider font-semibold">spot value</div>
         </div>
         <button
@@ -273,7 +274,7 @@ export function TopSpotCard({ spot, place }) {
         </div>
         <div className="flex items-end justify-between mt-5">
           <div>
-            <div className={`font-display font-bold text-3xl ${isFirst ? 'text-[var(--gold-deep)] dark:text-[var(--gold)]' : 'text-[var(--ink)]'}`}>{money(spot.amount)}</div>
+            <div className={`font-display font-bold text-3xl ${isFirst ? 'text-[var(--gold-deep)] dark:text-[var(--gold)]' : 'text-[var(--ink)]'}`}>{money(displayAmount(spot.amount))}</div>
             <div className="text-[11px] text-[var(--ink-3)] uppercase tracking-wider font-semibold">spot value</div>
           </div>
           <div className="text-right text-xs text-[var(--ink-2)] space-y-1">

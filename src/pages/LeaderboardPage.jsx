@@ -6,6 +6,7 @@ import Podium from '../components/Podium';
 import DramaTicker from '../components/DramaTicker';
 import ClaimStrip from '../components/ClaimStrip';
 import { money, compact } from '../lib/format';
+import { displayAmount } from '../lib/display';
 
 const PAGE = 20;
 
@@ -106,7 +107,7 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
           {/* live stat strip */}
           <div className="grid grid-cols-3 gap-2.5 mt-6 max-w-md mx-auto">
             {[
-              { icon: '💰', v: money(spots.reduce((a, s) => a + s.amount, 0)), l: 'total buzz' },
+              { icon: '💰', v: money(displayAmount(spots.reduce((a, s) => a + s.amount, 0))), l: 'total buzz' },
               { icon: '⚡', v: String(spots.length), l: 'spots competing' },
               { icon: '👁️', v: compact(spots.reduce((a, s) => a + (s.views || 0), 0)), l: 'profile views' },
             ].map((st) => (
@@ -148,7 +149,7 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
         <div className="mt-10">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-display font-bold text-2xl text-snow">{isSearching ? <>Results for <span className="grad-gold">“{q.trim()}”</span></> : 'All spots'} <span className="text-mist text-base font-sans font-medium">({filtered.length} competing)</span></h2>
-            <span className="text-xs text-mist font-semibold">Total buzz: <b className="text-[var(--blaze)]">{money(spots.reduce((a, s) => a + s.amount, 0))}</b></span>
+            <span className="text-xs text-mist font-semibold">Total buzz: <b className="text-[var(--blaze)]">{money(displayAmount(spots.reduce((a, s) => a + s.amount, 0)))}</b></span>
           </div>
           <p className="hidden md:block text-[11px] text-mist mt-1 mb-2" aria-hidden="true">
             🎯 Psst — the racers are shy. Try catching one with your cursor.

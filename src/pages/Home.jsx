@@ -14,13 +14,18 @@ import { LIVE_FEED_POOL, IS_PREVIEW_DATA } from '../lib/data';
 import { IS_LIVE } from '../lib/store';
 import { allPosts } from '../lib/blog';
 import BlogCard from '../components/BlogCard';
+import { useSiteSettings } from '../lib/siteSettings';
+import { useDisplayOnline, displayAmount } from '../lib/display';
+import { getOnlineCount } from '../lib/analytics';
 
 /* ---------------- Floating live-stats pill ---------------- */
-// Total volume is REAL: $1,603 seed base + every actual claim/boost on the board.
-// Brands live is REAL: the actual spot count. Online-now stays a simulated ambient ticker.
+// Total volume: REAL board volume passed through display.js lift.
+// Online now: REAL analytics online count passed through display.js
+// (never below 29, grows with real traffic). Admin shows the real numbers.
 const VOLUME_BASE = 1603;
 
-function LiveStatsPill({ viewers, totalVolume, brandCount }) {
+function LiveStatsPill({ realViewers, totalVolume, brandCount }) {
+  const viewers = useDisplayOnline(realViewers);
   const stats = [
     { icon: '🟢', value: <CountUp to={viewers ?? 0} format={(n) => Math.round(n).toString()} />, label: 'online now' },
     { icon: '💰', value: <>{money(totalVolume)}</>, label: 'total volume' },
@@ -77,6 +82,8 @@ function FeedTicker() {
 const HERO_KING = `${import.meta.env.BASE_URL}hero-king.jpg`;
 
 function ChampionStage({ leader, onClaim }) {
+  const { settings } = useSiteSettings();
+  const { dancer, hero, champion } = settings;
   return (
     <div className="relative rounded-[32px] overflow-hidden champion-stage shadow-[var(--shadow-lift)]">
       {/* rotating light rays */}
@@ -88,34 +95,39 @@ function ChampionStage({ leader, onClaim }) {
         ))}
       </div>
 
-      {/* the frog king on his throne */}
+      {/* the champion stage photo (editable in Admin → Site Content) */}
       <div className="relative">
         <img
-          src={HERO_KING}
-          alt="The FlexSpot frog king defending his golden throne"
+          src={hero.heroImage || HERO_KING}
+          alt={hero.heroImageAlt || 'FlexSpot champion spotlight'}
           className="w-full h-52 min-[420px]:h-60 sm:h-72 object-cover"
           loading="eager"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-black/15" aria-hidden="true" />
-        {/* dancing hype-man cutout — top-right of the banner, next to the frog king.
+        {/* dancing hype-man cutout — toggleable/replaceable from Admin → Site Content.
             Grooves slowly (rotate + left/right sway) when the cursor comes near,
-            then eases back to his exact spot. Bigger + trending sticker. */}
+            then eases back to his exact spot. */}
+        {dancer.enabled && (
         <div className="hero-dancer-wrap absolute top-2.5 right-2.5 sm:top-3.5 sm:right-3.5 z-10 pointer-events-none flex flex-col items-center">
           <Sway>
             <span className="flex flex-col items-center">
+              {dancer.showSticker && (
               <span className="mb-1 inline-flex items-center gap-1 bg-[#12B76A]/25 backdrop-blur border border-[#12B76A]/50 rounded-full px-2.5 py-1 text-[9px] sm:text-[10px] font-extrabold text-[#34D399] uppercase tracking-wider shadow-[0_4px_14px_-4px_rgba(18,183,106,0.8)]">
-                ▲ trending now
+                {dancer.stickerText || '▲ trending now'}
               </span>
+              )}
               <img
-                src={`${import.meta.env.BASE_URL}hero-dancer.webp`}
+                src={dancer.image}
                 alt=""
                 aria-hidden="true"
                 className="hero-dancer w-20 min-[420px]:w-24 sm:w-28 lg:w-32 drop-shadow-[0_10px_16px_rgba(0,0,0,0.5)]"
+                style={{ maxWidth: dancer.size ? Math.min(160, Math.max(64, dancer.size)) : undefined }}
                 loading="eager"
               />
             </span>
           </Sway>
         </div>
+        )}
         {/* champion ribbon — top-left of the photo */}
         <div className="absolute top-4 left-4">
           <div className="inline-flex items-center gap-2 bg-black/70 backdrop-blur-md text-[#FBBF24] border border-[#F59E0B]/60 font-black text-[11px] sm:text-xs uppercase tracking-[0.2em] rounded-full px-5 py-2 shadow-[0_8px_24px_-6px_rgba(245,158,11,0.7)]">
@@ -131,7 +143,7 @@ function ChampionStage({ leader, onClaim }) {
 
       <div className="relative p-6 sm:p-8 pt-5 pb-14 sm:pb-16">
         {/* the champion brand card */}
-        {leader && (
+        {champion.showLeaderCard && leader && (
           <Link to={`/s/${leader.slug}`} className="group relative block rounded-3xl border-2 border-[#FBBF24] bg-gradient-to-br from-[#7C3AED]/30 via-white/[0.07] to-[#F59E0B]/20 backdrop-blur-md p-4 sm:p-5 overflow-hidden hover:border-[#FCD34D] transition-colors shadow-[0_0_44px_-8px_rgba(251,191,36,0.55)]">
             <div className="podium-shine" aria-hidden="true" />
             <div className="flex items-center gap-4">
@@ -142,7 +154,7 @@ function ChampionStage({ leader, onClaim }) {
                 <div className="text-sm text-white/60 truncate">{leader.tagline}</div>
               </div>
               <div className="text-right shrink-0">
-                <div className="font-display font-black text-2xl sm:text-3xl text-[#FCD34D]">{money(leader.amount)}</div>
+                <div className="font-display font-black text-2xl sm:text-3xl text-[#FCD34D]">{money(displayAmount(leader.amount))}</div>
                 <div className="text-[10px] uppercase tracking-widest text-white/50 font-bold">spot value</div>
                 <div className="text-xs font-bold text-white/70 mt-1">👁 {compact(leader.views)} views</div>
               </div>
@@ -152,9 +164,9 @@ function ChampionStage({ leader, onClaim }) {
 
         {/* dethrone CTA */}
         <button onClick={onClaim} className="btn-gold w-full py-4 mt-4 text-base font-extrabold">
-          <span aria-hidden="true">⚔️</span> <span className="shine-text-btn">Steal the crown — from just $1</span>
+          <span className="shine-text-btn">{champion.ctaLabel || 'Steal the crown — from just $1'}</span>
         </button>
-        <p className="text-center text-white/50 text-xs mt-2.5">One dollar more than the champ takes their throne.</p>
+        <p className="text-center text-white/50 text-xs mt-2.5">{champion.caption}</p>
       </div>
     </div>
   );
@@ -162,6 +174,8 @@ function ChampionStage({ leader, onClaim }) {
 
 /* ---------------- Hero right visual ---------------- */
 function HeroVisual({ leader, onClaim }) {
+  const { settings } = useSiteSettings();
+  const { claimCard } = settings;
   return (
     <div className="relative">
       <ChampionStage leader={leader} onClaim={onClaim} />
@@ -169,8 +183,8 @@ function HeroVisual({ leader, onClaim }) {
       <div className="relative z-10 -mt-10 mx-4 sm:mx-10 bg-[var(--surface)]/95 backdrop-blur border border-[var(--line)] rounded-3xl shadow-[var(--shadow-lift)] p-5">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--ink-3)]">Manual approval · crypto only</div>
-            <div className="font-display font-extrabold text-lg text-[var(--ink)] mt-0.5"><span className="sheen-light">Claim Your Spot From $1</span></div>
+            <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--ink-3)]">{claimCard.tagline}</div>
+            <div className="font-display font-extrabold text-lg text-[var(--ink)] mt-0.5"><span className="sheen-light">{claimCard.title}</span></div>
           </div>
           <Flee><span className="text-3xl shrink-0 block">🎟️</span></Flee>
         </div>
@@ -180,7 +194,7 @@ function HeroVisual({ leader, onClaim }) {
           <li className="flex items-center gap-2"><span className="text-[#12B76A]">✓</span> Live after approval</li>
         </ul>
         <button onClick={onClaim} className="btn-primary w-full py-3 mt-4 text-sm">
-          Start From $1 →
+          {claimCard.ctaLabel}
         </button>
       </div>
     </div>
@@ -312,11 +326,27 @@ const BENEFITS = [
 ];
 
 export default function Home({ spots, onClaim, onBoost, viewers }) {
-  const totalVolume = useMemo(() => VOLUME_BASE + spots.reduce((a, s) => a + s.amount, 0), [spots]);
+  const { settings } = useSiteSettings();
+  const { hero, announcement, ctaBand } = settings;
+  // Display-lifted public numbers; admin shows the real ones.
+  const totalVolume = useMemo(
+    () => displayAmount(VOLUME_BASE + spots.reduce((a, s) => a + s.amount, 0)),
+    [spots]
+  );
   const leader = useMemo(() => [...spots].sort((a, b) => b.amount - a.amount || (a.joinedAt || 0) - (b.joinedAt || 0))[0], [spots]);
 
   return (
     <div className="pt-[92px]">
+      {/* announcement bar — toggleable text from Admin → Site Content */}
+      {announcement.enabled && announcement.text && (
+        <div className="mx-4 sm:mx-6 mt-4 mb-2 max-w-7xl lg:mx-auto">
+          <div className="rounded-2xl bg-gradient-to-r from-[#7C3AED] to-[#4F46E5] text-white text-sm font-semibold text-center px-5 py-3 shadow-[var(--shadow-blaze)]">
+            {announcement.link ? (
+              <Link to={announcement.link} className="underline underline-offset-2">{announcement.text}</Link>
+            ) : announcement.text}
+          </div>
+        </div>
+      )}
       {/* HERO */}
       <section className="relative overflow-hidden">
         <Floaties
@@ -333,23 +363,22 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
         <div className="blob w-[380px] h-[380px] bg-[#F59E0B]/15 top-40 right-[-120px]" style={{ animationDelay: '-6s' }} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-16 grid lg:grid-cols-2 gap-8 lg:gap-10 items-center relative">
           <div>
-            <div className="inline-flex items-center gap-2 bg-[var(--surface)] border border-[var(--line)] rounded-full px-4 py-1.5 text-[11px] font-bold tracking-[0.14em] text-[var(--ink-2)] mb-5 shadow-[var(--shadow-card)]">
-              <span className="live-dot" /> BRANDS COMPETE. THE INTERNET WINS.
+            <div className="inline-flex items-center gap-2 bg-[var(--surface)] border border-[var(--line)] rounded-full px-4 py-1.5 text-[11px] font-bold tracking-[0.14em] text-[var(--ink-2)] mb-5 shadow-[var(--shadow-card)] max-w-full">
+              <span className="live-dot" /> <span className="truncate">{hero.eyebrow}</span>
             </div>
             <h1 className="font-display font-extrabold text-[38px] min-[400px]:text-[44px] sm:text-6xl lg:text-[72px] leading-[1.02] tracking-tight text-balance">
-              <span className="block sheen-light pb-1">BIG BRAND VISIBILITY.</span>
-              <span className="block grad-text-anim pb-2">START FROM JUST $1.</span>
+              <span className="block sheen-light pb-1">{hero.titleA}</span>
+              <span className="block grad-text-anim pb-2">{hero.titleB}</span>
             </h1>
             <p className="text-[var(--ink-2)] text-base sm:text-lg mt-4 max-w-lg leading-relaxed">
-              Anyone can boost any brand with <b className="text-[var(--ink)]">$1</b> — your name lands on their page,
-              and the highest total takes the crown. 👑
+              {hero.subtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 mt-7">
               <button onClick={onClaim} className="btn-primary px-8 py-4 text-base">
-                Start From $1 →
+                {hero.ctaPrimary}
               </button>
               <Link to="/how-it-works" className="btn-ghost px-8 py-4 text-base text-center">
-                How It Works
+                {hero.ctaSecondary}
               </Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-7 max-w-lg">
@@ -376,7 +405,7 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
 
       {/* live stats — between hero and leaderboard */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 -mt-4 pb-2">
-        <LiveStatsPill viewers={viewers} totalVolume={totalVolume} brandCount={spots.length} />
+        <LiveStatsPill realViewers={viewers} totalVolume={totalVolume} brandCount={spots.length} />
       </div>
 
       <LeaderboardSection spots={spots} onBoost={onBoost} onClaim={onClaim} />
@@ -463,16 +492,16 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
               <Flee><div className="relative text-7xl sm:text-8xl anim-floaty drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]">👑</div></Flee>
             </div>
             <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-[11px] font-extrabold tracking-[0.18em] text-[#FCD34D] mb-5">
-              <span className="live-dot" /> THE #1 SPOT IS UP FOR GRABS
+              <span className="live-dot" /> {ctaBand.eyebrow}
             </div>
             <h2 className="font-display font-extrabold text-3xl sm:text-5xl leading-tight">
-              The crown is waiting.<br /><span className="shine-text">Take the spotlight.</span>
+              {ctaBand.title}
             </h2>
             <p className="text-white/85 mt-4 max-w-lg mx-auto">
-              Every day, thousands of visitors browse the FlexSpot leaderboard. Your brand could be the one they remember.
+              {ctaBand.subtitle}
             </p>
             <button onClick={onClaim} className="btn-gold mt-8 px-10 py-4 rounded-full text-base font-extrabold shadow-[var(--shadow-gold)] hover:-translate-y-0.5 transition-transform">
-              ⚡ Claim Your Spot From $1
+              {ctaBand.ctaLabel}
             </button>
             <div className="flex items-center justify-center gap-4 sm:gap-6 mt-5 text-[11px] font-bold text-white/70 uppercase tracking-wider flex-wrap">
               <span>✓ No account needed</span>

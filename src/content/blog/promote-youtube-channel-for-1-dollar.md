@@ -1,6 +1,6 @@
 ---
 title: "How to Promote Your YouTube Channel With Just $1 in 2026"
-description: "Promoting a YouTube channel for $1 is possible — just not the way most people think. Here's what one dollar actually buys, and the free tactics that pair with it."
+description: "Promoting a YouTube channel for $1 is possible — just not the way most people think. Here's what one dollar buys, and the free tactics that pair with it."
 date: 2026-09-23
 author: "FlexSpot Editorial"
 category: "Viral Marketing"

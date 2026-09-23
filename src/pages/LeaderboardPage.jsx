@@ -39,11 +39,11 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
 
   useEffect(() => {
     const el = sentinelRef.current;
-    if (!el || rest.length === 0) return;
+    if (!el || listRows.length === 0) return;
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setVisibleCount((c) => (c < rest.length ? Math.min(c + PAGE, rest.length) : c));
+          setVisibleCount((c) => (c < listRows.length ? Math.min(c + PAGE, listRows.length) : c));
         }
       },
       { rootMargin: '500px' }
@@ -164,7 +164,7 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
           ) : (
             <motion.div layout className="space-y-2.5">
               {cells}
-              {visibleCount < rest.length && (
+              {visibleCount < listRows.length && (
                 <div className="card p-4 flex items-center gap-3 animate-pulse" aria-hidden="true">
                   <div className="w-9 h-9 rounded-xl bg-[var(--line)] shrink-0" />
                   <div className="flex-1 min-w-0">

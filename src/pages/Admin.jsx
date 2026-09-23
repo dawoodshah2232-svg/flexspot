@@ -89,7 +89,13 @@ function CopyBtn({ text, label }) {
 
 export default function Admin({ spots, refresh }) {
   const [pin, setPin] = useState('');
-  const [authed, setAuthed] = useState(false);
+  const [authed, setAuthed] = useState(() => {
+    try { return sessionStorage.getItem('flexspot_admin_authed') === '1'; } catch { return false; }
+  });
+  const unlock = () => {
+    try { sessionStorage.setItem('flexspot_admin_authed', '1'); } catch {}
+    setAuthed(true);
+  };
   const [tab, setTab] = useState('overview');
   const [msg, setMsg] = useState('');
   const [subs, setSubs] = useState([]);
@@ -186,9 +192,9 @@ export default function Admin({ spots, refresh }) {
             className="field text-center text-2xl tracking-[0.4em] mb-4"
             placeholder="••••" value={pin}
             onChange={(e) => setPin(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && (pin === ADMIN_PIN ? setAuthed(true) : flash('Wrong PIN.'))}
+            onKeyDown={(e) => e.key === 'Enter' && (pin === ADMIN_PIN ? unlock() : flash('Wrong PIN.'))}
           />
-          <button onClick={() => (pin === ADMIN_PIN ? setAuthed(true) : flash('Wrong PIN.'))} className="btn-primary w-full py-3">Unlock dashboard</button>
+          <button onClick={() => (pin === ADMIN_PIN ? unlock() : flash('Wrong PIN.'))} className="btn-primary w-full py-3">Unlock dashboard</button>
           {msg && <p className="text-red-500 text-sm mt-3">{msg}</p>}
           <p className="text-[11px] text-[var(--ink-3)] mt-4">Client-side gate only — not real authentication. Set VITE_ADMIN_PIN before any production use.</p>
         </div>

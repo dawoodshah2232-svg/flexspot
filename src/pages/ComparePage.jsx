@@ -86,6 +86,14 @@ export default function ComparePage({ spots }) {
     [selected, spots]
   );
 
+  // Normalize: a shared link with more than MAX_COMPARE slugs trims the URL.
+  useEffect(() => {
+    const fromUrl = (params.get('spots') || '').split(',').map((s) => s.trim()).filter(Boolean);
+    if (fromUrl.length > MAX_COMPARE) {
+      setParams({ spots: fromUrl.slice(0, MAX_COMPARE).join(',') }, { replace: true });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     try { localStorage.setItem(LS_COMPARE, JSON.stringify(selected)); } catch { /* ignore */ }
   }, [selected]);

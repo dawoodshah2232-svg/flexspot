@@ -30,6 +30,9 @@
 - Browse categories: https://flexspot.lol/explore
 - How it works: https://flexspot.lol/how-it-works
 - Rewards: https://flexspot.lol/rewards
+- Compare spots head-to-head: https://flexspot.lol/compare
+- Visibility calculator: https://flexspot.lol/calculator
+- Top referrers: https://flexspot.lol/top-referrers
 - FAQ: https://flexspot.lol/faq
 - Claim a spot: https://flexspot.lol/claim
 - Privacy: https://flexspot.lol/privacy

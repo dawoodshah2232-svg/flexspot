@@ -26,6 +26,8 @@ import { LIVE_FEED_POOL } from './lib/data';
 
 import { SiteSettingsProvider } from './lib/siteSettings.jsx';
 import { trackPageView, writeHeartbeat, useLiveOnline } from './lib/analytics';
+import { gaPageView } from './lib/ga';
+import CookieConsent from './components/CookieConsent';
 import DiscoveryPage from './pages/DiscoveryPage';
 import Explore from './pages/Explore';
 import CategoryPage from './pages/CategoryPage';
@@ -57,11 +59,13 @@ function ScrollTop() {
 
 // Real visitor analytics: page views on every route change + heartbeat
 // every 10s so the admin "online now" count is genuinely live.
+// Also fires a GA4 page_view per SPA navigation when GA is configured.
 function AnalyticsTracker() {
   const { pathname, search } = useLocation();
   useEffect(() => {
     const path = pathname + search;
     trackPageView(path, document.title);
+    gaPageView(path);
     writeHeartbeat(path);
     const t = setInterval(() => writeHeartbeat(path), 10000);
     return () => clearInterval(t);
@@ -194,6 +198,7 @@ function Shell() {
       </main>
       <Footer onClaim={openClaim} />
       <MobileNav onClaim={openClaim} />
+      <CookieConsent />
 
       {/* toasts */}
       <div className="fixed bottom-24 lg:bottom-8 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-2 pointer-events-none w-full px-4">

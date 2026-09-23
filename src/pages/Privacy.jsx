@@ -70,7 +70,8 @@ export default function Privacy() {
               preference, draft claim details, and referral-visit flags used to enforce the
               one-credit-per-day rule. This data stays on your device and is not transmitted to our
               servers; clearing your browser data removes it. We do not use third-party tracking
-              cookies or cross-site advertising identifiers.
+              cookies or cross-site advertising identifiers, except for Google Analytics (see
+              section 5), which only loads after you explicitly accept the cookie notice.
             </p>
           </Section>
 
@@ -107,12 +108,14 @@ export default function Privacy() {
             <ul className="list-disc pl-5 space-y-1.5">
               <li><strong className="text-[var(--ink)]">Supabase (database hosting)</strong> — when the service runs on live infrastructure, your submissions and account records are stored on Supabase-hosted databases. Supabase processes this data only on our instructions as a service provider.</li>
               <li><strong className="text-[var(--ink)]">Blockchain networks</strong> — USDT payments are verified against public blockchain records (BNB Smart Chain, Solana, Tron). Transaction details on public blockchains are inherently public; we cannot control or delete them.</li>
+              <li><strong className="text-[var(--ink)]">Google Analytics (only with your consent)</strong> — if you accept the cookie notice, we load Google Analytics 4 to measure aggregate traffic (pages visited, approximate location, device type). Google anonymizes IP addresses by default. No analytics scripts load and no analytics cookies are set until you accept; declining keeps the feature fully off. You can withdraw consent at any time by clearing this site's data in your browser settings, which resets the choice.</li>
               <li><strong className="text-[var(--ink)]">Legal compliance</strong> — we may disclose information if required by law, court order, or to protect against fraud, abuse, or harm to others.</li>
               <li><strong className="text-[var(--ink)]">Business transfer</strong> — if FlexSpot is acquired or merged, user data may transfer to the new operator, who will be bound by this policy or a materially equivalent one.</li>
             </ul>
             <p>
-              We do not currently share data with advertising networks or data brokers, and we do not
-              use third-party analytics that build cross-site profiles of you.
+              We do not currently share data with advertising networks or data brokers, and apart
+              from the consent-gated Google Analytics above, we do not use third-party analytics
+              that build cross-site profiles of you.
             </p>
           </Section>
 

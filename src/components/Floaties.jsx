@@ -1,13 +1,15 @@
 import { useEffect, useRef } from 'react';
 
 // Floating emoji decorations with meme energy — now playful:
-// they keep their gentle ambient float, but when your cursor comes near,
-// each emoji scampers a little away from it, then drifts back home at a
-// relaxed pace once the cursor leaves. Pure decoration: pointer-events-none,
-// aria-hidden, GPU-friendly transforms.
+// they keep their gentle ambient float, dodge your cursor on desktop, and
+// react to scrolling: each emoji drifts at its own speed/direction and tilts
+// slightly as it travels through the viewport (scroll parallax). On phones
+// — where there is no cursor — the scroll drift is the whole show.
+// Pure decoration: pointer-events-none, aria-hidden, GPU-friendly transforms.
 const FLEE_RADIUS = 120; // px — cursor influence zone
 const FLEE_PUSH = 54; // px — max scamper distance
 const EASE = 0.14; // smoothing — snappy flee, gentle return
+const PEASE = 0.08; // smoothing — slow dreamy lag for the scroll drift
 
 export default function Floaties({ items }) {
   const boxRef = useRef(null);
@@ -28,6 +30,7 @@ export default function Floaties({ items }) {
         x: (parseFloat(f.left) / 100) * r.width,
         y: (parseFloat(f.top) / 100) * r.height,
         ox: 0, oy: 0,
+        sx: 0, sy: 0, // smoothed scroll-parallax offsets
       }));
     };
     measure();
@@ -66,8 +69,21 @@ export default function Floaties({ items }) {
         }
         p.ox += (tx - p.ox) * EASE;
         p.oy += (ty - p.oy) * EASE;
+        // Scroll parallax: where is this emoji in the viewport right now?
+        // prog = 0 at viewport center, ±0.5 at the edges (clamped). Each
+        // emoji drifts at its own speed and direction, with a slight tilt —
+        // so scrolling up/down makes them swim past at different rates.
+        const vh = window.innerHeight || 1;
+        const prog = Math.max(-0.75, Math.min(0.75, ((r.top + p.y) - vh / 2) / vh));
+        const dir = i % 2 === 0 ? 1 : -1;
+        const depth = (0.55 + (i % 3) * 0.3) * dir;
+        const ptx = prog * 34 * -dir;
+        const pty = prog * 84 * depth;
+        p.sx += (ptx - p.sx) * PEASE;
+        p.sy += (pty - p.sy) * PEASE;
+        const rot = (p.sy * 0.35 * dir).toFixed(1);
         const el = nodeRefs.current[i];
-        if (el) el.style.transform = `translate3d(${p.ox.toFixed(1)}px,${p.oy.toFixed(1)}px,0)`;
+        if (el) el.style.transform = `translate3d(${(p.ox + p.sx).toFixed(1)}px,${(p.oy + p.sy).toFixed(1)}px,0) rotate(${rot}deg)`;
       });
       raf = requestAnimationFrame(tick);
     };

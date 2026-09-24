@@ -285,6 +285,7 @@ export default function Admin({ spots, refresh }) {
   // 15s while the admin is open. Null = still loading.
   const [traffic, setTraffic] = useState(null);
   const [trafficErr, setTrafficErr] = useState('');
+  const ok = authed && !!ADMIN_PIN;
   useEffect(() => {
     if (!ok) return;
     let alive = true;

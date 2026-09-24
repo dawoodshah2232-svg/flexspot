@@ -10,13 +10,13 @@ export default function FounderNote() {
         <div className="space-y-4 text-mist text-[15px] leading-relaxed">
           <p>
             Most advertising is a black box. You pay, you hope, and you never really
-            see where the money went \u2014 just a dashboard full of numbers someone
+            see where the money went — just a dashboard full of numbers someone
             else controls.
           </p>
           <p>
             We wanted the opposite: attention you can actually watch. A public board.
             A live rank. Every dollar visible to everyone. Claim a spot for $1 and the
-            whole internet can see you climb \u2014 or watch a rival steal your crown
+            whole internet can see you climb — or watch a rival steal your crown
             in real time.
           </p>
           <p>
@@ -24,7 +24,7 @@ export default function FounderNote() {
             Just you, your link, and a fair fight for the spotlight.
           </p>
         </div>
-        <p className="mt-6 text-snow font-display font-bold text-sm">\u2014 The FlexSpot team</p>
+        <p className="mt-6 text-snow font-display font-bold text-sm">— The FlexSpot team</p>
       </div>
     </section>
   );

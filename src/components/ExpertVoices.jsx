@@ -23,7 +23,7 @@ export default function ExpertVoices() {
   return (
     <section className="max-w-5xl mx-auto px-4 sm:px-6 mt-16 sm:mt-24">
       <h2 className="font-display font-bold text-2xl sm:text-3xl text-snow tracking-tight text-center mb-2">
-        Don\u2019t take our word for it
+        Don’t take our word for it
       </h2>
       <p className="text-mist text-sm text-center mb-8">
         The people who literally wrote the book on attention agree on one thing:
@@ -32,7 +32,7 @@ export default function ExpertVoices() {
         {QUOTES.map((q) => (
           <figure key={q.text} className="rounded-3xl bg-card border border-line/5 p-6 flex flex-col">
             <blockquote className="text-snow text-[15px] leading-relaxed flex-1">
-              \u201C{q.text}\u201D
+              “{q.text}”
             </blockquote>
             <figcaption className="mt-4 pt-4 border-t border-line/5">
               <p className="text-snow font-bold text-sm">{q.by}</p>

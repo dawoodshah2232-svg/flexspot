@@ -25,6 +25,7 @@ import { useSiteSettings, IMAGE_HINTS } from '../lib/siteSettings.jsx';
 import { getPendingClaim, clearPendingClaim, saveMember } from '../lib/member';
 import { approveAndNotifyMember, rejectAndNotify, emailNotConfigured, listMembers, sendEngagement, spotUrl, listCentralSubmissions, decideCentral } from '../lib/emailClient';
 import { projectedRank, importSubmissions } from '../lib/store';
+import { adminCreateSpot, adminUpdateSpot, adminDeleteSpot, adminRestoreSpot, adminListAllSpots, fileToDataUrl as fileToResizedDataUrl } from '../lib/spotApi';
 
 // Fail closed: a static SPA cannot hold a real secret, and silently falling
 // back to '1234' would ship an open admin gate. No PIN configured → the
@@ -33,6 +34,7 @@ const ADMIN_PIN = import.meta.env.VITE_ADMIN_PIN || '';
 
 const TABS = [
   { id: 'overview', label: '📊 Overview' },
+  { id: 'spots', label: '🏆 Spots' },
   { id: 'live', label: '🟢 Live visitors' },
   { id: 'deposits', label: '💳 Deposits & receipts' },
   { id: 'members', label: '👥 Members' },
@@ -396,6 +398,10 @@ export default function Admin({ spots, refresh }) {
             depositsToday={depositsToday} fakeReceipts={fakeReceipts}
             fraudFlags={fraudFlags} refresh={() => { reload(); refresh && refresh(); }}
           />
+        )}
+
+        {tab === 'spots' && (
+          <SpotsTab spots={spots} flash={flash} refresh={() => { reload(); refresh && refresh(); }} />
         )}
 
         {tab === 'live' && (
@@ -965,8 +971,8 @@ function SettingsTab({ flash, reload, refresh }) {
         <h3 className="font-bold text-[var(--ink)] mb-1">💰 Public amount display</h3>
         <p className="text-[11px] text-[var(--ink-3)] mb-4">Shown = real × {tuning.amountMult} + ${tuning.amountAdd}. Currently: real $100 → shows ${money(displayAmount(100, tuning))}.</p>
         <div className="grid sm:grid-cols-2 gap-4">
-          <div><label className="label">Multiplier (×)</label><input className="field" inputMode="decimal" value={tuning.amountMult} onChange={(e) => save({ amountMult: num(e.target.value, 1.06) })} /></div>
-          <div><label className="label">Flat add ($)</label><input className="field" inputMode="decimal" value={tuning.amountAdd} onChange={(e) => save({ amountAdd: num(e.target.value, 3) })} /></div>
+          <div><label className="label">Multiplier (×)</label><input className="field" inputMode="decimal" value={tuning.amountMult} onChange={(e) => save({ amountMult: num(e.target.value, 1) })} /></div>
+          <div><label className="label">Flat add ($)</label><input className="field" inputMode="decimal" value={tuning.amountAdd} onChange={(e) => save({ amountAdd: num(e.target.value, 0) })} /></div>
         </div>
       </div>
 
@@ -1201,6 +1207,268 @@ function ManualEntry({ spots, onAdded }) {
         </div>
         <button onClick={add} className="btn-primary w-full py-3.5 text-[15px] min-h-[52px]">➕ Add to leaderboard</button>
       </div>
+    </div>
+  );
+}
+
+// --- Spots manager -----------------------------------------------------------
+// Every record shown on the public site, editable from any device. Edits land
+// in the central KV store (/api/spots) and go live immediately. Editing a
+// demo brand creates a managed override (POST), never PATCHes a record that
+// doesn't exist. Deleting writes a tombstone (hidden:true) so a deleted demo
+// doesn't reappear; hidden spots are restorable from the Hidden section.
+function SpotsTab({ spots, flash, refresh }) {
+  const [kvState, setKvState] = useState('checking'); // checking | on | off
+  const [editing, setEditing] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [hiddenSpots, setHiddenSpots] = useState([]);
+
+  const loadHidden = async () => {
+    try {
+      const all = await adminListAllSpots();
+      setHiddenSpots((all || []).filter((s) => s.hidden));
+    } catch { setHiddenSpots([]); }
+  };
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const r = await fetch('/api/spots');
+        setKvState(r.ok ? 'on' : 'off');
+        if (r.ok) loadHidden();
+      } catch { setKvState('off'); }
+    })();
+  }, []);
+
+  const blank = {
+    isNew: true, slug: '', name: '', tagline: '', description: '', mark: '✨',
+    logo: '', amount: 1, clicks: 0, views: 0, website: '',
+    socials: { x: '', instagram: '', facebook: '', linkedin: '' }, category: 'startups',
+  };
+  const startEdit = (s) => {
+    if (!s) { setEditing({ ...blank, socials: { ...blank.socials } }); return; }
+    setEditing({
+      // Editing an unmanaged demo creates a managed override (POST) — a
+      // PATCH would 404 because no KV record exists yet.
+      isNew: false, managed: !!s.managed, slug: s.slug, name: s.name || '', tagline: s.tagline || '',
+      description: s.description || '', mark: s.mark || '✨', logo: s.logo || '',
+      amount: s.amount ?? 0, clicks: s.clicks ?? 0, views: s.views ?? 0,
+      website: s.website || '', category: s.category || 'startups',
+      socials: { x: '', instagram: '', facebook: '', linkedin: '', ...(s.socials || {}) },
+    });
+  };
+
+  const set = (k, v) => setEditing((e) => ({ ...e, [k]: v }));
+  const setSocial = (k, v) => setEditing((e) => ({ ...e, socials: { ...e.socials, [k]: v } }));
+
+  const onFile = async (f) => {
+    if (!f) return;
+    setUploading(true);
+    const url = await fileToResizedDataUrl(f);
+    setUploading(false);
+    if (!url) { flash('Image too large — try a smaller file or paste an image URL.'); return; }
+    set('logo', url);
+  };
+
+  const save = async () => {
+    if (kvState !== 'on') { flash('Central store not connected — connect Vercel KV first.'); return; }
+    if (!editing.name.trim()) { flash('Name is required.'); return; }
+    setSaving(true);
+    try {
+      const socials = {};
+      for (const k of ['x', 'instagram', 'facebook', 'linkedin']) {
+        const v = (editing.socials[k] || '').trim();
+        if (v) socials[k] = v;
+      }
+      const payload = {
+        name: editing.name.trim(),
+        tagline: editing.tagline.trim(),
+        description: editing.description.trim(),
+        mark: editing.mark.trim().slice(0, 4) || '✨',
+        logo: editing.logo.trim(),
+        amount: Math.max(0, Number(editing.amount) || 0),
+        clicks: Math.max(0, Math.floor(Number(editing.clicks) || 0)),
+        views: Math.max(0, Math.floor(Number(editing.views) || 0)),
+        website: editing.website.trim(),
+        socials,
+        category: editing.category,
+      };
+      if (editing.isNew) {
+        await adminCreateSpot({ slug: editing.slug.trim(), ...payload });
+        flash(`“${payload.name}” created — live on all devices.`);
+      } else if (editing.managed) {
+        await adminUpdateSpot(editing.slug, payload);
+        flash(`“${payload.name}” updated — live on all devices.`);
+      } else {
+        // Unmanaged demo — no KV record exists, so create a managed override.
+        // If the list was stale and an override already exists (409), fall
+        // back to updating it instead of leaving the admin stuck.
+        try {
+          await adminCreateSpot({ slug: editing.slug, ...payload });
+          flash(`“${payload.name}” saved as a managed override — live on all devices.`);
+        } catch (e) {
+          if (/already exists/i.test(e.message || '')) {
+            await adminUpdateSpot(editing.slug, payload);
+            flash(`“${payload.name}” updated — live on all devices.`);
+          } else { throw e; }
+        }
+      }
+      setEditing(null);
+      loadHidden();
+      refresh();
+    } catch (e) { flash('Save failed: ' + (e.message || 'unknown error')); }
+    setSaving(false);
+  };
+
+  const del = async (s) => {
+    if (!confirm(`Hide “${s.name || s.slug}” from the public site? It won't be deleted permanently — you can restore it below.`)) return;
+    try {
+      await adminDeleteSpot(s.slug);
+      flash(`“${s.name || s.slug}” hidden from the public site.`);
+      loadHidden();
+      refresh();
+    } catch (e) { flash('Hide failed: ' + (e.message || 'unknown error')); }
+  };
+
+  const restore = async (s) => {
+    try {
+      await adminRestoreSpot(s.slug);
+      flash(`“${s.name || s.slug}” restored — visible again.`);
+      loadHidden();
+      refresh();
+    } catch (e) { flash('Restore failed: ' + (e.message || 'unknown error')); }
+  };
+
+  const F = ({ label, children }) => (
+    <label className="block">
+      <span className="text-xs font-bold text-[var(--ink-2)] uppercase tracking-wide">{label}</span>
+      <div className="mt-1">{children}</div>
+    </label>
+  );
+  const inp = 'w-full rounded-xl border border-[var(--line)] bg-[var(--surface-2)] px-4 py-3 text-sm text-[var(--ink)] min-h-[48px]';
+
+  return (
+    <div>
+      <div className="flex items-center justify-between gap-3 mb-2">
+        <h2 className="font-display font-bold text-xl text-[var(--ink)]">Spots{REAL}</h2>
+        <button onClick={() => startEdit(null)} disabled={kvState !== 'on'}
+          className="btn-primary px-5 py-2.5 text-sm min-h-[44px] disabled:opacity-40">＋ Add spot</button>
+      </div>
+      <p className="text-[var(--ink-2)] text-sm mb-4">
+        Every record on the public site. Edits save to the central store and go live on all devices instantly.
+        {' '}{kvState === 'on' && <span className="font-bold text-emerald-600 dark:text-emerald-400">● Central store connected</span>}
+        {kvState === 'off' && <span className="font-bold text-amber-600 dark:text-amber-400">● Central store not connected — connect Vercel KV to manage spots from any device</span>}
+        {kvState === 'checking' && <span className="text-[var(--ink-3)]">● Checking store…</span>}
+      </p>
+
+      <div className="space-y-2">
+        {(spots || []).map((s, i) => (
+          <div key={s.slug} className="card p-3.5 flex items-center gap-3">
+            <span className="text-xs font-black text-[var(--ink-3)] w-7 shrink-0">#{i + 1}</span>
+            <BrandAvatar spot={s} size={40} />
+            <div className="flex-1 min-w-0">
+              <div className="font-bold text-[var(--ink)] text-sm truncate">
+                {s.name}{' '}
+                {s.managed
+                  ? <span className="text-[9px] font-extrabold tracking-widest bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/40 rounded-full px-2 py-0.5 align-middle">MANAGED</span>
+                  : <span className="text-[9px] font-extrabold tracking-widest bg-slate-500/10 text-slate-500 border border-slate-500/30 rounded-full px-2 py-0.5 align-middle">DEMO</span>}
+              </div>
+              <div className="text-xs text-[var(--ink-3)] truncate">
+                {money(s.amount)} · {compact(s.clicks || 0)} clicks · {compact(s.views || 0)} views · /s/{s.slug}
+              </div>
+            </div>
+            <button onClick={() => startEdit(s)} className="btn-ghost px-4 py-2 text-xs min-h-[44px] shrink-0">Edit</button>
+            <button onClick={() => del(s)} title="Hide from the public site (restorable)"
+              className="px-4 py-2 text-xs rounded-xl border border-red-400/60 text-red-600 dark:text-red-400 hover:bg-red-500/10 font-bold min-h-[44px] shrink-0">Hide</button>
+          </div>
+        ))}
+        {(spots || []).length === 0 && <p className="text-sm text-[var(--ink-3)]">No spots found.</p>}
+      </div>
+
+      {hiddenSpots.length > 0 && (
+        <div className="mt-6">
+          <h3 className="font-bold text-sm text-[var(--ink-2)] uppercase tracking-wide mb-2">🙈 Hidden spots ({hiddenSpots.length})</h3>
+          <p className="text-xs text-[var(--ink-3)] mb-3">Hidden from the public site. Restore any time — nothing is permanently erased.</p>
+          <div className="space-y-2">
+            {hiddenSpots.map((s) => (
+              <div key={s.slug} className="card p-3.5 flex items-center gap-3 opacity-80">
+                <BrandAvatar spot={s} size={36} />
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-[var(--ink)] text-sm truncate">{s.name || s.slug}</div>
+                  <div className="text-xs text-[var(--ink-3)] truncate">/s/{s.slug}</div>
+                </div>
+                <button onClick={() => restore(s)} className="btn-ghost px-4 py-2 text-xs min-h-[44px] shrink-0 font-bold">Restore</button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {editing && (
+        <div className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-6" onClick={() => !saving && setEditing(null)}>
+          <div className="bg-[var(--surface)] border border-[var(--line)] rounded-t-3xl sm:rounded-3xl w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto p-5 sm:p-7"
+            onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-display font-bold text-lg text-[var(--ink)]">{editing.isNew ? '＋ Add spot' : `Edit — ${editing.name}`}</h3>
+              <button onClick={() => setEditing(null)} className="btn-ghost w-11 h-11 rounded-xl text-lg">✕</button>
+            </div>
+            {!editing.isNew && !editing.managed && (
+              <p className="text-xs text-amber-700 dark:text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-xl px-3 py-2 mb-4">
+                Demo brand — saving creates a managed override in the central store. The demo stays untouched.
+              </p>
+            )}
+            <div className="grid sm:grid-cols-2 gap-4">
+              <F label="Brand name *"><input className={inp} value={editing.name} onChange={(e) => set('name', e.target.value)} placeholder="Acme Coffee" /></F>
+              <F label={editing.isNew ? 'Slug *' : 'Slug (locked)'}>
+                <input className={inp} value={editing.slug} disabled={!editing.isNew}
+                  onChange={(e) => set('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                  placeholder="acme-coffee" />
+              </F>
+              <F label="Tagline"><input className={inp} value={editing.tagline} onChange={(e) => set('tagline', e.target.value)} placeholder="One line hook" /></F>
+              <F label="Category">
+                <select className={inp} value={editing.category} onChange={(e) => set('category', e.target.value)}>
+                  {CATEGORIES.map((c) => <option key={c.slug} value={c.slug}>{c.icon} {c.name}</option>)}
+                </select>
+              </F>
+              <div className="sm:col-span-2">
+                <F label="Description"><textarea className={inp} rows={3} value={editing.description} onChange={(e) => set('description', e.target.value)} placeholder="What makes this brand worth a look?" /></F>
+              </div>
+              <F label="Emoji mark"><input className={inp} value={editing.mark} onChange={(e) => set('mark', e.target.value)} placeholder="☕" maxLength={4} /></F>
+              <F label="Amount ($)"><input type="number" min="0" step="0.5" className={inp} value={editing.amount} onChange={(e) => set('amount', e.target.value)} /></F>
+              <F label="Clicks"><input type="number" min="0" step="1" className={inp} value={editing.clicks} onChange={(e) => set('clicks', e.target.value)} /></F>
+              <F label="Views"><input type="number" min="0" step="1" className={inp} value={editing.views} onChange={(e) => set('views', e.target.value)} /></F>
+              <div className="sm:col-span-2">
+                <F label="Image">
+                  <div className="flex items-center gap-3">
+                    {editing.logo
+                      ? <img src={editing.logo} alt="" className="w-14 h-14 rounded-2xl object-cover border border-[var(--line)] shrink-0" />
+                      : <span className="w-14 h-14 rounded-2xl border border-dashed border-[var(--line)] grid place-items-center text-2xl shrink-0">{editing.mark || '✨'}</span>}
+                    <input className={`${inp} flex-1`} value={editing.logo} onChange={(e) => set('logo', e.target.value)} placeholder="https://… image URL" />
+                    <label className="btn-ghost px-4 py-3 text-xs cursor-pointer min-h-[48px] leading-[24px] whitespace-nowrap">
+                      {uploading ? '…' : 'Upload'}
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => onFile(e.target.files[0])} />
+                    </label>
+                  </div>
+                </F>
+              </div>
+              <div className="sm:col-span-2">
+                <F label="Website"><input className={inp} value={editing.website} onChange={(e) => set('website', e.target.value)} placeholder="https://brand.com" inputMode="url" /></F>
+              </div>
+              <F label="𝕏 / Twitter"><input className={inp} value={editing.socials.x} onChange={(e) => setSocial('x', e.target.value)} placeholder="https://x.com/brand" inputMode="url" /></F>
+              <F label="📸 Instagram"><input className={inp} value={editing.socials.instagram} onChange={(e) => setSocial('instagram', e.target.value)} placeholder="https://instagram.com/brand" inputMode="url" /></F>
+              <F label="📘 Facebook"><input className={inp} value={editing.socials.facebook} onChange={(e) => setSocial('facebook', e.target.value)} placeholder="https://facebook.com/brand" inputMode="url" /></F>
+              <F label="💼 LinkedIn"><input className={inp} value={editing.socials.linkedin} onChange={(e) => setSocial('linkedin', e.target.value)} placeholder="https://linkedin.com/company/brand" inputMode="url" /></F>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setEditing(null)} className="btn-ghost flex-1 py-3.5 min-h-[52px]">Cancel</button>
+              <button onClick={save} disabled={saving || kvState !== 'on'} className="btn-primary flex-1 py-3.5 min-h-[52px] disabled:opacity-40">
+                {saving ? 'Saving…' : editing.isNew ? 'Create spot' : 'Save changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

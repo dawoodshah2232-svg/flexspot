@@ -1,5 +1,6 @@
 import { DEMO_SPOTS } from './data';
 import { getVisitorId } from './analytics';
+import { fetchManagedSpots, fetchManagedHidden } from './spotApi';
 
 const SUPA_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const SUPA_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
@@ -98,7 +99,43 @@ export async function fetchLeaderboard() {
       pending: true,
     });
   }
-  const merged = [...DEMO_SPOTS.map(withBoosts), ...local.map(withBoosts), ...pendingSubs];
+  // Centrally managed spots (admin-edited, KV-backed): override demo/local
+  // entries with the same slug; brand-new slugs are appended. Never throws —
+  // fetchManagedSpots falls back to cache, then [].
+  // Hidden (admin-deleted) slugs suppress the matching demo/local entry too,
+  // so deleting a demo override doesn't let the demo reappear.
+  let managed = [];
+  let hiddenSlugs = new Set();
+  try {
+    [managed, hiddenSlugs] = await Promise.all([
+      fetchManagedSpots(),
+      fetchManagedHidden().then((h) => new Set(h || [])),
+    ]);
+  } catch { managed = []; hiddenSlugs = new Set(); }
+  const mBySlug = new Map(managed.map((m) => [m.slug, m]));
+  const applyManaged = (s) => {
+    const m = mBySlug.get(s.slug);
+    if (!m) return s;
+    return {
+      ...s, ...m, managed: true,
+      joinedAt: m.createdAt || s.joinedAt,
+      trend: Array.isArray(m.trend) && m.trend.length ? m.trend : [Number(m.amount) || 0],
+    };
+  };
+  const managedNew = managed
+    .filter((m) => !seen.has(m.slug))
+    .map((m) => ({
+      mark: '✨', tagline: '', description: '', socials: {}, category: 'startups',
+      ...m, managed: true,
+      joinedAt: m.createdAt || Date.now(),
+      trend: [Number(m.amount) || 0],
+    }));
+  const merged = [
+    ...DEMO_SPOTS.filter((s) => !hiddenSlugs.has(s.slug)).map((s) => withBoosts(applyManaged(s))),
+    ...local.filter((s) => !hiddenSlugs.has(s.slug)).map((s) => withBoosts(applyManaged(s))),
+    ...managedNew.map(withBoosts),
+    ...pendingSubs,
+  ];
   return withMovement(rank(merged));
 }
 
@@ -486,7 +523,7 @@ const LS_REF_ID = 'flexspot_ref_identities_v1';   // { code: { name, spotSlug, c
 const LS_REF_STATS = 'flexspot_ref_stats_v1';     // { code: { visits, earned } }
 const LS_REF_COUNTED = 'flexspot_ref_counted_v1'; // { "<code>:<yyyy-mm-dd>:<visitorId>": true }
 const LS_MY_REFS = 'flexspot_my_refs_v1';         // { spotSlug: code } created on this browser
-const LS_REF_SEED = 'flexspot_ref_seed_v1';
+const LS_REF_SEED = 'flexspot_ref_seed_v2';
 // Events ledger — referral activity as immutable events. This is the
 // foundation the affiliate wallet builds on (balances, withdrawals).
 const LS_REF_EVENTS = 'flexspot_ref_events_v1'; // [{ code, spotSlug, at, amount, kind }]
@@ -621,18 +658,14 @@ export function getTopReferrers(limit = 8) {
 // Demo seed so the boards are alive on first load. Boosts merge into the
 // normal boost ledger once, so displayed totals stay consistent.
 const DEMO_REFERRERS = [
-  { name: 'Ahmed R.', slug: 'brewline', visits: 14 },
-  { name: 'CryptoMama', slug: 'brewline', visits: 9 },
-  { name: 'DXB Hustle', slug: 'pixelforge', visits: 11 },
-  { name: 'Lena W.', slug: 'nomaddesk', visits: 7 },
-  { name: 'Sara K.', slug: 'lumennotes', visits: 6 },
-  { name: 'Omar F.', slug: 'voltathletics', visits: 5 },
-  { name: 'Umar', slug: 'casaverde', visits: 4 },
-  { name: 'Fatima A.', slug: 'orbitpay', visits: 4 },
-  { name: 'Raj P.', slug: 'fernandfable', visits: 3 },
-  { name: 'Nina S.', slug: 'pixelforge', visits: 3 },
-  { name: 'Khalid M.', slug: 'nomaddesk', visits: 2 },
-  { name: 'Zoe T.', slug: 'brewline', visits: 2 },
+  { name: 'Ahmed R.', slug: 'sipsociety', visits: 9 },
+  { name: 'CryptoMama', slug: 'neonnoodles', visits: 7 },
+  { name: 'DXB Hustle', slug: 'pixelpaws', visits: 6 },
+  { name: 'Lena W.', slug: 'hustlehoney', visits: 5 },
+  { name: 'Sara K.', slug: 'codechai', visits: 4 },
+  { name: 'Omar F.', slug: 'gymbroskis', visits: 3 },
+  { name: 'Umar', slug: 'memevault', visits: 3 },
+  { name: 'Fatima A.', slug: 'swiftship', visits: 2 },
 ];
 
 function ensureReferralSeed() {
@@ -640,6 +673,10 @@ function ensureReferralSeed() {
     if (localStorage.getItem(LS_REF_SEED) !== null) return;
     const ids = readLS(LS_REF_ID, {});
     const stats = readLS(LS_REF_STATS, {});
+    // drop any previous demo referrer identities so the board shrinks 12 → 8
+    Object.entries(ids).forEach(([code, v]) => {
+      if (v && v.demo) { delete ids[code]; delete stats[code]; }
+    });
     DEMO_REFERRERS.forEach((r, i) => {
       const code = `FS-${r.slug.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4).padEnd(4, 'X')}-D${String(i).padStart(3, '0')}`;
       if (!ids[code]) ids[code] = { name: r.name, spotSlug: r.slug, createdAt: Date.now() - (i + 1) * 86400e3, demo: true };
@@ -659,25 +696,25 @@ ensureReferralSeed();
 const LS_CONTRIB = 'flexspot_contributions_v2';
 
 const DEMO_CONTRIBUTIONS = {
-  brewline: [
-    { name: 'Sara K.', handle: '@sara.brews', amount: 50, at: Date.now() - 2 * 3600e3, demo: true },
-    { name: 'Caffeine Club', handle: 'caffeineclub.co', amount: 25, at: Date.now() - 26 * 3600e3, demo: true },
-    { name: 'Mike D.', handle: '@mike_dxb', amount: 10, at: Date.now() - 3 * 86400e3, demo: true },
+  sipsociety: [
+    { name: 'Sara K.', handle: '@sara.sips', amount: 9, at: Date.now() - 2 * 3600e3, demo: true },
+    { name: 'Mocktail Club', handle: 'mocktailclub.co', amount: 6, at: Date.now() - 26 * 3600e3, demo: true },
+    { name: 'Mike D.', handle: '@mike_dxb', amount: 3, at: Date.now() - 3 * 86400e3, demo: true },
   ],
-  pixelforge: [
-    { name: 'Aisha R.', handle: '@aisha.plays', amount: 30, at: Date.now() - 5 * 3600e3, demo: true },
-    { name: 'Retro Gamers', handle: 'discord.gg/retro', amount: 15, at: Date.now() - 2 * 86400e3, demo: true },
+  neonnoodles: [
+    { name: 'Aisha R.', handle: '@aisha.eats', amount: 7, at: Date.now() - 5 * 3600e3, demo: true },
+    { name: 'Late Night Crew', handle: 'latenightcrew', amount: 4, at: Date.now() - 2 * 86400e3, demo: true },
   ],
-  lumennotes: [
-    { name: 'June Rivera', handle: '@june.rivera', amount: 20, at: Date.now() - 8 * 3600e3, demo: true },
-    { name: 'Note Nerds', handle: '@notenerds', amount: 5, at: Date.now() - 4 * 86400e3, demo: true },
+  pixelpaws: [
+    { name: 'June Rivera', handle: '@june.rivera', amount: 5, at: Date.now() - 8 * 3600e3, demo: true },
+    { name: 'Pet Lovers', handle: '@petlovers', amount: 2, at: Date.now() - 4 * 86400e3, demo: true },
   ],
-  voltathletics: [
-    { name: 'Omar F.', handle: 'RunDXB crew', amount: 12, at: Date.now() - 12 * 3600e3, demo: true },
+  hustlehoney: [
+    { name: 'Omar F.', handle: 'DXB crew', amount: 3, at: Date.now() - 12 * 3600e3, demo: true },
   ],
-  nomaddesk: [
-    { name: 'Lena W.', handle: '@lena.works', amount: 18, at: Date.now() - 30 * 3600e3, demo: true },
-    { name: 'Remote OK', handle: 'remoteok.com', amount: 8, at: Date.now() - 5 * 86400e3, demo: true },
+  codechai: [
+    { name: 'Lena W.', handle: '@lena.reads', amount: 5, at: Date.now() - 30 * 3600e3, demo: true },
+    { name: 'Dev Daily', handle: 'devdaily', amount: 2, at: Date.now() - 5 * 86400e3, demo: true },
   ],
 };
 

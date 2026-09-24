@@ -1,167 +1,244 @@
 // FlexSpot transactional + engagement email templates.
-// Table-based, inline styles, dark premium theme with gold accents.
-// Every template is a pure function of its data — no hardcoded names.
+//
+// ── Master layout ─────────────────────────────────────────────────────────
+// One premium dark + gold layout shared by every email:
+//  • Table-based, 100% inline styles — safe in Gmail, Outlook, Apple Mail.
+//  • `color-scheme` meta tags + Outlook.com `[data-ogsc]` overrides so the
+//    design stays readable in both light- and dark-mode inboxes.
+//  • Mobile-first: 600px container, fluid tables, stat cards stack under
+//    480px via a small media query.
+//  • Every recipient-facing email greets the recipient by first name.
+//  • Copy is professional, concise and honest — no hype, no invented stats,
+//    no claims about followers, customers or performance.
+//
+// Data contract is UNCHANGED — api/email.js, src/lib/emailClient.js,
+// api/cron/weekly-digest.js and src/pages/Admin.jsx call these with the
+// same fields as before. Only layout + copy changed.
 import { APP_URL } from './mail.js';
 
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
 }[c]));
 
+// Brand palette — dark navy + gold.
+const C = {
+  bg: '#0B0F19',
+  card: '#131A30',
+  cardAlt: '#0E1428',
+  line: '#26304F',
+  gold: '#F5C044',
+  ink: '#FFFFFF',
+  body: '#C9CDE6',
+  muted: '#8A91B5',
+};
+
+const FONT = `font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;`;
+
 function wrap({ preheader = '', title, body }) {
-  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title></head>
-<body style="margin:0;padding:0;background:#0B0F19;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#E8EAF2;">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;">${esc(preheader)}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0B0F19;padding:28px 12px;">
-<tr><td align="center">
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#141A2E;border:1px solid #2A3350;border-radius:20px;overflow:hidden;">
-<tr><td style="background:linear-gradient(135deg,#7C3AED 0%,#4F46E5 60%,#312E81 100%);padding:26px 30px;text-align:center;">
-<div style="font-size:26px;font-weight:800;letter-spacing:-0.5px;color:#fff;">👑 Flex<span style="color:#F5C044;">Spot</span></div>
-<div style="font-size:11px;letter-spacing:3px;color:#C9CDF2;margin-top:6px;font-weight:700;">BID FOR ATTENTION</div>
+  return `<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
+<title>${esc(title)}</title>
+<style>
+@media only screen and (max-width:480px){
+  .stat-cell{display:block !important;width:100% !important;box-sizing:border-box;margin-bottom:10px !important;}
+  .pad{padding-left:20px !important;padding-right:20px !important;}
+  .h1{font-size:22px !important;}
+}
+/* Outlook.com dark mode keeps our explicit colors readable */
+[data-ogsc] .t1{color:#ffffff !important;}
+[data-ogsc] .tp{color:#d3d8f0 !important;}
+[data-ogsc] .tm{color:#a7aed6 !important;}
+</style>
+</head>
+<body style="margin:0;padding:0;word-spacing:normal;background-color:${C.bg};">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">${esc(preheader)}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${C.bg};">
+<tr><td align="center" style="padding:28px 12px;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;background-color:${C.card};border:1px solid ${C.line};border-radius:20px;">
+<tr><td class="pad" align="center" style="padding:30px 34px 24px;border-bottom:1px solid ${C.line};${FONT}">
+<div class="t1" style="font-size:28px;font-weight:800;letter-spacing:-0.5px;color:${C.ink};">Flex<span style="color:${C.gold};">Spot</span></div>
+<div style="margin-top:10px;font-size:10px;letter-spacing:4px;color:${C.gold};font-weight:700;">BID FOR ATTENTION</div>
 </td></tr>
-<tr><td style="padding:32px 30px;">${body}</td></tr>
-<tr><td style="padding:20px 30px;border-top:1px solid #232B45;text-align:center;">
-<div style="font-size:12px;color:#8A91B5;line-height:1.7;">You're receiving this because of activity on your FlexSpot account.<br>
-<a href="${APP_URL}" style="color:#F5C044;text-decoration:none;font-weight:700;">flexspot.lol</a> · Big brand visibility, start from $1.</div>
+<tr><td class="pad" style="padding:30px 34px 6px;${FONT}">${body}</td></tr>
+<tr><td class="pad" align="center" style="padding:22px 34px 30px;border-top:1px solid ${C.line};${FONT}">
+<div class="tm" style="font-size:12px;color:${C.muted};line-height:1.8;">
+You are receiving this email because of activity linked to your FlexSpot account.<br>
+<a href="${APP_URL}" style="color:${C.gold};text-decoration:none;font-weight:700;">flexspot.lol</a><span style="color:${C.line};">&nbsp;&nbsp;·&nbsp;&nbsp;</span>Big brand visibility, from $1.<br>
+<span style="font-size:11px;">Leaderboard rankings reflect verified payments only.</span>
+</div>
 </td></tr>
 </table>
+<div class="tm" style="font-size:11px;color:${C.muted};text-align:center;padding:16px 0 4px;${FONT}">© FlexSpot · flexspot.lol</div>
 </td></tr>
 </table>
 </body></html>`;
 }
 
-const h1 = (t) => `<div style="font-size:24px;font-weight:800;color:#fff;letter-spacing:-0.5px;margin:0 0 14px;">${t}</div>`;
-const p = (t) => `<div style="font-size:15px;color:#C6CBE4;line-height:1.75;margin:0 0 14px;">${t}</div>`;
-const cta = (href, label) => `<div style="text-align:center;margin:24px 0 8px;"><a href="${href}" style="display:inline-block;background:linear-gradient(135deg,#F5C044,#E8960C);color:#1A1206;font-weight:800;font-size:15px;text-decoration:none;padding:14px 34px;border-radius:14px;letter-spacing:0.2px;">${label}</a></div>`;
-const statRow = (stats) => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:18px 0;"><tr>${stats.map((s) => `
-<td style="background:#1C2340;border:1px solid #2A3350;border-radius:14px;padding:14px 10px;text-align:center;width:${Math.floor(100 / stats.length)}%;">
-<div style="font-size:11px;color:#8A91B5;font-weight:700;letter-spacing:1px;margin-bottom:6px;">${s.label}</div>
-<div style="font-size:20px;color:#F5C044;font-weight:800;">${s.value}</div></td>`).join('')}
+const h1 = (t) => `<div class="h1 t1" style="font-size:24px;font-weight:800;color:${C.ink};letter-spacing:-0.3px;line-height:1.3;margin:0 0 12px;">${t}</div>`;
+const greet = (name) => `<div class="tp" style="font-size:15px;color:${C.body};line-height:1.7;margin:0 0 14px;">Hi ${esc(name)},</div>`;
+const p = (t) => `<div class="tp" style="font-size:15px;color:${C.body};line-height:1.75;margin:0 0 14px;">${t}</div>`;
+const w = (t) => `<b style="color:${C.ink};">${t}</b>`;
+const gold = (t) => `<b style="color:${C.gold};">${t}</b>`;
+
+const cta = (href, label) => `
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:24px auto 12px;"><tr>
+<td align="center" bgcolor="${C.gold}" style="border-radius:14px;background-color:${C.gold};">
+<a href="${href}" style="display:inline-block;padding:15px 38px;font-size:15px;font-weight:800;color:#1A1206;text-decoration:none;letter-spacing:0.2px;${FONT}">${label}</a>
+</td></tr></table>`;
+
+const statRow = (stats) => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:18px 0;"><tr>${stats.map((s) => `
+<td class="stat-cell" width="${Math.floor(100 / stats.length)}%" valign="top" style="background-color:${C.cardAlt};border:1px solid ${C.line};border-radius:14px;padding:14px 10px;text-align:center;">
+<div class="tm" style="font-size:10px;color:${C.muted};font-weight:700;letter-spacing:1.5px;margin-bottom:6px;">${s.label}</div>
+<div class="t1" style="font-size:20px;color:${C.gold};font-weight:800;word-break:break-word;">${s.value}</div></td>`).join('')}
 </tr></table>`;
+
 const credBox = (email, password, ib) => `
-<div style="background:#0E1428;border:1px dashed #F5C044;border-radius:14px;padding:18px;margin:18px 0;">
-<div style="font-size:11px;color:#8A91B5;font-weight:700;letter-spacing:1.5px;margin-bottom:12px;">🔑 YOUR LOGIN CREDENTIALS</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-<tr><td style="font-size:12px;color:#8A91B5;padding:5px 0;">Login ID (your email)</td><td style="font-size:14px;color:#fff;font-weight:700;text-align:right;word-break:break-all;">${esc(email)}</td></tr>
-<tr><td style="font-size:12px;color:#8A91B5;padding:5px 0;">Password</td><td style="font-size:16px;color:#F5C044;font-weight:800;text-align:right;font-family:ui-monospace,Menlo,monospace;letter-spacing:1px;">${esc(password)}</td></tr>
-<tr><td style="font-size:12px;color:#8A91B5;padding:5px 0;">IB / Member №</td><td style="font-size:14px;color:#fff;font-weight:800;text-align:right;font-family:ui-monospace,Menlo,monospace;">${esc(ib)}</td></tr>
+<div style="background-color:${C.cardAlt};border:1px dashed ${C.gold};border-radius:14px;padding:20px;margin:20px 0;">
+<div class="tm" style="font-size:10px;color:${C.muted};font-weight:700;letter-spacing:2px;margin-bottom:12px;">YOUR LOGIN DETAILS</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr><td class="tm" style="font-size:12px;color:${C.muted};padding:6px 0;">Login email</td><td class="t1" style="font-size:14px;color:${C.ink};font-weight:700;text-align:right;word-break:break-all;">${esc(email)}</td></tr>
+<tr><td class="tm" style="font-size:12px;color:${C.muted};padding:6px 0;">Password</td><td style="font-size:16px;color:${C.gold};font-weight:800;text-align:right;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:1px;">${esc(password)}</td></tr>
+<tr><td class="tm" style="font-size:12px;color:${C.muted};padding:6px 0;">Member №</td><td class="t1" style="font-size:14px;color:${C.ink};font-weight:800;text-align:right;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;">${esc(ib)}</td></tr>
 </table>
-<div style="font-size:12px;color:#8A91B5;margin-top:10px;line-height:1.6;">Keep this email safe — your password is only shown here once. You can change it anytime in your dashboard settings.</div>
+<div class="tm" style="font-size:12px;color:${C.muted};margin-top:12px;line-height:1.6;">Please keep this email somewhere safe — your password is shown here only once. You can change it at any time from your dashboard.</div>
 </div>`;
-const note = (t) => `<div style="background:#1C2340;border-left:3px solid #F5C044;border-radius:0 12px 12px 0;padding:14px 16px;font-size:13.5px;color:#C6CBE4;line-height:1.7;margin:16px 0;">${t}</div>`;
+
+const note = (t) => `<div class="tp" style="background-color:${C.cardAlt};border-left:3px solid ${C.gold};border-radius:0 12px 12px 0;padding:14px 16px;font-size:13.5px;color:${C.body};line-height:1.7;margin:16px 0;">${t}</div>`;
+
+const steps = (items) => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0;">${items.map(([t, x], i) => `
+<tr><td valign="top" style="padding:10px 0;width:44px;">
+<div style="width:30px;height:30px;border-radius:50%;background-color:${C.gold};color:#1A1206;font-weight:800;font-size:14px;text-align:center;line-height:30px;${FONT}">${i + 1}</div>
+</td><td style="padding:10px 0 10px 4px;">
+<div class="t1" style="font-size:15px;color:${C.ink};font-weight:700;margin-bottom:4px;">${t}</div>
+<div class="tp" style="font-size:13.5px;color:${C.body};line-height:1.65;">${x}</div></td></tr>`).join('')}
+</table>`;
+
+const kv = (rows) => `
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${C.cardAlt};border:1px solid ${C.line};border-radius:14px;margin:16px 0;">
+<tr><td style="padding:14px 18px;font-size:13.5px;color:${C.body};line-height:2;${FONT}">
+${rows.map(([k, v]) => `<span class="tm" style="color:${C.muted};font-weight:700;">${k}:</span> ${v}<br>`).join('')}
+</td></tr></table>`;
 
 export const TEMPLATES = {
   // ── 1. Buyer: payment received, pending team verification ──────────────
   'payment-received': (d) => ({
-    subject: `Payment received — ${d.brandName} is under review 👑`,
+    subject: `Payment received — ${d.brandName} is under review`,
     html: wrap({
-      title: 'Payment received', preheader: `We got your $${d.amount} payment for ${d.brandName}. Verification usually takes a few hours.`,
+      title: 'Payment received', preheader: `We received your $${d.amount} payment for ${d.brandName}. Verification usually takes a few hours.`,
       body: `
-        ${h1(`Thanks, ${esc(d.buyerName)}! 🙏`)}
-        ${p(`We've received your <b style="color:#fff;">$${esc(d.amount)} USDT</b> payment for <b style="color:#fff;">${esc(d.brandName)}</b>. Our team is now verifying your transaction on-chain.`)}
+        ${h1('Payment received')}
+        ${greet(d.buyerName)}
+        ${p(`Thank you — we have received your ${gold(`$${esc(d.amount)} USDT`)} payment for ${w(esc(d.brandName))}. Our team is now verifying the transaction, which usually takes a few hours.`)}
         ${statRow([
           { label: 'BRAND', value: esc(d.brandName) },
-          { label: 'AMOUNT', value: `$${esc(d.amount)}` },
+          { label: 'AMOUNT PAID', value: `$${esc(d.amount)}` },
           { label: 'REFERENCE', value: esc(d.claimRef) },
         ])}
-        ${p(`Once verified, your brand goes <b style="color:#fff;">live on the leaderboard</b> — and we'll email your <b style="color:#F5C044;">login credentials</b> (your email is your login ID) plus your <b style="color:#F5C044;">IB / member number</b> right away.`)}
-        ${note(`⏱️ Verification usually takes a few hours. You'll hear from us the moment your brand is live — no need to do anything else right now.`)}
-        ${cta(`${APP_URL}/leaderboard`, 'Watch the live board 👀')}`,
+        ${p(`Once verified, ${w(esc(d.brandName))} goes live on the leaderboard. We will then email your login details — your email address is your login ID — together with your IB member number.`)}
+        ${note(`There is nothing you need to do right now. We will write to you the moment your brand is live.`)}
+        ${cta(`${APP_URL}/leaderboard`, 'View the leaderboard')}`,
     }),
   }),
 
   // ── 2. Admin: new payment needs verification ───────────────────────────
   'admin-payment-alert': (d) => ({
-    subject: `💰 New payment: $${d.amount} — ${d.brandName} needs verification`,
+    subject: `Action needed — verify $${d.amount} payment from ${d.brandName}`,
     html: wrap({
-      title: 'New payment', preheader: `${d.brandName} paid $${d.amount}. Review the proof and approve from /admin.`,
+      title: 'New payment to verify', preheader: `${d.brandName} paid $${d.amount}. Review the proof and decide from /admin.`,
       body: `
-        ${h1(`💰 New payment received`)}
-        ${p(`<b style="color:#fff;">${esc(d.brandName)}</b> just paid <b style="color:#F5C044;">$${esc(d.amount)} USDT</b> (${esc(d.network)}). Verify the transaction, then approve it from the admin dashboard.`)}
+        ${h1('New payment to verify')}
+        ${p(`${w(esc(d.brandName))} has submitted a ${gold(`$${esc(d.amount)} USDT`)} payment (${esc(d.network)}). Please review the transaction proof, then approve or reject it from the admin dashboard.`)}
         ${statRow([
           { label: 'AMOUNT', value: `$${esc(d.amount)}` },
           { label: 'NETWORK', value: esc(d.network) },
-          { label: 'REF', value: esc(d.claimRef) },
+          { label: 'REFERENCE', value: esc(d.claimRef) },
         ])}
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0E1428;border:1px solid #2A3350;border-radius:14px;margin:16px 0;">
-        <tr><td style="padding:14px 18px;font-size:13.5px;color:#C6CBE4;line-height:2;">
-        <b style="color:#8A91B5;">Buyer:</b> ${esc(d.buyerName)} &lt;${esc(d.buyerEmail)}&gt;<br>
-        <b style="color:#8A91B5;">TX ID:</b> <span style="font-family:ui-monospace,Menlo,monospace;">${esc(d.txId || '—')}</span><br>
-        <b style="color:#8A91B5;">Screenshot:</b> ${d.hasScreenshot ? '✅ attached in submission' : '—'}<br>
-        <b style="color:#8A91B5;">Submitted:</b> ${esc(d.submittedAt)}
-        </td></tr></table>
-        ${note(`Approving auto-sends the buyer their live email with <b>rank, spot URL, login credentials and IB number</b>. Rejecting sends a polite rejection email with your note.`)}
-        ${cta(`${APP_URL}/admin`, 'Open admin dashboard →')}`,
+        ${kv([
+          ['Buyer', `${esc(d.buyerName)} &lt;${esc(d.buyerEmail)}&gt;`],
+          ['TX ID', `<span style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;">${esc(d.txId || '—')}</span>`],
+          ['Screenshot', d.hasScreenshot ? 'Received with submission' : 'Not provided'],
+          ['Submitted', esc(d.submittedAt)],
+        ])}
+        ${note(`Approving publishes the brand and sends the buyer their live email — rank, spot page, login details and IB number. Rejecting sends a polite email including your note.`)}
+        ${cta(`${APP_URL}/admin`, 'Open admin dashboard')}`,
     }),
   }),
 
-  // ── 3. Buyer: approved — you're LIVE + credentials ─────────────────────
+  // ── 3. Buyer: approved — you're LIVE + credentials (flagship) ──────────
   'member-approved': (d) => ({
-    subject: `🎉 ${d.brandName} is LIVE at #${d.rank} — your login details inside`,
+    subject: `${d.brandName} is live on FlexSpot — rank #${d.rank}`,
     html: wrap({
-      title: 'You are live!', preheader: `${d.brandName} is live on FlexSpot at rank #${d.rank}. Your login credentials and IB number are inside.`,
+      title: 'You are live on FlexSpot', preheader: `${d.brandName} is live at rank #${d.rank}. Your login details and member number are inside.`,
       body: `
-        ${h1(`🎉 You're live, ${esc(d.buyerName)}!`)}
-        ${p(`Our team verified your payment — <b style="color:#fff;">${esc(d.brandName)}</b> is now on the FlexSpot leaderboard.`)}
+        ${h1('You are live on FlexSpot')}
+        ${greet(d.buyerName)}
+        ${p(`Good news — your payment has been verified, and ${w(esc(d.brandName))} is now on the FlexSpot leaderboard.`)}
         ${statRow([
           { label: 'YOUR RANK', value: `#${esc(d.rank)}` },
           { label: 'SPOT VALUE', value: `$${esc(d.amount)}` },
-          { label: 'IB / MEMBER №', value: esc(d.ib) },
+          { label: 'MEMBER №', value: esc(d.ib) },
         ])}
-        ${p(`👀 <b style="color:#fff;">Check your brand live here:</b><br><a href="${d.spotUrl}" style="color:#F5C044;font-weight:700;word-break:break-all;">${esc(d.spotUrl)}</a>`)}
+        ${p(`Your brand page:<br><a href="${d.spotUrl}" style="color:${C.gold};font-weight:700;word-break:break-all;">${esc(d.spotUrl)}</a>`)}
         ${credBox(d.email, d.password, d.ib)}
-        ${note(`🚀 <b style="color:#fff;">Want to climb higher?</b> Anyone can boost your brand from $1 — share your spot URL and every boost pushes you up the board. Plus you earn <b style="color:#F5C044;">20% instant commission</b> on every payment from people you refer.`)}
-        ${cta(`${APP_URL}/dashboard`, 'Log in to your dashboard →')}`,
+        ${note(`Two ways to move up from here: share your brand page to bring in more visitors — every verified boost moves you up the board — and refer other brands: you earn ${gold('20% commission')} on every verified payment they make.`)}
+        ${cta(`${APP_URL}/dashboard`, 'Log in to your dashboard')}`,
     }),
   }),
 
   // ── 4. Buyer: rejected ─────────────────────────────────────────────────
   'member-rejected': (d) => ({
-    subject: `About your FlexSpot submission for ${d.brandName}`,
+    subject: `Update on your FlexSpot submission for ${d.brandName}`,
     html: wrap({
-      title: 'Submission update', preheader: `Your submission for ${d.brandName} needs attention.`,
+      title: 'Submission update', preheader: `Your submission for ${d.brandName} needs attention — details inside.`,
       body: `
-        ${h1(`Quick update on ${esc(d.brandName)}`)}
-        ${p(`Hi ${esc(d.buyerName)} — our team reviewed your submission, but we couldn't approve it this time.`)}
-        ${d.reason ? note(`<b style="color:#fff;">Reason from our team:</b><br>${esc(d.reason)}`) : ''}
-        ${p(`This is usually fixable — most often it's a missing or unclear payment screenshot. Reply to this email or submit again at <a href="${APP_URL}/claim" style="color:#F5C044;font-weight:700;">flexspot.lol/claim</a> and we'll get you live.`)}
-        ${cta(`${APP_URL}/claim`, 'Try again →')}`,
+        ${h1('An update on your submission')}
+        ${greet(d.buyerName)}
+        ${p(`Thank you for submitting ${w(esc(d.brandName))} to FlexSpot. After review, we were not able to approve it this time.`)}
+        ${d.reason ? note(`${w('Feedback from our team:')}<br>${esc(d.reason)}`) : ''}
+        ${p(`This is usually straightforward to resolve — most often it is a missing or unclear payment screenshot. You are welcome to submit again and we will review it promptly.`)}
+        ${cta(`${APP_URL}/claim`, 'Submit again')}`,
     }),
   }),
 
-  // ── 5. Engagement: welcome drip (day 1) ────────────────────────────────
+  // ── 5. Engagement: welcome (day 1) ─────────────────────────────────────
   'welcome': (d) => ({
-    subject: `Welcome to the spotlight, ${d.buyerName} 👑`,
+    subject: `Welcome to FlexSpot, ${d.buyerName} — three ways to climb`,
     html: wrap({
-      title: 'Welcome!', preheader: `3 moves to climb the FlexSpot board with ${d.brandName}.`,
+      title: 'Welcome to FlexSpot', preheader: `${d.brandName} is live. Here is how to make the most of your spot.`,
       body: `
-        ${h1(`Welcome to the spotlight 👑`)}
-        ${p(`${esc(d.brandName)} is live — now let's make the internet look. Here are the 3 moves every climber makes:`)}
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;">
-        ${[
-          ['📣', 'Share your spot URL', `Post <a href="${d.spotUrl}" style="color:#F5C044;font-weight:700;">your brand page</a> everywhere — every visitor counts.`],
-          ['⚡', 'Get boosted', 'Fans can boost you from $1. One dollar more than the brand above you steals their rank.'],
-          ['💰', 'Refer & earn 20%', 'Your referral link pays <b style="color:#F5C044;">20% instant commission</b> on every payment from people you bring.'],
-        ].map(([e, t, x]) => `<tr><td style="padding:10px 0;vertical-align:top;font-size:22px;width:40px;">${e}</td><td style="padding:10px 0;"><div style="font-size:15px;color:#fff;font-weight:700;">${t}</div><div style="font-size:13.5px;color:#C6CBE4;line-height:1.6;">${x}</div></td></tr>`).join('')}
-        </table>
-        ${p(`Your IB / member number is <b style="color:#F5C044;font-family:ui-monospace,Menlo,monospace;">${esc(d.ib)}</b> — quote it anytime you talk to our team.`)}
-        ${cta(d.spotUrl, 'View my brand page →')}`,
+        ${h1('Welcome to FlexSpot')}
+        ${greet(d.buyerName)}
+        ${p(`${w(esc(d.brandName))} is live on the leaderboard. Here are three simple ways to get the most from your spot:`)}
+        ${steps([
+          ['Share your page', `Your brand page is your stage: <a href="${d.spotUrl}" style="color:${C.gold};font-weight:700;word-break:break-all;">${esc(d.spotUrl)}</a>. Every visitor sees your brand on the board.`],
+          ['Get boosted', 'Anyone can boost your brand from $1 — each verified boost moves you up the leaderboard.'],
+          ['Refer and earn 20%', `Invite other brands with your referral link and earn ${gold('20% commission')} on every verified payment they make.`],
+        ])}
+        ${p(`Your member number is ${gold(`<span style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;">${esc(d.ib)}</span>`)} — please quote it in any message to our team so we can help you faster.`)}
+        ${cta(d.spotUrl, 'View my brand page')}`,
     }),
   }),
 
   // ── 6. Engagement: rank milestone ──────────────────────────────────────
   'rank-milestone': (d) => ({
-    subject: `🏆 ${d.brandName} just hit #${d.rank} on FlexSpot!`,
+    subject: `${d.brandName} climbed to rank #${d.rank} on FlexSpot`,
     html: wrap({
-      title: 'Rank up!', preheader: `${d.brandName} climbed to #${d.rank}. Keep the momentum going.`,
+      title: 'Rank up', preheader: `${d.brandName} is now rank #${d.rank}. Keep the momentum going.`,
       body: `
-        ${h1(`🏆 You climbed to #${esc(d.rank)}!`)}
-        ${p(`Big news, ${esc(d.buyerName)} — <b style="color:#fff;">${esc(d.brandName)}</b> just moved up to <b style="color:#F5C044;">rank #${esc(d.rank)}</b> on the FlexSpot leaderboard.`)}
+        ${h1(`You climbed to #${esc(d.rank)}`)}
+        ${greet(d.buyerName)}
+        ${p(`${w(esc(d.brandName))} just moved up to ${gold(`rank #${esc(d.rank)}`)} on the FlexSpot leaderboard — congratulations.`)}
         ${statRow([
           { label: 'NEW RANK', value: `#${esc(d.rank)}` },
           { label: 'SPOT VALUE', value: `$${esc(d.amount)}` },
         ])}
-        ${note(`The top 10 gets 80% of all clicks. One boost from a fan could take you even higher — share your page while you're hot 🔥`)}
-        ${cta(d.spotUrl, 'See it live →')}`,
+        ${note(`Momentum matters: brands that keep sharing their page bring in more visitors, and every verified boost can take you higher.`)}
+        ${cta(d.spotUrl, 'See it live')}`,
     }),
   }),
 
@@ -169,19 +246,20 @@ export const TEMPLATES = {
   'weekly-digest': (d) => {
     const rankLabel = d.rank == null ? 'LIVE' : `#${d.rank}`;
     return {
-    subject: d.rank == null ? `Your FlexSpot week: ${d.brandName} 📊` : `Your FlexSpot week: ${d.brandName} at #${d.rank} 📊`,
+    subject: d.rank == null ? `Your week on FlexSpot: ${d.brandName}` : `Your week on FlexSpot: ${d.brandName} at #${d.rank}`,
     html: wrap({
-      title: 'Weekly digest', preheader: `How ${d.brandName} did this week on FlexSpot.`,
+      title: 'Weekly digest', preheader: `How ${d.brandName} performed this week on FlexSpot.`,
       body: `
-        ${h1(`Your week on FlexSpot 📊`)}
-        ${p(`Hi ${esc(d.buyerName)} — here's how <b style="color:#fff;">${esc(d.brandName)}</b> is doing:`)}
+        ${h1('Your week on FlexSpot')}
+        ${greet(d.buyerName)}
+        ${p(`Here is how ${w(esc(d.brandName))} is doing:`)}
         ${statRow([
           { label: 'RANK', value: esc(rankLabel) },
           { label: 'SPOT VALUE', value: `$${esc(d.amount)}` },
           { label: 'PROFILE VIEWS', value: esc(d.views) },
         ])}
-        ${p(d.rankUp ? `📈 You're <b style="color:#F5C044;">up ${esc(d.rankUp)} places</b> this week — the momentum is real.` : `💡 Tip: brands that share their spot URL weekly climb 3× faster. Your page: <a href="${d.spotUrl}" style="color:#F5C044;font-weight:700;word-break:break-all;">${esc(d.spotUrl)}</a>`)}
-        ${cta(d.spotUrl, 'Check my rank →')}`,
+        ${p(d.rankUp ? `You are ${gold(`up ${esc(d.rankUp)} places`)} this week — strong momentum.` : `A simple tip: sharing your brand page regularly is the easiest way to bring in more visitors. Your page: <a href="${d.spotUrl}" style="color:${C.gold};font-weight:700;word-break:break-all;">${esc(d.spotUrl)}</a>`)}
+        ${cta(d.spotUrl, 'Check my rank')}`,
     }),
   };},
 };

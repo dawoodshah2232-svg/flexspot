@@ -8,7 +8,7 @@ import { getPost, publicPosts } from './blog';
 
 // Canonical production URL. Overridden at build time by VITE_SITE_URL
 // (preview builds point at the GitHub Pages URL).
-export const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://flexspot.lol').replace(/\/+$/, '');
+export const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://www.flexspot.lol').replace(/\/+$/, '');
 export const OG_IMAGE = `${SITE_URL}/og-cover.png`;
 
 const url = (path) => `${SITE_URL}${path}`;

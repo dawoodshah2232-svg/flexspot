@@ -216,7 +216,7 @@ export default function Dashboard({ spots = [], onClaim }) {
           </p>
         </div>
         {spot && (
-          <Link to={`/s/${spot.slug}`} className="btn-ghost px-4 py-2.5 text-sm">View public profile →</Link>
+          <Link to={`/s/${spot.slug}`} className="btn-ghost px-4 py-2.5 text-sm max-sm:basis-full max-sm:text-center">View public profile →</Link>
         )}
         <button
           onClick={() => { clearMember(); window.location.href = import.meta.env.BASE_URL; }}

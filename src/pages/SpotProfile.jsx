@@ -288,7 +288,7 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
 
           <div className="bg-card border border-line/5 rounded-3xl p-6">
             <h2 className="font-display font-bold text-lg text-snow mb-1">📣 Help {spot.name} reach #1</h2>
-            <p className="text-mist text-sm mb-4">Share this page — every visit and boost pushes them higher.</p>
+            <p className="text-mist text-sm mb-4">Share this page — every boost pushes them higher.</p>
             <ShareButtons spot={spot} refCode={myCode} />
           </div>
 

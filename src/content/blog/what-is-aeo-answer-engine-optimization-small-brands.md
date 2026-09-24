@@ -45,7 +45,7 @@ Short declarative sentences with numbers get lifted verbatim. "Google Ads costs 
 
 ### 3. Use FAQ sections and structured data
 
-Every article on this blog carries FAQ schema and clear Q&A formatting — that's machine-readable answer fuel. Add an `llms.txt` file to your site (we have one) so AI crawlers understand what you are in one read.
+Use FAQ sections with clear Q&A formatting — questions as headings, direct answers beneath. That's machine-readable answer fuel. Add an `llms.txt` file to your site (we have one) so AI crawlers understand what you are in one read.
 
 ### 4. Be the source of original claims
 

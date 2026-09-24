@@ -10,17 +10,34 @@ import ClaimPage from './pages/ClaimPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import HowItWorks from './pages/HowItWorks';
 import Rewards from './pages/Rewards';
+import ErrorBoundary from './components/ErrorBoundary';
+// Chunk filenames change on every deploy. If a code-split chunk 404s because
+// the tab holds HTML from the previous deploy, reload once to fetch fresh
+// HTML instead of dying on a black page. The ErrorBoundary below is the
+// second net: any render crash shows a reload card, never a dead screen.
+function lazyRetry(importFn) {
+  return React.lazy(() =>
+    importFn().catch((err) => {
+      const key = 'flexspot_chunk_retry_v1';
+      if (!sessionStorage.getItem(key)) {
+        sessionStorage.setItem(key, '1');
+        window.location.reload();
+      }
+      throw err;
+    })
+  );
+}
 // Compare + Calculator are code-split like the blog — they never touch first paint.
-const ComparePage = React.lazy(() => import('./pages/ComparePage'));
-const CalculatorPage = React.lazy(() => import('./pages/CalculatorPage'));
+const ComparePage = lazyRetry(() => import('./pages/ComparePage'));
+const CalculatorPage = lazyRetry(() => import('./pages/CalculatorPage'));
 import FAQ from './pages/FAQ';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import Disclaimers from './pages/Disclaimers';
 import SpotProfile from './pages/SpotProfile';
 import TopReferrersPage from './pages/TopReferrersPage';
-const Dashboard = React.lazy(() => import('./pages/Dashboard'));
-const Admin = React.lazy(() => import('./pages/Admin'));
+const Dashboard = lazyRetry(() => import('./pages/Dashboard'));
+const Admin = lazyRetry(() => import('./pages/Admin'));
 import { fetchLeaderboard, fetchPendingSpots, rank, saveRankSnapshot, IS_LIVE } from './lib/store';
 import { LIVE_FEED_POOL } from './lib/data';
 
@@ -37,8 +54,8 @@ import SecurityGuard from './components/SecurityGuard';
 import PageHead from './components/PageHead';
 
 // Blog engine — code-split so the markdown bundle never touches first paint.
-const Blog = React.lazy(() => import('./pages/Blog'));
-const BlogPost = React.lazy(() => import('./pages/BlogPost'));
+const Blog = lazyRetry(() => import('./pages/Blog'));
+const BlogPost = lazyRetry(() => import('./pages/BlogPost'));
 
 function BlogFallback() {
   return (
@@ -167,6 +184,7 @@ function Shell() {
       <SecurityGuard />
       <Header onClaim={openClaim} />
       <main>
+        <ErrorBoundary>
         <Routes>
           <Route path="/" element={<Home spots={spots} onClaim={openClaim} onBoost={openBoost} viewers={online.length} />} />
           <Route path="/claim" element={<ClaimPage spots={spots} onSubmitted={onSubmitted} />} />
@@ -195,6 +213,7 @@ function Shell() {
           <Route path="/:slug" element={<RootProfile spots={spots} onClaim={openClaim} onBoost={openBoost} />} />
           <Route path="*" element={<NotFound onClaim={openClaim} />} />
         </Routes>
+        </ErrorBoundary>
       </main>
       <Footer onClaim={openClaim} />
       <MobileNav onClaim={openClaim} />

@@ -187,40 +187,68 @@ export default function Podium({ spots, onBoost }) {
       <div className="absolute inset-x-0 -top-8 bottom-0 pointer-events-none" aria-hidden="true">
         <div className="absolute left-1/2 -translate-x-1/2 top-0 w-[300px] sm:w-[560px] h-[280px] bg-[var(--gold)]/15 blur-[100px] rounded-full" />
       </div>
-      {/* Mobile: compact top-3 list — the full podium is far too tall for phones */}
+      {/* Mobile: the throne + the challengers — compact but unmissable */}
       <div className="relative sm:hidden max-w-4xl mx-auto">
         <div className="flex justify-center mb-4">
           <span className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.22em] px-5 py-2 rounded-full bg-[#F59E0B]/15 text-[#B45309] dark:text-[#FCD34D] border border-[#F59E0B]/40">
             👑 Top 3 this week
           </span>
         </div>
+
+        {/* #1 — the throne: dark, gold, unmissable */}
+        {first && (
+          <div className="relative mt-8">
+            <div className="absolute -top-8 left-1/2 -translate-x-1/2 z-10 text-5xl crown-bob drop-shadow-[0_6px_16px_rgba(245,158,11,0.9)] pointer-events-none" aria-hidden="true">👑</div>
+            <div className="relative rounded-3xl overflow-hidden border-2 border-[#FBBF24] podium-champion shadow-[0_0_44px_-8px_rgba(251,191,36,0.55)]">
+              <div className="podium-shine" aria-hidden="true" />
+              <Link to={`/s/${first.slug}`} className="block px-5 pt-6 pb-4 text-center">
+                <div className="text-[10px] font-black uppercase tracking-[0.28em] text-[#FCD34D]">Reigning champion</div>
+                <div className="flex justify-center mt-3">
+                  <BrandAvatar spot={first} size={72} ring />
+                </div>
+                <div className="font-display font-extrabold text-2xl text-white mt-2 truncate">{first.name}</div>
+                <div className="text-sm text-[#FCD34D] truncate">{first.tagline}</div>
+                <div className="flex items-center justify-center gap-4 mt-3">
+                  <div>
+                    <div className="font-display font-black text-3xl text-[#FCD34D]">{money(displayAmount(first.amount))}</div>
+                    <div className="text-[10px] uppercase tracking-widest text-white/60 font-bold">spot value</div>
+                  </div>
+                  <div className="w-px h-10 bg-white/20" />
+                  <div>
+                    <div className="font-display font-black text-3xl text-white">{compact(first.views)}</div>
+                    <div className="text-[10px] uppercase tracking-widest text-white/60 font-bold">views</div>
+                  </div>
+                </div>
+              </Link>
+              <div className="px-5 pb-5">
+                <button onClick={() => onBoost(first)} className="btn-gold w-full py-3.5 text-sm font-extrabold">
+                  ⚡ Defend the crown
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* #2 / #3 — the challengers, coming for the throne */}
+        <div className="flex items-center gap-2 mt-6 mb-3 px-1">
+          <span className="text-[11px] font-black uppercase tracking-[0.22em] text-[var(--ink-3)]">⚔️ The challengers</span>
+          <span className="flex-1 h-px bg-[var(--line)]" aria-hidden="true" />
+        </div>
         <div className="space-y-2.5">
-          {spots.map((s, i) => s && (
+          {[second, third].map((s, idx) => s && (
             <Link key={s.slug} to={`/s/${s.slug}`} className="card card-lift flex items-center gap-3 p-3">
-              <span className={`grid place-items-center w-9 h-9 rounded-full font-display font-black text-sm shrink-0 shadow ${medalCls(i + 1)}`}>
-                {i + 1}
+              <span className={`grid place-items-center w-9 h-9 rounded-full font-display font-black text-sm shrink-0 shadow ${medalCls(idx + 2)}`}>
+                {idx + 2}
               </span>
               <BrandAvatar spot={s} size={44} />
               <div className="min-w-0 flex-1">
-                <div className="font-display font-bold text-[15px] text-[var(--ink)] truncate">
-                  {i === 0 ? '👑 ' : ''}{s.name}
-                </div>
-                <div className="text-xs text-[var(--ink-2)] truncate">{s.tagline}</div>
+                <div className="font-display font-bold text-[15px] text-[var(--ink)] truncate">{s.name}</div>
+                <div className="text-xs text-[var(--ink-3)] truncate">{money(displayAmount(s.amount))} · 👁 {compact(s.views)} views</div>
               </div>
-              <div className="text-right shrink-0">
-                <div className="font-display font-black text-[15px] text-[var(--blaze-deep)] dark:text-[#FF8A66] whitespace-nowrap">
-                  {money(displayAmount(s.amount))}
-                </div>
-                <div className="text-[10px] text-[var(--ink-3)] font-semibold">👁 {compact(s.views)}</div>
-              </div>
+              <span className="shrink-0 text-[11px] font-extrabold text-[var(--blaze)] border border-[var(--blaze)]/40 rounded-full px-3 py-1.5">⚔️ Challenge</span>
             </Link>
           ))}
         </div>
-        {first && onBoost && (
-          <button onClick={() => onBoost(first)} className="btn-gold w-full py-3.5 mt-4 text-sm font-extrabold">
-            ⚡ Defend the crown
-          </button>
-        )}
       </div>
 
       {/* Desktop / tablet: the full dramatic podium */}

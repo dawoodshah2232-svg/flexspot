@@ -270,8 +270,7 @@ const PR_CSS = `<style>
 .pr-footer{margin-top:24px;font-size:13px;color:#888;border-top:1px solid #eee;padding-top:16px}
 </style>`;
 
-function buildPage(path, meta) {
-  const template = readFileSync(join(DIST, 'index.html'), 'utf8');
+function buildPage(template, path, meta) {
   const faqs = GEO_FAQS[meta.faqKey] || [];
   let html = template;
   // Head: title / description / canonical (answer-first, crawler-readable).
@@ -308,9 +307,13 @@ function main() {
     console.error('prerender-seo: dist/index.html not found — run after `vite build`.');
     process.exit(1);
   }
+  // Read the pristine SPA shell ONCE — the loop overwrites dist/index.html
+  // with the home page, so re-reading it per route would leak home content
+  // into every other route.
+  const template = readFileSync(join(DIST, 'index.html'), 'utf8');
   let count = 0;
   for (const [path, meta] of Object.entries(META)) {
-    const html = buildPage(path, meta);
+    const html = buildPage(template, path, meta);
     const outPath =
       path === '/' ? join(DIST, 'index.html') : join(DIST, path.slice(1), 'index.html');
     mkdirSync(dirname(outPath), { recursive: true });

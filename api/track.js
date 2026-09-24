@@ -109,7 +109,8 @@ async function onlineList(store) {
   const stale = [];
   for (const [vid, s] of Object.entries(raw)) {
     try {
-      const o = JSON.parse(s);
+      // @vercel/kv auto-deserializes JSON values — handle both shapes
+      const o = typeof s === 'string' ? JSON.parse(s) : s;
       if (now - o.ts < ONLINE_WINDOW_MS) out.push({ vid, page: o.page || '/', dev: o.dev || 'mobile', ts: o.ts });
       else stale.push(vid);
     } catch { stale.push(vid); }
@@ -166,7 +167,9 @@ export default async function handler(req, res) {
       const vid = cleanVid(q.trail);
       if (!vid) return json(res, 400, { ok: false });
       const raw = await store.lrange(K.trail(vid), 0, 80);
-      const trail = (raw || []).map((s) => { try { return JSON.parse(s); } catch { return null; } }).filter(Boolean);
+      const trail = (raw || []).map((s) => {
+        try { return typeof s === 'string' ? JSON.parse(s) : s; } catch { return null; }
+      }).filter(Boolean);
       return json(res, 200, { ok: true, vid, trail });
     }
 

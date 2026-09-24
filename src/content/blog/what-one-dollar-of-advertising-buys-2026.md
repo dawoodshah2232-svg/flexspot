@@ -39,7 +39,7 @@ Why does this work? Because leaderboards turn advertising into a **spectator spo
 
 ## What $1 CAN buy: a referral engine
 
-The second thing $1 unlocks on FlexSpot is membership economics. Every member gets a personal referral link. Every visit through that link earns $1 and pushes the referrer up the public Top Referrers board. So your single dollar doesn't just buy placement — it buys you into a system where **other people are financially motivated to send you traffic**.
+The second thing $1 unlocks on FlexSpot is affiliate economics. Every member gets a personal referral link. When someone joins through your link and pays — for anything on the platform — you earn **20% instant commission on every payment**, straight to your wallet (withdrawable in USDT from $20). So your single dollar doesn't just buy placement — it buys you into a system where **you're financially motivated to grow the pie**.
 
 Compare that to the $1 you hand Meta: 80 impressions, zero clicks, zero residual value. The dollar you put into a referral-driven leaderboard keeps working because the incentive structure keeps working.
 

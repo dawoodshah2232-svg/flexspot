@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
 import { topReferrers } from '../lib/referral';
-import { money } from '../lib/format';
+import { money2 } from '../lib/format';
 
-// Homepage Top Referrers — the names behind the visits. Every visit through
-// a referral link adds $1 to the backed spot's total.
+// Homepage Top Referrers — ranked by affiliate performance: members referred
+// and 20% instant commission earned on their payments.
 // #1 gets a premium VIP row, #2/#3 get elite top-referrer cards, #4–#10 stay
 // compact. "See more" opens the full /top-referrers board.
 export default function TopReferrers() {
@@ -18,8 +18,8 @@ export default function TopReferrers() {
           🏆 Top referrers
         </h2>
         <p className="text-[var(--ink-2)] mt-2 text-sm max-w-xl mx-auto">
-          They bring the crowd — every visit through their link adds{' '}
-          <b className="text-[var(--ink)]">$1</b> to the brand they back. No signup needed, just a visit.
+          They bring the people — every member who joins through their link earns{' '}
+          them <b className="text-[var(--ink)]">20% instant commission</b> on every payment.
         </p>
       </div>
 
@@ -40,8 +40,8 @@ export default function TopReferrers() {
               <div className="text-[11px] text-[var(--ink-3)] truncate">Most trusted traffic source on FlexSpot</div>
             </div>
             <div className="text-right shrink-0">
-              <div className="font-display font-black text-xl text-[#B45309]">+{money(first.earned)}</div>
-              <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--ink-3)]">{first.visits} visits</div>
+              <div className="font-display font-black text-xl text-[#B45309]">+{money2(first.commission)}</div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--ink-3)]">{first.members} members</div>
             </div>
           </div>
         </div>
@@ -62,8 +62,8 @@ export default function TopReferrers() {
                 </span>
               </div>
               <div className="text-right shrink-0">
-                <div className="font-display font-black text-[#B45309]">+{money(r.earned)}</div>
-                <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--ink-3)]">{r.visits} visits</div>
+                <div className="font-display font-black text-[#B45309]">+{money2(r.commission)}</div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--ink-3)]">{r.members} members</div>
               </div>
             </div>
           ))}
@@ -75,8 +75,8 @@ export default function TopReferrers() {
             <div key={r.name} className="flex items-center gap-3 px-4 py-2.5">
               <span className="font-display font-black text-[var(--ink-3)] w-7 text-center shrink-0 text-sm">#{r.rank}</span>
               <span className="font-bold text-sm text-[var(--ink)] flex-1 truncate">{r.name}</span>
-              <span className="text-[11px] font-bold text-[var(--ink-3)] shrink-0">{r.visits} visits</span>
-              <span className="font-display font-black text-sm text-[#B45309] shrink-0 w-14 text-right">+{money(r.earned)}</span>
+              <span className="text-[11px] font-bold text-[var(--ink-3)] shrink-0">{r.members} members</span>
+              <span className="font-display font-black text-sm text-[#B45309] shrink-0 w-20 text-right">+{money2(r.commission)}</span>
             </div>
           ))}
         </div>

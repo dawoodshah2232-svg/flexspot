@@ -64,7 +64,7 @@ export const META = {
   '/rewards': {
     title: 'Rewards — Boosts, Referrals & Crowns | FlexSpot.LOL',
     description:
-      'FlexSpot rewards: earn your place with boosts, referral links that add $1 per visit, and the champion crown for the top spot.',
+      'FlexSpot rewards: earn your place with boosts, 20% instant affiliate commission on referred payments, and the champion crown for the top spot.',
   },
   '/compare': {
     title: 'Spot vs Spot — Compare Brands Head-to-Head | FlexSpot.LOL',
@@ -79,7 +79,7 @@ export const META = {
   '/top-referrers': {
     title: 'Top Referrers — The People Behind the Traffic | FlexSpot.LOL',
     description:
-      'Meet FlexSpot’s top referrers: every visit through their personal link adds $1 to the brand they back. Get your own referral link from $1.',
+      'Meet FlexSpot’s top referrers: members who earn 20% instant commission on every payment from people who join through their link.',
   },
   '/dashboard': {
     title: 'Member Dashboard — Wallet, Referrals & My Spot | FlexSpot.LOL',

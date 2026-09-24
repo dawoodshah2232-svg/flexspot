@@ -8,7 +8,7 @@ import { money, compact, timeAgo, copyText, spotPath } from '../lib/format';
 import { displayAmount } from '../lib/display';
 import { trackEvent } from '../lib/analytics';
 import { REWARDS } from '../lib/data';
-import { recordClick, recordReferralClick, recordVisit, getContributions, createReferralIdentity, myReferralCode, creditReferralVisit, getSpotReferrers } from '../lib/store';
+import { recordClick, recordReferralClick, recordVisit, getContributions, createReferralIdentity, myReferralCode, trackReferralVisit, getSpotReferrers } from '../lib/store';
 import Flee from '../components/Flee';
 import CelebrationBurst from '../components/CelebrationBurst';
 
@@ -43,15 +43,15 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
   const [refCredit, setRefCredit] = useState(null);
   const spot = spots.find((s) => s.slug === slug);
 
-  // Incoming referral visit: +$1 to this spot's total, once per visitor per day.
-  // creditReferralVisit is idempotent per day, so re-runs are harmless.
+  // Incoming referral visit: counted for attribution (once per visitor per day).
+  // trackReferralVisit is idempotent per day, so re-runs are harmless.
   const refParam = params.get('ref');
   useEffect(() => {
     setMyCode(spot ? myReferralCode(spot.slug) : null);
     setRefCredit(null);
     if (!spot) return;
     if (!refParam) return;
-    const res = creditReferralVisit(refParam, spot.slug);
+    const res = trackReferralVisit(refParam, spot.slug);
     if (res.ok && !res.already) {
       setRefCredit({ name: res.name });
       if (refresh) refresh();
@@ -73,8 +73,8 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
   const supporters = useMemo(() => (spot ? getSpotReferrers(spot.slug, 5) : []), [spot?.slug, refCredit, myCode]); // eslint-disable-line react-hooks/exhaustive-deps
   // Your own stats must search ALL referrers, not just the top 5 shown above.
   const myStats = useMemo(() => {
-    if (!spot || !myCode) return { visits: 0, earned: 0 };
-    return getSpotReferrers(spot.slug, 1000).find((r) => r.code === myCode) || { visits: 0, earned: 0 };
+    if (!spot || !myCode) return { visits: 0 };
+    return getSpotReferrers(spot.slug, 1000).find((r) => r.code === myCode) || { visits: 0 };
   }, [spot?.slug, refCredit, myCode]); // eslint-disable-line react-hooks/exhaustive-deps
   const contribs = useMemo(() => (spot ? getContributions(spot.slug) : []), [spot, spots]);
   const badges = useMemo(() => REWARDS.filter((r) => { try { return r.check(spots) === spot?.slug; } catch { return false; } }), [spots, spot]);
@@ -173,7 +173,7 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
               <div>
                 <div className="font-bold text-snow text-sm">You arrived through {refCredit.name}'s link!</div>
                 <p className="text-mist text-sm mt-1 leading-relaxed">
-                  {refCredit.name} just earned <b className="text-[#FCD34D]">$1</b> for {spot.name} — every visit through a referral link adds $1 to the total.
+                  If you join through this link and pay, {refCredit.name} earns <b className="text-[#FCD34D]">20% commission</b>.
                 </p>
               </div>
             </motion.div>
@@ -294,11 +294,11 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
 
           {/* referral rewards */}
           <div className="rounded-3xl bg-gradient-to-br from-[var(--blaze-soft)] to-card border border-[var(--blaze)] p-6">
-            <h2 className="font-display font-bold text-lg text-snow mb-1">🔗 Refer & add $1 per visit</h2>
+            <h2 className="font-display font-bold text-lg text-snow mb-1">🔗 Refer & earn 20%</h2>
             <p className="text-mist text-sm mb-4">
-              Create your personal link and share it anywhere — Facebook, Telegram, WhatsApp.
-              Every visit through it adds <b className="text-snow">$1</b> to {spot.name}'s total
-              and puts your name on the supporters board. Counts once per friend per day.
+              Create your personal affiliate link and share it anywhere — Facebook, Telegram, WhatsApp.
+              When someone joins through it and pays, you earn <b className="text-snow">20% instant commission</b> on
+              every payment, and your name goes on the supporters board.
             </p>
             {myCode ? (
               <>
@@ -309,7 +309,7 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
                 <div className="grid grid-cols-3 gap-3">
                   {[
                     { l: 'Visits brought', v: myStats.visits },
-                    { l: '$ earned', v: '$' + myStats.earned },
+                    { l: 'Commission rate', v: '20%' },
                     { l: 'Rank right now', v: '#' + spot.rank },
                   ].map((s) => (
                     <div key={s.l} className="bg-ink/50 rounded-2xl p-3 text-center">
@@ -347,7 +347,7 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
           </div>
           <div className="bg-card border border-line/5 rounded-3xl p-5">
             <h3 className="font-display font-bold text-snow mb-1">⭐ Top supporters</h3>
-            <p className="text-mist text-xs mb-3">Their links brought visitors — each visit added $1.</p>
+            <p className="text-mist text-xs mb-3">Their links brought visitors to this spot.</p>
             {supporters.length ? (
               <div className="space-y-2">
                 {supporters.map((r, i) => (
@@ -359,7 +359,7 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
                       <div className="text-sm font-bold text-snow truncate">{r.name}</div>
                       <div className="text-[11px] text-mist">{r.visits} visit{r.visits === 1 ? '' : 's'} brought</div>
                     </div>
-                    <div className="font-black text-[#FCD34D] text-sm shrink-0">+${r.earned}</div>
+
                   </div>
                 ))}
               </div>

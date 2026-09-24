@@ -574,16 +574,14 @@ function ReferralsTab({ referrals }) {
   const totals = useMemo(() => ({
     codes: referrals.length,
     visits: referrals.reduce((a, r) => a + (r.visits || 0), 0),
-    earned: referrals.reduce((a, r) => a + (r.earned || 0), 0),
   }), [referrals]);
   return (
     <div>
       <h2 className="font-display font-bold text-xl text-[var(--ink)] mb-2">Referrals{REAL}</h2>
-      <p className="text-[var(--ink-2)] text-sm mb-5">Every referral code, its clicks and its $1 earnings ledger.</p>
-      <div className="grid grid-cols-3 gap-3 mb-6">
+      <p className="text-[var(--ink-2)] text-sm mb-5">Every referral code and the visits it brought.</p>
+      <div className="grid grid-cols-2 gap-3 mb-6">
         <StatCard icon="🔗" label="Codes" value={totals.codes} real />
         <StatCard icon="👁️" label="Referral visits" value={compact(totals.visits)} real />
-        <StatCard icon="💰" label="Earned ($1 each)" value={money(totals.earned)} real />
       </div>
       {referrals.length === 0 ? <Empty icon="🔗" text="No referral codes created yet." /> : (
         <div className="space-y-2">
@@ -599,7 +597,6 @@ function ReferralsTab({ referrals }) {
               </div>
               <div className="text-right shrink-0">
                 <div className="font-bold text-[var(--ink)] text-sm">{r.visits} visits</div>
-                <div className="text-xs text-emerald-600 dark:text-emerald-400 font-bold">{money(r.earned)} earned</div>
               </div>
             </div>
           ))}

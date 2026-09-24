@@ -20,7 +20,7 @@ sample: true
 > - FlexSpot is a public leaderboard where brands, creators, and meme pages compete for homepage visibility — starting from just $1.
 > - Claiming a spot takes under a minute and requires no account.
 > - Your rank is decided by total boosts: every dollar of buzz moves you up.
-> - Referral links let every visitor add $1 to your total, once per day.
+> - Referral links pay you 20% instant commission on every payment from members who join through your link.
 > - This guide walks the whole journey, from claim to crown.
 
 ## What is FlexSpot, exactly?
@@ -94,8 +94,8 @@ do three things:
 - **Boosting once and disappearing.** Visibility compounds; one-and-done
   entries sink.
 - **Linking to a generic homepage.** Every extra click loses visitors.
-- **Ignoring referrals.** The $1-per-visit referral engine is the cheapest
-  ranking fuel on the platform — use it.
+- **Ignoring referrals.** The affiliate program pays 20% instant commission on
+  every payment from members who join through your link — use it.
 - **Chasing #1 on day one.** Climb a few ranks, learn what moves your audience,
   then make your run.
 

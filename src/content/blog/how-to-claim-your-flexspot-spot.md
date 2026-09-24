@@ -83,7 +83,7 @@ Once verified, your spot is live on the leaderboard with its shareable profile p
 - **Claiming before your link works.** Test your destination URL. A live spot pointing at a broken page wastes your launch moment.
 - **A vague description.** "Check out my awesome project!!!" tells visitors nothing. Say what it is and why it matters.
 - **Setting and forgetting.** The leaderboard rewards activity. Spots whose owners promote daily outperform spots with bigger opening boosts and silent owners.
-- **Ignoring your referral link.** It's the highest-leverage tool you get at claim time — a personal link that credits your spot $1 per referred visit. Not using it is leaving rank on the table.
+- **Ignoring your referral link.** It's the highest-leverage tool you get at claim time — a personal affiliate link paying 20% instant commission on every payment from members who join through it. Not using it is leaving money on the table.
 - **Boosting without a sharing plan.** Paid boosts plus promotion compound; paid boosts alone are just a number.
 
 ## What happens next

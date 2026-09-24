@@ -1,31 +1,30 @@
 // src/lib/referral.js
-// The public Top Referrers board. A curated demo board (versioned, so old
-// browsers migrate automatically) enriched with REAL tracked referral visits
-// from this browser's event ledger, matched by referrer name.
-import { readLS } from './store';
+// The public Top Referrers board: ranks referrers by affiliate performance —
+// members referred and 20% instant commission earned on their payments.
+// There is no per-visit reward. Curated demo board (versioned, so old
+// browsers migrate automatically) enriched with the current member's REAL
+// affiliate stats, matched by member name.
+import { getMember } from './member';
 
-const BOARD_KEY = 'flexspot_referrer_board_v2';
-const BOARD_VERSION = 2;
+const BOARD_KEY = 'flexspot_referrer_board_v3';
+const BOARD_VERSION = 3;
 
-// Curated demo board — visits/earned are display seeds. Umar sits at #7 per
-// the owner's request (ranks 7–10 zone).
+// Curated demo board — members/commission are display seeds. Umar sits at #7
+// per the owner's request (ranks 7–10 zone).
 const SEED = [
-  { name: 'Ahmed R.', visits: 14, earned: 14 },
-  { name: 'CryptoMama', visits: 11, earned: 11 },
-  { name: 'DXB Hustle', visits: 9, earned: 9 },
-  { name: 'Lena W.', visits: 7, earned: 7 },
-  { name: 'Sara K.', visits: 6, earned: 6 },
-  { name: 'Omar F.', visits: 5, earned: 5 },
-  { name: 'Umar', visits: 4, earned: 4 },
-  { name: 'Fatima A.', visits: 4, earned: 4 },
-  { name: 'Raj P.', visits: 3, earned: 3 },
-  { name: 'Nina S.', visits: 3, earned: 3 },
-  { name: 'Khalid M.', visits: 2, earned: 2 },
-  { name: 'Zoe T.', visits: 2, earned: 2 },
+  { name: 'Ahmed R.', members: 6, commission: 48.0 },
+  { name: 'CryptoMama', members: 5, commission: 41.5 },
+  { name: 'DXB Hustle', members: 5, commission: 36.0 },
+  { name: 'Lena W.', members: 4, commission: 29.2 },
+  { name: 'Sara K.', members: 4, commission: 24.0 },
+  { name: 'Omar F.', members: 3, commission: 19.8 },
+  { name: 'Umar', members: 3, commission: 15.0 },
+  { name: 'Fatima A.', members: 2, commission: 12.4 },
+  { name: 'Raj P.', members: 2, commission: 9.0 },
+  { name: 'Nina S.', members: 2, commission: 7.2 },
+  { name: 'Khalid M.', members: 1, commission: 5.0 },
+  { name: 'Zoe T.', members: 1, commission: 3.4 },
 ];
-
-const LS_REF_ID = 'flexspot_ref_identities_v1';
-const LS_REF_STATS = 'flexspot_ref_stats_v1';
 
 function loadBoard() {
   let saved = null;
@@ -37,29 +36,30 @@ function loadBoard() {
   return saved.rows;
 }
 
-// Merge real tracked visits (by referrer name) on top of the board.
+// Merge the current member's real affiliate performance (by member name) on
+// top of the board.
 function withRealStats(rows) {
   const byName = new Map(rows.map((r) => [r.name.trim().toLowerCase(), r]));
-  let ids = {}, stats = {};
   try {
-    ids = readLS(LS_REF_ID, {});
-    stats = readLS(LS_REF_STATS, {});
-  } catch {}
-  for (const code of Object.keys(stats)) {
-    const id = ids[String(code).toUpperCase()];
-    if (!id || !id.name) continue;
-    const key = id.name.trim().toLowerCase();
-    const s = stats[code] || {};
-    const v = Number(s.visits) || 0, e = Number(s.earned) || 0;
-    if (byName.has(key)) {
-      const row = byName.get(key);
-      row.visits += v; row.earned += e;
-    } else if (v > 0 || e > 0) {
-      byName.set(key, { name: id.name.trim(), visits: v, earned: e });
+    const m = getMember();
+    if (m && m.name) {
+      const key = m.name.trim().toLowerCase();
+      const refs = m.referrals || [];
+      const members = refs.length;
+      const commission = refs.reduce((a, r) => a + (Number(r.commission) || 0), 0);
+      if (members > 0 || commission > 0) {
+        if (byName.has(key)) {
+          const row = byName.get(key);
+          row.members += members;
+          row.commission = Math.round((row.commission + commission) * 100) / 100;
+        } else {
+          byName.set(key, { name: m.name.trim(), members, commission });
+        }
+      }
     }
-  }
+  } catch {}
   return [...byName.values()]
-    .sort((a, b) => b.earned - a.earned || b.visits - a.visits || a.name.localeCompare(b.name))
+    .sort((a, b) => b.commission - a.commission || b.members - a.members || a.name.localeCompare(b.name))
     .map((r, i) => ({ ...r, rank: i + 1 }));
 }
 

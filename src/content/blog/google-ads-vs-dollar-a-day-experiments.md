@@ -24,7 +24,7 @@ It's the heavyweight vs. the scrappy underdog: Google Ads, the $200-billion gian
 ## Round 1: What $30 buys
 
 - **Google Ads:** At $2–$4 per click, $30 buys 8–15 clicks. If your site converts at 2% (generous for a new startup), that's 0.3 customers. You also spent 3 hours setting up campaigns, keywords, and negative lists.
-- **$1-a-day leaderboard:** $30 buys 30 days of a live, public brand position + a referral link that adds $1 to your spot's total per referred visit + 4–5 visible rank jumps you can screenshot and share. Setup time: 10 minutes.
+- **$1-a-day leaderboard:** $30 buys 30 days of a live, public brand position + a referral link paying 20% instant commission on every referred payment + 4–5 visible rank jumps you can screenshot and share. Setup time: 10 minutes.
 
 **Winner: $1-a-day.** It's not close at this budget.
 

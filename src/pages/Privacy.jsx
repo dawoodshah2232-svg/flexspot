@@ -62,7 +62,7 @@ export default function Privacy() {
             <ul className="list-disc pl-5 space-y-1.5">
               <li><strong className="text-[var(--ink)]">Usage data</strong> — page views on spots, leaderboard visits, and interaction counts, so the site can display live counters and trends. Collected in aggregated or pseudonymous form.</li>
               <li><strong className="text-[var(--ink)]">Device and browser information</strong> — such as browser type and approximate region, used for abuse prevention and to improve the service. We do not run behavioral advertising trackers.</li>
-              <li><strong className="text-[var(--ink)]">Referral visit records</strong> — when someone visits through a referral link, we record the referral code and the time of visit so the $1-per-visit credit can be applied (limited to one credit per visitor per day).</li>
+              <li><strong className="text-[var(--ink)]">Referral visit records</strong> — when someone visits through a referral link, we record the referral code and the time of visit for affiliate attribution (limited to one counted visit per visitor per day). There is no per-visit reward.</li>
             </ul>
             <p><strong className="text-[var(--ink)]">C. Data stored in your browser (local storage)</strong></p>
             <p>

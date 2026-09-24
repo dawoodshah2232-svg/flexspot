@@ -20,7 +20,7 @@ sample: true
 > - FlexSpot ranks every spot by total verified boosts — highest total sits at #1.
 > - Every dollar counts the same; passing a rival takes their rank instantly.
 > - Small, steady boosts usually beat one big splash.
-> - Referral visits add $1 each to your spot's total (once per visitor per day) — free ranking fuel, not cash.
+> - Referral links pay 20% instant commission on every payment from members who join through your link.
 > - Watch the overtake meter to see exactly how far you are from the next rank.
 
 ## The one rule of ranking
@@ -59,11 +59,13 @@ boosted" toasts that other visitors see, and gives you ten chances to react to
 rivals. One $20 boost gives you one. Momentum is a feature of the board's
 design — use it.
 
-### 3. Farm your referral link
+### 3. Work your referral link
 
 Your personal referral link (create it with just your name on your spot page)
-adds **$1 per visit to your spot's leaderboard total, counted once per visitor per day**. A single tweet that
-brings 30 real visitors is $30 of ranking power you didn't pay for. (Cash rewards are separate: $0.01 per new referred member plus 20% of what they spend.) Put the
+is your affiliate engine: when someone joins through it and pays — for a claim,
+a boost, anything — you earn **20% instant commission on every payment**, straight
+to your wallet. A single tweet that brings 30 real visitors can keep paying you
+long after the tweet dies. Put the
 link in your bio, your newsletter, your launch posts — everywhere.
 
 ### 4. Know when to go big

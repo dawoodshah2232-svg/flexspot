@@ -181,7 +181,7 @@ function OverviewTab({ member, wallet, spot, rank, total, go }) {
         <Stat icon="💰" label="Spot value" value={money(spotValueOf(spot))} sub={rank ? `Rank #${rank} of ${total}` : 'Not ranked yet'} />
         <Stat icon="👁️" label="Views" value={compact(spot?.views || 0)} sub="all time" />
         <Stat icon="💳" label="Wallet balance" value={money2(wallet?.balance || 0)} sub={`${money2(wallet?.pending || 0)} pending withdrawal`} />
-        <Stat icon="🔗" label="Referral visits" value={ref.visits} sub={`${money(ref.earned)} earned for your spot`} />
+        <Stat icon="🔗" label="Referral visits" value={ref.visits} sub="through your affiliate link" />
         <Stat icon="🧑‍🤝‍🧑" label="Referred members" value={(member.referrals || []).length} sub={`${money2((member.referrals || []).reduce((a, r) => a + (r.commission || 0), 0))} commission earned`} />
         <Stat icon="🏦" label="Lifetime earnings" value={money2(wallet?.lifetime || 0)} sub="wallet credits, all time" />
       </div>
@@ -214,7 +214,7 @@ function OverviewTab({ member, wallet, spot, rank, total, go }) {
               { t: 'Edit my spot', d: 'Logo, photos, tagline & links', tab: 'spot', icon: '🎯' },
               { t: 'Withdraw', d: `USDT · min $${MIN_WITHDRAWAL}`, tab: 'wallet', icon: '🏦' },
               { t: 'Boost my spot', d: 'Spend wallet balance', tab: 'wallet', icon: '🚀' },
-              { t: 'Invite & earn', d: '$0.01 + 20% commission', tab: 'referrals', icon: '🔗' },
+              { t: 'Invite & earn', d: '20% instant commission', tab: 'referrals', icon: '🔗' },
             ].map((a) => (
               <button key={a.t} onClick={() => go(a.tab)} className="text-left rounded-2xl border border-[var(--line)] bg-[var(--surface-2)] p-4 hover:border-[var(--gold)] transition-colors">
                 <div className="text-2xl mb-1.5">{a.icon}</div>
@@ -544,7 +544,7 @@ function ReferralsTab({ member, spot }) {
       <div className={card}>
         <h3 className={h2 + ' mb-1'}>Your referral link 🔗</h3>
         <p className="text-xs text-[var(--ink-3)] mb-4">
-          Every visit through your link adds <b className="text-[var(--ink-2)]">$1</b> to your spot — and when someone claims, you earn <b className="text-[var(--ink-2)]">$0.01</b> plus <b className="text-[var(--ink-2)]">20%</b> of everything they spend, forever.
+          Share your personal link — when someone joins through it and pays, you earn <b className="text-[var(--ink-2)]">20% instant commission</b> on every payment, forever.
         </p>
         <div className="flex gap-2">
           <input className={field + ' font-mono !text-xs'} readOnly value={link} onFocus={(e) => e.target.select()} />
@@ -555,9 +555,8 @@ function ReferralsTab({ member, spot }) {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <Stat icon="👣" label="Visits" value={stats.visits} sub="through your link" />
-        <Stat icon="💵" label="Visit earnings" value={money(stats.earned)} sub="$1 per visit to your spot" />
-        <Stat icon="🧑‍🤝‍🧑" label="Referred members" value={referred.length} sub="$0.01 each" />
-        <Stat icon="📈" label="Commission" value={money2(commission)} sub="20% of their spend" />
+        <Stat icon="🧑‍🤝‍🧑" label="Referred members" value={referred.length} sub="joined via your link" />
+        <Stat icon="📈" label="Commission" value={money2(commission)} sub="20% instant, every payment" />
       </div>
 
       <div className={card}>
@@ -573,7 +572,7 @@ function ReferralsTab({ member, spot }) {
             <tbody>
               {referred.map((r) => (
                 <tr key={r.id} className="border-b border-[var(--line)]/60 last:border-0">
-                  <td className="py-2.5 pr-3 font-semibold text-[var(--ink)]">{r.name} <span className="text-[11px] font-normal text-[var(--ink-3)]">+ $0.01 signup</span></td>
+                  <td className="py-2.5 pr-3 font-semibold text-[var(--ink)]">{r.name}</td>
                   <td className="py-2.5 pr-3 text-xs text-[var(--ink-3)] whitespace-nowrap">{new Date(r.joinedAt || r.at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</td>
                   <td className="py-2.5 pr-3 text-right">{money2(r.spend)}</td>
                   <td className="py-2.5 text-right font-display font-extrabold text-green-600">+{money2(r.commission)}</td>

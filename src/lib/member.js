@@ -114,9 +114,9 @@ export function getMemberSpot() {
 }
 
 // --- Referrals -------------------------------------------------------------
-// Personal referral link for the member's spot: every visit through it adds
-// $1 to the spot. $0.01 per new referred member + 20% of their spend lands
-// in the wallet (per the affiliate spec).
+// Personal affiliate link for the member's spot. No per-visit reward — the
+// only earning is 20% instant commission on every payment made by a member
+// who joined through the referrer's link, credited to the wallet.
 export function memberReferralLink(origin) {
   const m = getMember();
   if (!m || !m.spotSlug) return '';
@@ -132,7 +132,7 @@ export function memberReferralStats() {
   const code = myReferralCode(m.spotSlug);
   if (!code) return { visits: 0, earned: 0 };
   const s = readLS(LS_REF_STATS, {})[code] || {};
-  return { visits: Number(s.visits) || 0, earned: Number(s.earned) || 0 };
+  return { visits: Number(s.visits) || 0 };
 }
 
 // --- Pending claim ---------------------------------------------------------
@@ -155,20 +155,12 @@ function seedWalletTxns() {
   const D = 86400e3, now = Date.now();
   // Chronological seed (oldest first); the loop derives balance/lifetime.
   const seed = [
-    { at: now - 16 * D, kind: 'credit', label: 'New referred member — Leo M. joined', amount: 0.01 },
-    { at: now - 15 * D, kind: 'credit', label: 'Referral reward — visit via your link', amount: 1 },
-    { at: now - 12 * D, kind: 'credit', label: 'Referral reward — visit via your link', amount: 1 },
     { at: now - 10 * D, kind: 'credit', label: '20% commission — Omar F. claimed $50', amount: 10 },
     { at: now - 9 * D, kind: 'debit', label: 'Withdrawal — USDT (TRC-20)', amount: 25, status: 'done' },
     { at: now - 8 * D, kind: 'credit', label: '20% commission — Leo M. claimed $5', amount: 1 },
-    { at: now - 6 * D, kind: 'credit', label: 'Referral reward — visit via your link', amount: 1 },
     { at: now - 5 * D, kind: 'debit', label: 'Boost — own spot', amount: 10 },
     { at: now - 4 * D, kind: 'credit', label: '20% commission — Priya S. boosted $15', amount: 3 },
-    { at: now - 4 * D, kind: 'credit', label: 'New referred member — Priya S. joined', amount: 0.01 },
-    { at: now - 3 * D, kind: 'credit', label: 'New referred member — Jon D. joined', amount: 0.01 },
     { at: now - 2 * D, kind: 'credit', label: '20% commission — Sana R. boosted $40', amount: 8 },
-    { at: now - 2 * D, kind: 'credit', label: 'Referral reward — visit via your link', amount: 1 },
-    { at: now - 1 * D, kind: 'credit', label: 'Referral reward — visit via your link', amount: 1 },
   ];
   let balance = 0, lifetime = 0, pending = 0;
   const chronological = seed.map((t, i) => {
@@ -210,7 +202,7 @@ export function ensureMemberDemo() {
       usdt: { network: 'TRC-20', address: 'TJk8vQm2xR4pL9nW3sDf6hJz1cVb5N' },
       notify: { payouts: true, rankAlerts: true, referrals: true },
       referrals: [
-        { id: 'ref-jon', name: 'Jon D.', at: Date.now() - 3 * 86400e3, spend: 1, commission: 0.01 },
+        { id: 'ref-jon', name: 'Jon D.', at: Date.now() - 3 * 86400e3, spend: 5, commission: 1 },
         { id: 'ref-priya', name: 'Priya S.', at: Date.now() - 4 * 86400e3, spend: 15, commission: 3 },
         { id: 'ref-leo', name: 'Leo M.', at: Date.now() - 8 * 86400e3, spend: 5, commission: 1 },
       ],

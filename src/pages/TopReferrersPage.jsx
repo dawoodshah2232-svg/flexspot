@@ -1,12 +1,14 @@
 // Top Referrers — full rankings page. Homepage shows the top 10; this page
 // shows the whole board with the premium VIP treatment for the leaders.
+// Ranked by affiliate performance: members referred + 20% commission earned.
 import { Link } from 'react-router-dom';
 import { topReferrers } from '../lib/referral';
+import { money2 } from '../lib/format';
 
 const EXTRA = [
-  ['Mariam H.', 2, 2], ['Vikram S.', 2, 2], ['Dana K.', 2, 2], ['Igor V.', 1, 1],
-  ['Aisha B.', 1, 1], ['Leo M.', 1, 1], ['Nadia R.', 1, 1], ['Chris D.', 1, 1],
-  ['Yasmin T.', 1, 1], ['Tom E.', 1, 1],
+  ['Mariam H.', 1, 2.4], ['Vikram S.', 1, 2.0], ['Dana K.', 1, 1.8], ['Igor V.', 1, 1.5],
+  ['Aisha B.', 1, 1.2], ['Leo M.', 1, 1.0], ['Nadia R.', 1, 0.8], ['Chris D.', 1, 0.6],
+  ['Yasmin T.', 1, 0.4], ['Tom E.', 1, 0.2],
 ];
 
 const MEDAL = [
@@ -19,8 +21,8 @@ export default function TopReferrersPage() {
   const all = topReferrers();
   const leaders = all.slice(0, 3);
   const mid = all.slice(3, 10);
-  const rest = [...all.slice(10), ...EXTRA.map(([name, visits, earned], i) => ({
-    name, visits, earned, rank: all.length + i + 1,
+  const rest = [...all.slice(10), ...EXTRA.map(([name, members, commission], i) => ({
+    name, members, commission, rank: all.length + i + 1,
   }))];
 
   return (
@@ -31,8 +33,8 @@ export default function TopReferrersPage() {
           Top <span className="grad-text">Referrers</span>
         </h1>
         <p className="text-[var(--ink-2)] mt-3 max-w-xl mx-auto text-sm sm:text-base">
-          The people sending real traffic to FlexSpot brands. Every visit through a personal link
-          puts <b className="text-[var(--ink)]">$1</b> straight into the brand's bid.
+          The people growing FlexSpot. Every member who joins through a personal link
+          earns the referrer <b className="text-[var(--ink)]">20% instant commission</b> on every payment.
         </p>
         <Link to="/claim" className="btn-gold px-6 py-2.5 mt-5 inline-block text-sm">Get your referral link</Link>
       </div>
@@ -52,13 +54,13 @@ export default function TopReferrersPage() {
                 <span className="text-xl font-display font-extrabold text-[var(--ink)]">{leaders[0].name}</span>
                 <span className="text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-[#F59E0B] to-[#B45309] text-white px-2.5 py-1 rounded-full">👑 VIP · Top Referrer</span>
               </div>
-              <p className="text-xs text-[var(--ink-3)] mt-1.5">The most trusted traffic source on FlexSpot — brands boosted by {leaders[0].name} climb faster.</p>
+              <p className="text-xs text-[var(--ink-3)] mt-1.5">The highest-earning affiliate on FlexSpot — {leaders[0].members} members referred.</p>
             </div>
             <div className="text-right">
-              <div className="font-display font-black text-3xl text-[var(--ink)]">{leaders[0].visits}</div>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--ink-3)]">visits</div>
-              <div className="font-display font-extrabold text-lg text-green-600 mt-1">+${leaders[0].earned}</div>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--ink-3)]">generated</div>
+              <div className="font-display font-black text-3xl text-[var(--ink)]">{leaders[0].members}</div>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--ink-3)]">members</div>
+              <div className="font-display font-extrabold text-lg text-green-600 mt-1">+{money2(leaders[0].commission)}</div>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--ink-3)]">commission</div>
             </div>
           </div>
         </div>
@@ -78,9 +80,9 @@ export default function TopReferrersPage() {
               </span>
             </div>
             <div className="text-right shrink-0">
-              <div className="font-display font-extrabold text-2xl text-[var(--ink)]">{r.visits}</div>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--ink-3)]">visits</div>
-              <div className="text-sm font-bold text-green-600">+${r.earned}</div>
+              <div className="font-display font-extrabold text-2xl text-[var(--ink)]">{r.members}</div>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--ink-3)]">members</div>
+              <div className="text-sm font-bold text-green-600">+{money2(r.commission)}</div>
             </div>
           </div>
         ))}
@@ -93,8 +95,8 @@ export default function TopReferrersPage() {
           <div key={r.name} className="flex items-center gap-4 px-5 py-3.5">
             <span className="font-display font-black text-[var(--ink-3)] w-8 text-center shrink-0">#{r.rank}</span>
             <span className="font-bold text-[var(--ink)] flex-1 truncate">{r.name}</span>
-            <span className="text-sm text-[var(--ink-2)] whitespace-nowrap">{r.visits} visits</span>
-            <span className="text-sm font-bold text-green-600 whitespace-nowrap w-16 text-right">+${r.earned}</span>
+            <span className="text-sm text-[var(--ink-2)] whitespace-nowrap">{r.members} members</span>
+            <span className="text-sm font-bold text-green-600 whitespace-nowrap w-20 text-right">+{money2(r.commission)}</span>
           </div>
         ))}
       </div>
@@ -108,15 +110,15 @@ export default function TopReferrersPage() {
               <div key={r.name} className="flex items-center gap-4 px-5 py-3">
                 <span className="font-display font-bold text-[var(--ink-3)] w-8 text-center shrink-0 text-sm">#{r.rank}</span>
                 <span className="font-semibold text-sm text-[var(--ink)] flex-1 truncate">{r.name}</span>
-                <span className="text-xs text-[var(--ink-3)] whitespace-nowrap">{r.visits} visits</span>
-                <span className="text-xs font-bold text-green-600 whitespace-nowrap w-14 text-right">+${r.earned}</span>
+                <span className="text-xs text-[var(--ink-3)] whitespace-nowrap">{r.members} members</span>
+                <span className="text-xs font-bold text-green-600 whitespace-nowrap w-20 text-right">+{money2(r.commission)}</span>
               </div>
             ))}
           </div>
         </>
       )}
 
-      <p className="text-center text-[11px] text-[var(--ink-3)] mt-8">Demo rankings while the live backend ships — your visits count for real.</p>
+      <p className="text-center text-[11px] text-[var(--ink-3)] mt-8">Demo rankings while the live backend ships — your referrals count for real.</p>
     </div>
   );
 }

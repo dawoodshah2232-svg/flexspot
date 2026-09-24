@@ -35,7 +35,7 @@ Anyone promising "floods of traffic for $1/day" is selling a course, not a strat
 
 On FlexSpot, $1 claims your brand a **live spot on a public leaderboard** — a position every visitor sees, not an impression that vanishes. That's the foundation. Then the dollar compounds:
 
-- **Days 1–7:** Your spot is live. You share your referral link — every visit through it adds $1 to your spot's leaderboard total and ranks you on the public Top Referrers board.
+- **Days 1–7:** Your spot is live. You share your referral link — everyone who joins through it and pays earns you 20% instant commission on every payment.
 - **Days 8–14:** You post rank screenshots in founder groups. "We just hit #6" beats any ad copy.
 - **Days 15–21:** You boost $2–$3 once. The visible jump past rivals becomes content itself.
 - **Days 22–30:** You measure everything ([use this ROI framework](/blog/measuring-roi-of-one-dollar-ad-experiments)) and decide what to scale.

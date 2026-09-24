@@ -302,7 +302,7 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
             </p>
             {myCode ? (
               <>
-                <button onClick={copyRef} className="w-full font-mono text-sm bg-ink/60 border border-line/10 rounded-xl px-4 py-3 text-[var(--blaze)] hover:border-[var(--blaze)] transition-colors break-all">
+                <button onClick={copyRef} className="w-full font-mono text-sm bg-[var(--surface)] border border-[var(--line)] rounded-xl px-4 py-3 text-[var(--blaze)] hover:border-[var(--blaze)] transition-colors break-all">
                   {refLink}
                 </button>
                 <div className="text-xs text-mist mt-2 mb-4">{copiedRef ? '✓ Referral link copied!' : 'Tap to copy your referral link'}</div>
@@ -312,9 +312,9 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
                     { l: 'Commission rate', v: '20%' },
                     { l: 'Rank right now', v: '#' + spot.rank },
                   ].map((s) => (
-                    <div key={s.l} className="bg-ink/50 rounded-2xl p-3 text-center">
-                      <div className="font-display font-bold text-xl text-snow">{s.v}</div>
-                      <div className="text-[10px] text-mist uppercase tracking-wider font-semibold mt-0.5">{s.l}</div>
+                    <div key={s.l} className="bg-[var(--surface)] border border-[var(--line)] rounded-2xl p-3 text-center">
+                      <div className="font-display font-bold text-xl text-[var(--ink)]">{s.v}</div>
+                      <div className="text-[10px] text-[var(--ink-2)] uppercase tracking-wider font-semibold mt-0.5">{s.l}</div>
                     </div>
                   ))}
                 </div>
@@ -327,7 +327,7 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
                   onKeyDown={(e) => { if (e.key === 'Enter') makeRefCode(); }}
                   placeholder="Your name — shown on the board"
                   maxLength={30}
-                  className="flex-1 bg-ink/60 border border-line/10 rounded-xl px-4 py-3 text-sm text-snow placeholder:text-mist/60 outline-none focus:border-[var(--blaze)]"
+                  className="flex-1 bg-[var(--surface)] border border-[var(--line)] rounded-xl px-4 py-3 text-sm text-[var(--ink)] placeholder:text-[var(--ink-3)] outline-none focus:border-[var(--blaze)]"
                 />
                 <button onClick={makeRefCode} disabled={!refName.trim()} className="btn-gold px-6 py-3 text-sm disabled:opacity-40">
                   Get my link

@@ -150,7 +150,7 @@ export function SpotRow({ spot, move, onBoost, highlight, race, count = null, ov
             {spot.gift && <span className="text-sm" title={`Surprised by ${spot.gift.from}`}>🎁</span>}
           </div>
           <p className="text-[var(--ink-2)] text-xs truncate">{spot.gift ? `🎁 Surprised by ${spot.gift.from}` : spot.tagline}</p>
-          <div className="flex items-center gap-3 mt-1 text-[11px] text-[var(--ink-3)]">
+          <div className="hidden min-[420px]:flex items-center gap-3 mt-1 text-[11px] text-[var(--ink-3)]">
             <span>👁 {compact(spot.views)}</span>
             <span>🖱 {compact(spot.clicks)}</span>
             <span className="hidden sm:inline"><MoveIndicator move={move} /></span>
@@ -221,7 +221,7 @@ export function SpotRow({ spot, move, onBoost, highlight, race, count = null, ov
         )}
         <div className="text-right shrink-0">
           {/* the amount they paid to hold this rank — given pride of place */}
-          <div className="font-display font-black text-[var(--blaze-deep)] dark:text-[#FF8A66] text-xl sm:text-2xl tracking-tight whitespace-nowrap">🏆 {money(displayAmount(spot.amount))}</div>
+          <div className="font-display font-black text-[var(--blaze-deep)] dark:text-[#FF8A66] text-lg min-[420px]:text-xl sm:text-2xl tracking-tight whitespace-nowrap">🏆 {money(displayAmount(spot.amount))}</div>
           <div className="text-[10px] text-[var(--ink-3)] uppercase tracking-wider font-semibold">spot value</div>
         </div>
         <button

@@ -22,7 +22,7 @@ export function Logo({ compact = false }) {
         alt="FlexSpot crown logo"
         width={44}
         height={44}
-        className="w-11 h-11 rounded-[14px] object-cover shadow-[0_6px_16px_rgba(124,58,237,0.45)] ring-1 ring-white/20 group-hover:scale-[1.06] group-hover:rotate-[-3deg] transition-transform duration-300"
+        className="w-9 h-9 sm:w-11 sm:h-11 rounded-[12px] sm:rounded-[14px] object-cover shadow-[0_6px_16px_rgba(124,58,237,0.45)] ring-1 ring-white/20 group-hover:scale-[1.06] group-hover:rotate-[-3deg] transition-transform duration-300"
       />
       {!compact && (
         <span className="leading-none hidden min-[380px]:block">
@@ -49,7 +49,7 @@ export default function Header({ onClaim }) {
   return (
     <header className="fixed top-3 inset-x-3 sm:inset-x-6 z-40">
       <div className="header-glass max-w-7xl mx-auto bg-[var(--surface)]/80 backdrop-blur-2xl border border-[var(--line)] rounded-2xl shadow-[var(--shadow-lift)]">
-        <div className="px-4 sm:px-5 h-[68px] flex items-center justify-between gap-3">
+        <div className="px-3 sm:px-5 h-[60px] sm:h-[68px] flex items-center justify-between gap-2 sm:gap-3">
           <Logo />
           <nav className="hidden lg:flex items-center gap-1" aria-label="Primary">
             {LINKS.map((l) => (
@@ -83,7 +83,7 @@ export default function Header({ onClaim }) {
             </Link>
             <button
               onClick={toggle}
-              className="grid place-items-center w-10 h-10 rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--ink-2)] hover:text-[var(--ink)] hover:border-[var(--ink-3)] transition-colors"
+              className="grid place-items-center w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--ink-2)] hover:text-[var(--ink)] hover:border-[var(--ink-3)] transition-colors"
               title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
               aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
             >
@@ -100,7 +100,7 @@ export default function Header({ onClaim }) {
             </button>
             <Link
               to="/dashboard"
-              className="grid place-items-center w-10 h-10 rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--ink-2)] hover:text-[var(--ink)] hover:border-[var(--ink-3)] transition-colors overflow-hidden shrink-0"
+              className="grid place-items-center w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--ink-2)] hover:text-[var(--ink)] hover:border-[var(--ink-3)] transition-colors overflow-hidden shrink-0"
               title={member ? 'My dashboard' : 'Log in / My account'}
               aria-label={member ? 'My dashboard' : 'Log in / My account'}
             >
@@ -113,7 +113,7 @@ export default function Header({ onClaim }) {
                 </svg>
               )}
             </Link>
-            <button onClick={onClaim} className="btn-primary whitespace-nowrap px-4 sm:px-6 py-2.5 text-sm shrink-0">
+            <button onClick={onClaim} className="btn-primary whitespace-nowrap px-3 sm:px-6 py-2.5 text-[13px] sm:text-sm shrink-0">
               <span className="hidden min-[420px]:inline">Claim Your Spot From $1</span>
               <span className="min-[420px]:hidden">Claim $1</span>
             </button>

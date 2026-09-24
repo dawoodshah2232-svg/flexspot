@@ -33,7 +33,7 @@ function LiveStatsPill({ realViewers, brandCount }) {
   const stats = [
     { icon: '🟢', value: <CountUp to={viewers ?? 0} format={(n) => Math.round(n).toString()} />, label: 'online now' },
     { icon: '💰', value: <>{money(REVENUE_DISPLAY)}</>, label: 'total revenue' },
-    { icon: '🎁', value: <>{money(REFERRAL_BONUS_DISPLAY)}</>, label: 'referral bonus generated' },
+    { icon: '🎁', value: <>{money(REFERRAL_BONUS_DISPLAY)}</>, label: 'referral bonus' },
     { icon: '⚡', value: <CountUp to={brandCount} format={(n) => Math.round(n).toString()} />, label: 'brands live' },
   ];
   return (
@@ -41,10 +41,10 @@ function LiveStatsPill({ realViewers, brandCount }) {
       <p className="text-center text-[11px] font-bold tracking-[0.18em] uppercase text-[var(--ink-3)] mb-3">
         Real brands. Real bids. Live now.
       </p>
-      <div className="inline-flex flex-wrap justify-center items-center gap-x-5 gap-y-2 sm:gap-8 bg-[var(--surface)]/90 backdrop-blur border border-[var(--line)] rounded-3xl min-[420px]:rounded-full px-4 min-[420px]:pl-5 min-[420px]:pr-6 sm:pl-6 sm:pr-8 py-2.5 shadow-[var(--shadow-card)] max-w-full">
+      <div className="grid grid-cols-2 min-[420px]:flex min-[420px]:flex-wrap justify-center items-center gap-x-5 gap-y-3 min-[420px]:gap-y-2 sm:gap-8 bg-[var(--surface)]/90 backdrop-blur border border-[var(--line)] rounded-3xl min-[420px]:rounded-full px-5 min-[420px]:px-4 min-[420px]:pl-5 min-[420px]:pr-6 sm:pl-6 sm:pr-8 py-3 min-[420px]:py-2.5 shadow-[var(--shadow-card)] max-w-full">
         {stats.map((s, i) => (
-          <div key={s.label} className="flex items-center gap-2.5">
-            {i > 0 && <span className="w-px h-6 bg-[var(--line)] -ml-2.5 sm:-ml-4" aria-hidden="true" />}
+          <div key={s.label} className="flex items-center gap-2.5 min-w-0">
+            {i > 0 && <span className="hidden min-[420px]:block w-px h-6 bg-[var(--line)] -ml-2.5 sm:-ml-4 shrink-0" aria-hidden="true" />}
             <Flee><span className="text-base block">{s.icon}</span></Flee>
             <div className="leading-tight">
               <div className="font-display font-extrabold text-[15px] text-[var(--ink)]">{s.value}</div>
@@ -362,7 +362,7 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
         <div className="blob w-[420px] h-[420px] bg-[#F59E0B]/15 -top-20 -left-32" />
         <div className="blob w-[380px] h-[380px] bg-[#F59E0B]/15 top-40 right-[-120px]" style={{ animationDelay: '-6s' }} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-16 grid lg:grid-cols-2 gap-8 lg:gap-10 items-center relative">
-          <div>
+          <div className="min-w-0">
             <div className="inline-flex items-center gap-2 bg-[var(--surface)] border border-[var(--line)] rounded-full px-4 py-1.5 text-[11px] font-bold tracking-[0.14em] text-[var(--ink-2)] mb-5 shadow-[var(--shadow-card)] max-w-full">
               <span className="live-dot" /> <span className="truncate">{hero.eyebrow}</span>
             </div>
@@ -397,7 +397,7 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
               )}
             </div>
           </div>
-          <div className="pb-2">
+          <div className="pb-2 min-w-0">
             <HeroVisual leader={leader} onClaim={onClaim} />
           </div>
         </div>

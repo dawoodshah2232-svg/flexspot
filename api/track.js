@@ -29,13 +29,14 @@ const isTestRef = (host) => /test/i.test(String(host || ''));
 // Bot/crawler traffic — never counted. Search engines execute the tracking JS
 // while crawling (Googlebot/Bingbot run headless Chrome), so without this
 // filter every sitemap submission shows up as a wave of fake "visitors".
-const BOT_UA = /bot|crawl|spider|slurp|mediapartners|baidu|yandex|sogou|exabot|facebot|ia_archiver|semrush|ahrefs|mj12|dotbot|petalbot|bytespider|gptbot|claudebot|ccbot|anthropic|cohere|diffbot|headless|phantom|selenium|puppeteer|playwright|lighthouse|pagespeed|pingdom|uptimerobot|screaming/i;
+const BOT_UA = /bot|crawl|spider|slurp|mediapartners|baidu|yandex|sogou|exabot|facebot|facebookexternalhit|ia_archiver|semrush|ahrefs|mj12|dotbot|petalbot|bytespider|gptbot|claudebot|ccbot|anthropic|cohere|diffbot|google-extended|googleother|headless|phantom|selenium|puppeteer|playwright|lighthouse|pagespeed|pingdom|uptimerobot|screaming|twitterbot|linkedinbot|slackbot|discordbot|telegrambot|whatsapp|pinterest|redditbot|embedly|iframely|vkshare|quora/i;
 const isBot = (ua) => BOT_UA.test(String(ua || ''));
 
-// 2-letter country code from Vercel's geo header ('' when unavailable).
+// 2-letter country code from the edge geo header ('' when unavailable).
 // The IP itself is never read or stored — only this code.
 const countryOf = (req) => {
-  const c = String(req.headers['x-vercel-ip-country'] || '').toUpperCase();
+  const h = (req && req.headers) || {};
+  const c = String(h['x-vercel-ip-country'] || h['cf-ipcountry'] || '').toUpperCase();
   return /^[A-Z]{2}$/.test(c) ? c : '';
 };
 

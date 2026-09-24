@@ -399,10 +399,10 @@ export default function Admin({ spots, refresh }) {
 
         {msg && <div className="mb-5 text-sm rounded-xl px-4 py-3 border" style={{ background: '#D1FAE5', borderColor: '#6EE7B7', color: '#065F46' }}>{msg}</div>}
 
-        <div className="flex gap-2 mb-8 overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="flex gap-2 mb-8 overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible">
           {TABS.map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)}
-              className={`px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-colors min-h-[44px] ${tab === t.id ? 'btn-primary' : 'btn-ghost'}`}>
+              className={`shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-colors min-h-[44px] ${tab === t.id ? 'btn-primary' : 'btn-ghost'}`}>
               {t.label}{t.id === 'deposits' && pendingSubs.length > 0 && ` (${pendingSubs.length})`}
               {t.id === 'live' && online.length > 0 && ` (${online.length})`}
             </button>
@@ -596,9 +596,9 @@ function OverviewTab({ online, traffic, trafficErr, live, spots, subs, pendingSu
               <div className="space-y-2">
                 {t.topPages.map((r) => (
                   <div key={r.p} className="flex items-center justify-between gap-3 text-sm">
-                    <span className="text-[var(--ink-2)] truncate font-mono text-xs">{r.p}</span>
-                    <span className="shrink-0 text-[11px] text-[var(--ink-3)]">⏱ {fmtDur(r.avgMs)}</span>
-                    <span className="font-bold text-[var(--ink)] shrink-0">{compact(r.v)}</span>
+                    <span className="text-[var(--ink-2)] truncate font-mono text-xs flex-1 min-w-0">{r.p}</span>
+                    <span className="shrink-0 w-[72px] text-right text-[11px] text-[var(--ink-3)] tabular-nums">⏱ {fmtDur(r.avgMs)}</span>
+                    <span className="font-bold text-[var(--ink)] shrink-0 w-10 text-right tabular-nums">{compact(r.v)}</span>
                   </div>
                 ))}
               </div>
@@ -616,8 +616,8 @@ function OverviewTab({ online, traffic, trafficErr, live, spots, subs, pendingSu
               <div className="space-y-2">
                 {t.topRefs.map((r) => (
                   <div key={r.r} className="flex items-center justify-between gap-3 text-sm">
-                    <span className="text-[var(--ink-2)] truncate">{r.r}</span>
-                    <span className="font-bold text-[var(--ink)] shrink-0">{compact(r.v)}</span>
+                    <span className="text-[var(--ink-2)] truncate flex-1 min-w-0">{r.r}</span>
+                    <span className="font-bold text-[var(--ink)] shrink-0 w-10 text-right tabular-nums">{compact(r.v)}</span>
                   </div>
                 ))}
               </div>
@@ -635,8 +635,8 @@ function OverviewTab({ online, traffic, trafficErr, live, spots, subs, pendingSu
               <div className="space-y-2">
                 {t.topCountries.map((r) => (
                   <div key={r.c} className="flex items-center justify-between gap-3 text-sm">
-                    <span className="text-[var(--ink-2)] truncate">{countryFlag(r.c)} {countryName(r.c)}</span>
-                    <span className="font-bold text-[var(--ink)] shrink-0">{compact(r.v)}</span>
+                    <span className="text-[var(--ink-2)] truncate flex-1 min-w-0">{countryFlag(r.c)} {countryName(r.c)}</span>
+                    <span className="font-bold text-[var(--ink)] shrink-0 w-10 text-right tabular-nums">{compact(r.v)}</span>
                   </div>
                 ))}
               </div>

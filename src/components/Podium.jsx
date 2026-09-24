@@ -187,7 +187,44 @@ export default function Podium({ spots, onBoost }) {
       <div className="absolute inset-x-0 -top-8 bottom-0 pointer-events-none" aria-hidden="true">
         <div className="absolute left-1/2 -translate-x-1/2 top-0 w-[300px] sm:w-[560px] h-[280px] bg-[var(--gold)]/15 blur-[100px] rounded-full" />
       </div>
-      <div className="relative grid sm:grid-cols-3 gap-4 sm:gap-5 items-end max-w-4xl mx-auto pt-14">
+      {/* Mobile: compact top-3 list — the full podium is far too tall for phones */}
+      <div className="relative sm:hidden max-w-4xl mx-auto">
+        <div className="flex justify-center mb-4">
+          <span className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.22em] px-5 py-2 rounded-full bg-[#F59E0B]/15 text-[#B45309] dark:text-[#FCD34D] border border-[#F59E0B]/40">
+            👑 Top 3 this week
+          </span>
+        </div>
+        <div className="space-y-2.5">
+          {spots.map((s, i) => s && (
+            <Link key={s.slug} to={`/s/${s.slug}`} className="card card-lift flex items-center gap-3 p-3">
+              <span className={`grid place-items-center w-9 h-9 rounded-full font-display font-black text-sm shrink-0 shadow ${medalCls(i + 1)}`}>
+                {i + 1}
+              </span>
+              <BrandAvatar spot={s} size={44} />
+              <div className="min-w-0 flex-1">
+                <div className="font-display font-bold text-[15px] text-[var(--ink)] truncate">
+                  {i === 0 ? '👑 ' : ''}{s.name}
+                </div>
+                <div className="text-xs text-[var(--ink-2)] truncate">{s.tagline}</div>
+              </div>
+              <div className="text-right shrink-0">
+                <div className="font-display font-black text-[15px] text-[var(--blaze-deep)] dark:text-[#FF8A66] whitespace-nowrap">
+                  {money(displayAmount(s.amount))}
+                </div>
+                <div className="text-[10px] text-[var(--ink-3)] font-semibold">👁 {compact(s.views)}</div>
+              </div>
+            </Link>
+          ))}
+        </div>
+        {first && onBoost && (
+          <button onClick={() => onBoost(first)} className="btn-gold w-full py-3.5 mt-4 text-sm font-extrabold">
+            ⚡ Defend the crown
+          </button>
+        )}
+      </div>
+
+      {/* Desktop / tablet: the full dramatic podium */}
+      <div className="relative hidden sm:grid sm:grid-cols-3 gap-5 items-end max-w-4xl mx-auto pt-14">
         {step(second, 2, '2nd · Silver', 'order-2 sm:order-1')}
         {step(first, 1, 'Champion', 'order-1 sm:order-2')}
         {step(third, 3, '3rd · Bronze', 'order-3 sm:order-3')}
@@ -285,6 +322,13 @@ function StepMedal({ rank }) {
         fill={tones.num} fontFamily="'Bricolage Grotesque', 'Inter', system-ui, sans-serif">{rank}</text>
     </svg>
   );
+}
+
+// Medal badge colors for the compact mobile top-3 list.
+function medalCls(rank) {
+  if (rank === 1) return 'bg-gradient-to-br from-[#FCD34D] to-[#B45309] text-white';
+  if (rank === 2) return 'bg-gradient-to-br from-slate-200 to-slate-400 text-slate-700';
+  return 'bg-gradient-to-br from-[#EFB27A] to-[#8A5A24] text-white';
 }
 
 function stepFrontClass(rank) {

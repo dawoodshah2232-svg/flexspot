@@ -10,7 +10,7 @@ import Flee from '../components/Flee';
 import Sway from '../components/Sway';
 import TopReferrers from '../components/TopReferrers';
 import { compact, money } from '../lib/format';
-import { LIVE_FEED_POOL, IS_PREVIEW_DATA } from '../lib/data';
+import { IS_PREVIEW_DATA } from '../lib/data';
 import { IS_LIVE } from '../lib/store';
 import { allPosts } from '../lib/blog';
 import BlogCard from '../components/BlogCard';
@@ -21,26 +21,20 @@ import { useDisplayOnline, displayAmount } from '../lib/display';
 import { getOnlineCount } from '../lib/analytics';
 
 /* ---------------- Floating live-stats pill ---------------- */
-// Total revenue: owner-pinned public figure ($1,201).
-// Referral bonus generated: owner-pinned public figure ($131).
-// Online now: REAL analytics online count passed through display.js — drifts
-// up and down every few seconds so the site feels alive. Brands live is real.
-// Admin always shows the real numbers.
-const REVENUE_DISPLAY = 1201;
-const REFERRAL_BONUS_DISPLAY = 131;
+// Only real numbers here: online now (analytics) and brands live (board).
+// Revenue/referral totals stay hidden until real payment data exists —
+// never show fabricated figures.
 
 function LiveStatsPill({ realViewers, brandCount }) {
   const viewers = useDisplayOnline(realViewers);
   const stats = [
     { icon: '🟢', value: <CountUp to={viewers ?? 0} format={(n) => Math.round(n).toString()} />, label: 'online now' },
-    { icon: '💰', value: <>{money(REVENUE_DISPLAY)}</>, label: 'total revenue' },
-    { icon: '🎁', value: <>{money(REFERRAL_BONUS_DISPLAY)}</>, label: 'referral bonus' },
     { icon: '⚡', value: <CountUp to={brandCount} format={(n) => Math.round(n).toString()} />, label: 'brands live' },
   ];
   return (
     <div className="flex flex-col items-center px-4">
       <p className="text-center text-[11px] font-bold tracking-[0.18em] uppercase text-[var(--ink-3)] mb-3">
-        Real brands. Real bids. Live now.
+        Live leaderboard.
       </p>
       <div className="grid grid-cols-2 min-[420px]:flex min-[420px]:flex-wrap justify-center items-center gap-x-5 gap-y-3 min-[420px]:gap-y-2 sm:gap-8 bg-[color-mix(in_srgb,var(--surface)_90%,transparent)] backdrop-blur border border-[var(--line)] rounded-3xl min-[420px]:rounded-full px-5 min-[420px]:px-4 min-[420px]:pl-5 min-[420px]:pr-6 sm:pl-6 sm:pr-8 py-3 min-[420px]:py-2.5 shadow-[var(--shadow-card)] max-w-full">
         {stats.map((s, i) => (
@@ -54,32 +48,6 @@ function LiveStatsPill({ realViewers, brandCount }) {
           </div>
         ))}
       </div>
-    </div>
-  );
-}
-
-/* ---------------- Viral feed ticker ---------------- */
-function FeedTicker() {
-  const [idx, setIdx] = useState(0);
-  useEffect(() => {
-    const t = setInterval(() => setIdx((i) => (i + 1) % LIVE_FEED_POOL.length), 4000);
-    return () => clearInterval(t);
-  }, []);
-  const [name, action] = LIVE_FEED_POOL[idx];
-  return (
-    <div className="flex items-center gap-2.5 text-sm">
-      <span className="live-dot shrink-0" />
-      <AnimatePresence mode="wait">
-        <motion.span
-          key={idx}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          className="text-[var(--ink-2)]"
-        >
-          <b className="text-[var(--ink)]">{name}</b> {action}
-        </motion.span>
-      </AnimatePresence>
     </div>
   );
 }
@@ -431,7 +399,6 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
             </div>
             <div className="mt-7 max-w-md space-y-3">
               <DramaTicker />
-              <FeedTicker />
               {IS_PREVIEW_DATA && (
                 <p className="text-[11px] text-[var(--ink-3)]">Preview data — demo brands shown for illustration only.</p>
               )}

@@ -105,20 +105,9 @@ export const FAQS = [
   { q: 'Do I need an account to claim a spot?', blog: 'how-to-claim-your-flexspot-spot', a: 'No. Claiming takes under a minute: enter your details, choose your boost starting at $1, and complete payment. To update your spot details later, contact our team at support@flexspot.lol.' },
   { q: 'How do payments work right now?', a: 'We\'re in Phase 1: after claiming, you complete payment manually and our team verifies it — usually within a few hours. Automatic payment processing is coming soon.' },
   { q: 'Can I pay with crypto or USDT?', blog: 'usdt-vs-card-fees-for-advertising', a: 'Yes. FlexSpot accepts USDT (TRC-20, BEP-20, or Solana) for bids starting from $1 \u2014 handy if you don\'t have a card or you\'re paying cross-border. Crypto payments are final once sent, so double-check the network and address before transferring.' },
-  { q: 'How do referrals work?', blog: 'referral-marketing', a: 'Every spot has a personal referral link (flexspot.lol/s/your-brand?ref=YOUR-CODE) — create yours with just your name, no signup. Share it anywhere: Facebook, Telegram, WhatsApp. Every visit through your link automatically adds $1 to that brand\u2019s total (counted once per friend per day), and your name climbs the Top Referrers board and the brand\u2019s Top Supporters list.' },
+  { q: 'How do referrals work?', blog: 'referral-marketing', a: 'Every spot has a personal referral link (flexspot.lol/s/your-brand?ref=YOUR-CODE) — create yours with just your name, no signup. Share it anywhere: Facebook, Telegram, WhatsApp. You earn 20% instant commission on every payment made by people who join through your link, and your name climbs the Top Referrers board.' },
   { q: 'Can I boost a spot I like?', blog: 'how-boosting-moves-you-up-the-leaderboard', a: 'Yes! Anyone can contribute to any spot to push it higher. It\'s the fastest way to help a friend — or a brand you love — reach #1.' },
   { q: 'Can I compare two spots before boosting?', a: 'Yes — open any spot profile and hit "⚔️ Compare", or go straight to flexspot.lol/compare. Pick up to 3 spots and see rank, total boosts, views, clicks, click-through rate and 7-day momentum side by side, with a live verdict on who leads.' },
   { q: 'How much visibility will my budget get me?', a: 'Try the visibility calculator at flexspot.lol/calculator: slide your budget and campaign length to project your rank, profile views, clicks and cost per 1,000 views, estimated from today\'s live board medians. Estimates only — real results vary.' },
   { q: 'Is there a fee?', a: 'Claiming starts at $1 and 100% of your boost counts toward your ranking. There are no hidden fees to join or appear on the leaderboard.' },
-];
-
-export const LIVE_FEED_POOL = [
-  ['Nova Studio', 'just claimed a spot'],
-  ['Atlas Coffee', 'boosted to #4'],
-  ['Pixel Press', 'just claimed a spot'],
-  ['June Rivera', 'boosted to #7'],
-  ['Orbit Labs', 'just claimed a spot'],
-  ['Mango & Co', 'boosted to #3'],
-  ['Theo Marchetti', 'just claimed a spot'],
-  ['Lumen Studio', 'boosted to #9'],
 ];

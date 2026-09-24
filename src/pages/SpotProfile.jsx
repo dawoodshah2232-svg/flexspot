@@ -7,7 +7,7 @@ import CountUp from '../components/CountUp';
 import { money, compact, timeAgo, copyText, spotPath } from '../lib/format';
 import { displayAmount } from '../lib/display';
 import { trackEvent } from '../lib/analytics';
-import { REWARDS } from '../lib/data';
+import { REWARDS, DEMO_SPOTS } from '../lib/data';
 import { recordClick, recordReferralClick, recordVisit, getContributions, createReferralIdentity, myReferralCode, trackReferralVisit, getSpotReferrers } from '../lib/store';
 import Flee from '../components/Flee';
 import CelebrationBurst from '../components/CelebrationBurst';
@@ -78,6 +78,8 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
   }, [spot?.slug, refCredit, myCode]); // eslint-disable-line react-hooks/exhaustive-deps
   const contribs = useMemo(() => (spot ? getContributions(spot.slug) : []), [spot, spots]);
   const badges = useMemo(() => REWARDS.filter((r) => { try { return r.check(spots) === spot?.slug; } catch { return false; } }), [spots, spot]);
+  // Demo showcase brands are clearly labelled sample profiles — never real customers.
+  const isDemo = !!spot && DEMO_SPOTS.some((d) => d.slug === spot.slug);
   const neighbors = useMemo(() => {
     if (!spot) return [];
     return spots.filter((s) => s.slug !== spot.slug).slice(0, 4);
@@ -132,6 +134,9 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
                 <h1 className="font-display font-bold text-3xl sm:text-4xl text-snow">{spot.name}</h1>
                 {spot.rank === 1 && <Flee><span className="text-3xl crown-bob inline-block">👑</span></Flee>}
               </div>
+              {isDemo && (
+                <p className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[var(--ink-3)] bg-[var(--surface)] border border-[var(--line)] rounded-full px-3 py-1">🧪 Sample profile — illustrative demo data</p>
+              )}
               <p className="text-mist mt-1.5 text-[15px]">{spot.tagline}</p>
               {badges.length > 0 && (
                 <div className="flex gap-2 mt-3 flex-wrap">

@@ -16,6 +16,13 @@ const DAY_MS = 86400000;
 const ONLINE_WINDOW_MS = 90000;
 const DAILY_TTL = 45 * DAY_MS / 1000;
 
+// Verification/test traffic — never counted in analytics. Keeps the admin
+// dashboard honest: only real visitors appear.
+const TEST_VIDS = new Set(['v-test-abc123']);
+const isTestVid = (vid) => TEST_VIDS.has(vid) || /^v-test-/i.test(String(vid || ''));
+const isTestPage = (page) => page === '/test-page' || String(page || '').startsWith('/test-page?') || String(page || '').startsWith('/test/');
+const isTestRef = (host) => /test/i.test(String(host || ''));
+
 const dayKey = (ts) => new Date(ts).toISOString().slice(0, 10);
 const K = {
   pv: (d) => `trk:pv:${d}`,
@@ -55,7 +62,7 @@ const refHost = (r) => {
 async function record(store, b) {
   const vid = cleanVid(b.vid);
   const page = cleanPage(b.page);
-  if (!vid) return;
+  if (!vid || isTestVid(vid) || isTestPage(page)) return; // test traffic: never recorded
   const t = b.t === 'beat' ? 'beat' : b.t === 'leave' ? 'leave' : b.t === 'event' ? 'event' : 'view';
   const now = Date.now();
   const d = dayKey(now);
@@ -91,7 +98,7 @@ async function record(store, b) {
   const host = refHost(b.ref);
   await store.hincrby(K.pv(d), page, 1);
   await store.sadd(K.vis(d), vid);
-  await store.hincrby(K.ref(d), host, 1);
+  if (!isTestRef(host)) await store.hincrby(K.ref(d), host, 1); // test referrers: never counted
   await store.hincrby(K.dev(d), dev, 1);
   await store.lpush(K.trail(vid), JSON.stringify({ t: now, k: 'p', p: page }));
   await store.ltrim(K.trail(vid), 0, 80);
@@ -108,6 +115,7 @@ async function onlineList(store) {
   const out = [];
   const stale = [];
   for (const [vid, s] of Object.entries(raw)) {
+    if (isTestVid(vid)) { stale.push(vid); continue; } // purge test visitors from online
     try {
       // @vercel/kv auto-deserializes JSON values — handle both shapes
       const o = typeof s === 'string' ? JSON.parse(s) : s;
@@ -120,8 +128,8 @@ async function onlineList(store) {
 }
 
 async function dayStats(store, d) {
-  const [visitors, pv, ref, dev, ev, tm, tmc] = await Promise.all([
-    store.scard(K.vis(d)),
+  const [members, pv, ref, dev, ev, tm, tmc] = await Promise.all([
+    store.smembers(K.vis(d)),
     store.hgetall(K.pv(d)),
     store.hgetall(K.ref(d)),
     store.hgetall(K.dev(d)),
@@ -129,6 +137,8 @@ async function dayStats(store, d) {
     store.hgetall(K.tm(d)),
     store.hgetall(K.tmc(d)),
   ]);
+  // Visitor count excludes test ids (recorded before the ingest filter existed).
+  const visitors = (members || []).filter((v) => !isTestVid(typeof v === 'string' ? v : String(v))).length;
   const views = Object.values(pv || {}).reduce((a, v) => a + Number(v || 0), 0);
   return { d, visitors: visitors || 0, views, pv: pv || {}, ref: ref || {}, dev: dev || {}, ev: ev || {}, tm: tm || {}, tmc: tmc || {} };
 }
@@ -166,6 +176,7 @@ export default async function handler(req, res) {
     if (q.trail) {
       const vid = cleanVid(q.trail);
       if (!vid) return json(res, 400, { ok: false });
+      if (isTestVid(vid)) return json(res, 200, { ok: true, vid, trail: [] }); // test visitors: no trail
       const raw = await store.lrange(K.trail(vid), 0, 80);
       const trail = (raw || []).map((s) => {
         try { return typeof s === 'string' ? JSON.parse(s) : s; } catch { return null; }
@@ -190,9 +201,11 @@ export default async function handler(req, res) {
     const tmAll = merge((s) => s.tm);
     const tmcAll = merge((s) => s.tmc);
 
-    const topPages = top(pvAll, 10).map(([p, v]) => ({
-      p, v, avgMs: tmcAll[p] ? Math.round(tmAll[p] / tmcAll[p]) : 0,
-    }));
+    const topPages = top(pvAll, 10)
+      .filter(([p]) => !isTestPage(p)) // hide test pages recorded before the filter
+      .map(([p, v]) => ({
+        p, v, avgMs: tmcAll[p] ? Math.round(tmAll[p] / tmcAll[p]) : 0,
+      }));
     const weekVisitors = stats.reduce((a, s) => a + s.visitors, 0);
     const weekViews = stats.reduce((a, s) => a + s.views, 0);
     const online = await onlineList(store);
@@ -205,7 +218,7 @@ export default async function handler(req, res) {
       yesterday: days > 1 ? { d: stats[1].d, visitors: stats[1].visitors, views: stats[1].views } : null,
       week: { visitors: weekVisitors, views: weekViews },
       topPages,
-      topRefs: top(refAll, 8).map(([r, v]) => ({ r, v })),
+      topRefs: top(refAll, 8).filter(([r]) => !isTestRef(r)).map(([r, v]) => ({ r, v })),
       devices: { mobile: devAll.mobile || 0, desktop: devAll.desktop || 0 },
       events: top(evAll, 12).map(([n, v]) => ({ n, v })),
       online,

@@ -1,6 +1,6 @@
 // Shared server-side helpers for FlexSpot email + member APIs.
 // Runs on Vercel serverless (Node runtime). Zero extra deps besides @vercel/kv.
-import { createHmac, randomBytes, scryptSync } from 'node:crypto';
+import { createHmac, randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 
 const KV_OK = !!process.env.KV_REST_API_URL;
 let _kv = null;
@@ -50,9 +50,10 @@ export function hashPassword(pw) {
 export function verifyPassword(pw, stored) {
   try {
     const [, salt, hash] = String(stored).split('$');
-    const check = scryptSync(pw, salt, 64, { N: 16384, r: 8, p: 1 }).toString('hex');
-    return check.length === hash.length && createHmac('sha256', 'x').update(check).digest('hex') ===
-      createHmac('sha256', 'x').update(hash).digest('hex');
+    if (!salt || !hash) return false;
+    const check = scryptSync(pw, salt, 64, { N: 16384, r: 8, p: 1 });
+    const want = Buffer.from(hash, 'hex');
+    return check.length === want.length && timingSafeEqual(check, want);
   } catch { return false; }
 }
 
@@ -70,8 +71,11 @@ export function verifySession(token) {
   try {
     if (!MEMBER_SECRET) return null;
     const [a, b, sig] = String(token).split('.');
+    if (!a || !b || !sig) return null;
     const want = createHmac('sha256', MEMBER_SECRET).update(`${a}.${b}`).digest('base64url');
-    if (sig !== want) return null;
+    const sigBuf = Buffer.from(sig, 'base64url');
+    const wantBuf = Buffer.from(want, 'base64url');
+    if (sigBuf.length !== wantBuf.length || !timingSafeEqual(sigBuf, wantBuf)) return null;
     const exp = Number(Buffer.from(b, 'base64url').toString());
     if (!exp || exp < Date.now()) return null;
     return Buffer.from(a, 'base64url').toString().toLowerCase();

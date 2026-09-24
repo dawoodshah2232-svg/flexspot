@@ -75,7 +75,7 @@ export default function MobileNav({ onClaim }) {
               <path d="M13 2 4.5 13.5H11L9.5 22 19 10h-6.5L13 2Z" fill="#fff" />
             </svg>
           </span>
-          <span className="text-[10px] font-bold text-[var(--blaze)]">Start $1</span>
+          <span className="text-[10px] font-bold text-[var(--ink-3)]">Start $1</span>
         </button>
         {ITEMS.slice(2).map((it) => (
           <NavLink

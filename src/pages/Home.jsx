@@ -353,7 +353,7 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
           items={[
             { emoji: '🚀', left: '2%', top: '12%', size: 30, cls: 'hidden lg:block' },
             { emoji: '💰', left: '94%', top: '8%', size: 26, cls: 'hidden lg:block', opacity: 0.45 },
-            { emoji: '🔥', left: '46%', top: '4%', size: 24, opacity: 0.4 },
+            { emoji: '🔥', left: '46%', top: '4%', size: 24, opacity: 0.4, cls: 'hidden sm:block' },
             { emoji: '👑', left: '90%', top: '72%', size: 30, cls: 'hidden lg:block', opacity: 0.4 },
             { emoji: '😂', left: '3%', top: '78%', size: 26, cls: 'hidden lg:block', opacity: 0.35 },
             { emoji: '💎', left: '52%', top: '88%', size: 22, opacity: 0.4 },

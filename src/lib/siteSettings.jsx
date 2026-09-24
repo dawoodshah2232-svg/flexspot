@@ -14,7 +14,7 @@ export const DEFAULT_SETTINGS = {
     titleA: 'BIG BRAND VISIBILITY.',
     titleB: 'START FROM JUST $1.',
     subtitle:
-      'Anyone can boost any brand with $1 — your name lands on their page, and the highest total takes the crown. 👑',
+      'A live leaderboard where brands pay for the spotlight. Claim a spot from $1 in USDT — the highest bidder takes the crown, and a real human checks every payment before it goes live.',
     ctaPrimary: 'Start From $1 →',
     ctaSecondary: 'How It Works',
     // Champion stage image (the big photo on the right of the hero)

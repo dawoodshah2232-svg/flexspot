@@ -716,6 +716,20 @@ export default function ClaimPage({ spots, onSubmitted }) {
               wallet address and network before sending.
             </p>
 
+            {/* what happens next — reassurance at the payment step */}
+            <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5">
+              <h4 className="text-sm font-bold text-[var(--ink)] mb-3">🛡️ What happens after you submit</h4>
+              <ol className="space-y-2.5 text-[13px] text-[var(--ink-2)]">
+                <li className="flex gap-3"><span className="grid place-items-center w-6 h-6 rounded-full bg-[var(--blaze-soft)] text-[var(--blaze-deep)] text-[11px] font-extrabold shrink-0">1</span><span><b className="text-[var(--ink)]">You send the USDT</b> and upload your screenshot here.</span></li>
+                <li className="flex gap-3"><span className="grid place-items-center w-6 h-6 rounded-full bg-[var(--blaze-soft)] text-[var(--blaze-deep)] text-[11px] font-extrabold shrink-0">2</span><span><b className="text-[var(--ink)]">A real person reviews it</b> — no bots, no auto-approvals. Most reviews are done within 24 hours.</span></li>
+                <li className="flex gap-3"><span className="grid place-items-center w-6 h-6 rounded-full bg-[var(--blaze-soft)] text-[var(--blaze-deep)] text-[11px] font-extrabold shrink-0">3</span><span><b className="text-[var(--ink)]">Your spot goes live</b> on the leaderboard at the rank your amount earned.</span></li>
+              </ol>
+              <p className="text-[12px] text-[var(--ink-3)] mt-3">
+                New to crypto? <Link to="/faq" className="text-[var(--blaze)] hover:underline font-semibold">Read the FAQ</Link> — or{' '}
+                <a href="mailto:support@flexspot.lol" className="text-[var(--blaze)] hover:underline font-semibold">ask us anything</a> before you send.
+              </p>
+            </div>
+
             <div className="flex gap-2.5">
               <button onClick={() => { setError(''); setStep(amountStep); }} className="btn-ghost px-5 py-3.5 text-sm">← Back</button>
               <button onClick={submit} disabled={busy} className="btn-gold flex-1 py-3.5 text-[15px]">

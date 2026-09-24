@@ -5,11 +5,6 @@ import Header from './components/Header';
 import Flee from './components/Flee';
 import MobileNav from './components/MobileNav';
 import Footer from './components/Footer';
-import Home from './pages/Home';
-import ClaimPage from './pages/ClaimPage';
-import LeaderboardPage from './pages/LeaderboardPage';
-import HowItWorks from './pages/HowItWorks';
-import Rewards from './pages/Rewards';
 import ErrorBoundary from './components/ErrorBoundary';
 // Chunk filenames change on every deploy. If a code-split chunk 404s because
 // the tab holds HTML from the previous deploy, reload once to fetch fresh
@@ -28,14 +23,27 @@ function lazyRetry(importFn) {
   );
 }
 // Compare + Calculator are code-split like the blog — they never touch first paint.
+// Route-level splitting: every page is its own chunk, so the first-paint
+// bundle only carries the shell (header/footer/analytics) + whatever route
+// the visitor lands on. This took the main bundle from ~1.5MB to a fraction.
+const Home = lazyRetry(() => import('./pages/Home'));
+const ClaimPage = lazyRetry(() => import('./pages/ClaimPage'));
+const LeaderboardPage = lazyRetry(() => import('./pages/LeaderboardPage'));
+const HowItWorks = lazyRetry(() => import('./pages/HowItWorks'));
+const Rewards = lazyRetry(() => import('./pages/Rewards'));
+const FAQ = lazyRetry(() => import('./pages/FAQ'));
+const Privacy = lazyRetry(() => import('./pages/Privacy'));
+const Terms = lazyRetry(() => import('./pages/Terms'));
+const Disclaimers = lazyRetry(() => import('./pages/Disclaimers'));
+const SpotProfile = lazyRetry(() => import('./pages/SpotProfile'));
+const TopReferrersPage = lazyRetry(() => import('./pages/TopReferrersPage'));
+const DiscoveryPage = lazyRetry(() => import('./pages/DiscoveryPage'));
+const Explore = lazyRetry(() => import('./pages/Explore'));
+const CategoryPage = lazyRetry(() => import('./pages/CategoryPage'));
+const RootProfile = lazyRetry(() => import('./components/RootProfile'));
+const NotFound = lazyRetry(() => import('./pages/NotFound'));
 const ComparePage = lazyRetry(() => import('./pages/ComparePage'));
 const CalculatorPage = lazyRetry(() => import('./pages/CalculatorPage'));
-import FAQ from './pages/FAQ';
-import Privacy from './pages/Privacy';
-import Terms from './pages/Terms';
-import Disclaimers from './pages/Disclaimers';
-import SpotProfile from './pages/SpotProfile';
-import TopReferrersPage from './pages/TopReferrersPage';
 const Dashboard = lazyRetry(() => import('./pages/Dashboard'));
 const Admin = lazyRetry(() => import('./pages/Admin'));
 import { fetchLeaderboard, fetchPendingSpots, rank, saveRankSnapshot, IS_LIVE } from './lib/store';
@@ -45,11 +53,6 @@ import { SiteSettingsProvider } from './lib/siteSettings.jsx';
 import { trackPageView, writeHeartbeat, useLiveOnline } from './lib/analytics';
 import { gaPageView } from './lib/ga';
 import CookieConsent from './components/CookieConsent';
-import DiscoveryPage from './pages/DiscoveryPage';
-import Explore from './pages/Explore';
-import CategoryPage from './pages/CategoryPage';
-import RootProfile from './components/RootProfile';
-import NotFound from './pages/NotFound';
 import SecurityGuard from './components/SecurityGuard';
 import PageHead from './components/PageHead';
 
@@ -57,12 +60,13 @@ import PageHead from './components/PageHead';
 const Blog = lazyRetry(() => import('./pages/Blog'));
 const BlogPost = lazyRetry(() => import('./pages/BlogPost'));
 
-function BlogFallback() {
+// Shared lazy-route fallback: matches the pre-data loading screen.
+function RouteFallback() {
   return (
     <div className="pt-[92px]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-16 pb-24 text-center">
-        <div className="text-5xl mb-4 anim-floaty">📝</div>
-        <div className="font-display font-bold text-[var(--ink)] text-lg">Loading the article…</div>
+        <div className="text-5xl mb-4 anim-floaty">⚡</div>
+        <div className="font-display font-bold text-[var(--ink)] text-lg">Loading the spotlight…</div>
       </div>
     </div>
   );
@@ -185,6 +189,7 @@ function Shell() {
       <Header onClaim={openClaim} />
       <main>
         <ErrorBoundary>
+        <React.Suspense fallback={<RouteFallback />}>
         <Routes>
           <Route path="/" element={<Home spots={spots} onClaim={openClaim} onBoost={openBoost} viewers={online.length} />} />
           <Route path="/claim" element={<ClaimPage spots={spots} onSubmitted={onSubmitted} />} />
@@ -196,23 +201,24 @@ function Shell() {
           <Route path="/winners" element={<DiscoveryPage mode="winners" spots={spots} moves={moves} onBoost={openBoost} onClaim={openClaim} />} />
           <Route path="/new" element={<DiscoveryPage mode="new" spots={spots} moves={moves} onBoost={openBoost} onClaim={openClaim} />} />
           <Route path="/how-it-works" element={<HowItWorks onClaim={openClaim} />} />
-          <Route path="/compare" element={<React.Suspense fallback={<BlogFallback />}><ComparePage spots={spots} /></React.Suspense>} />
-          <Route path="/calculator" element={<React.Suspense fallback={<BlogFallback />}><CalculatorPage spots={spots} onClaim={openClaim} /></React.Suspense>} />
+          <Route path="/compare" element={<ComparePage spots={spots} />} />
+          <Route path="/calculator" element={<CalculatorPage spots={spots} onClaim={openClaim} />} />
           <Route path="/rewards" element={<Rewards spots={spots} onClaim={openClaim} />} />
           <Route path="/faq" element={<FAQ onClaim={openClaim} />} />
-          <Route path="/blog" element={<React.Suspense fallback={<BlogFallback />}><Blog /></React.Suspense>} />
-          <Route path="/blog/:slug" element={<React.Suspense fallback={<BlogFallback />}><BlogPost /></React.Suspense>} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/disclaimers" element={<Disclaimers />} />
           <Route path="/s/:slug" element={<SpotProfile spots={spots} onClaim={openClaim} onBoost={openBoost} refresh={load} />} />
           <Route path="/top-referrers" element={<TopReferrersPage />} />
-          <Route path="/dashboard" element={<React.Suspense fallback={<BlogFallback />}><Dashboard spots={spots} onClaim={openClaim} /></React.Suspense>} />
-          <Route path="/admin" element={<React.Suspense fallback={<BlogFallback />}><Admin spots={spots} pending={pending} refresh={load} /></React.Suspense>} />
+          <Route path="/dashboard" element={<Dashboard spots={spots} onClaim={openClaim} />} />
+          <Route path="/admin" element={<Admin spots={spots} pending={pending} refresh={load} />} />
           {/* Root profiles — static routes always win over /:slug in React Router ranking */}
           <Route path="/:slug" element={<RootProfile spots={spots} onClaim={openClaim} onBoost={openBoost} />} />
           <Route path="*" element={<NotFound onClaim={openClaim} />} />
         </Routes>
+        </React.Suspense>
         </ErrorBoundary>
       </main>
       <Footer onClaim={openClaim} />

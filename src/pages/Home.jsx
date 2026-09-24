@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import CountUp from '../components/CountUp';
@@ -14,7 +14,8 @@ import { LIVE_FEED_POOL, IS_PREVIEW_DATA } from '../lib/data';
 import { IS_LIVE } from '../lib/store';
 import { allPosts } from '../lib/blog';
 import BlogCard from '../components/BlogCard';
-import OnboardingTour from '../components/OnboardingTour';
+// Onboarding tour is non-critical — code-split so it never touches first paint.
+const OnboardingTour = lazy(() => import('../components/OnboardingTour'));
 import { useSiteSettings } from '../lib/siteSettings.jsx';
 import { useDisplayOnline, displayAmount } from '../lib/display';
 import { getOnlineCount } from '../lib/analytics';
@@ -107,6 +108,7 @@ function ChampionStage({ leader, onClaim }) {
           alt={hero.heroImageAlt || 'FlexSpot champion spotlight'}
           className="w-full h-52 min-[420px]:h-60 sm:h-72 object-cover"
           loading="eager"
+          fetchPriority="high"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-black/15" aria-hidden="true" />
         {/* dancing hype-man cutout — toggleable/replaceable from Admin → Site Content.
@@ -288,13 +290,43 @@ function LeaderboardSection({ spots, onBoost, onClaim }) {
   );
 }
 
+/* ---------------- How it works in 10 seconds — instant clarity for first-timers ---------------- */
+const HOW_STEPS = [
+  { icon: '🎯', title: 'Claim a spot from $1', d: 'Pay in USDT crypto. Your amount is your ranking power.' },
+  { icon: '🔎', title: 'We verify by hand', d: 'A real person checks your payment before anything goes live.' },
+  { icon: '👑', title: 'Highest bid takes the crown', d: 'More = higher on the board. Anyone can outbid anyone.' },
+];
+
+function HowStepsStrip() {
+  return (
+    <ol className="flex flex-col min-[420px]:flex-row gap-2 mt-6 max-w-lg">
+      {HOW_STEPS.map((s, i) => (
+        <li key={s.title} className="flex-1 flex items-start gap-2.5 bg-[var(--surface)] border border-[var(--line)] rounded-2xl px-3.5 py-3 shadow-[var(--shadow-card)]">
+          <span className="grid place-items-center w-7 h-7 rounded-full bg-[var(--blaze-soft)] text-[var(--blaze-deep)] text-[13px] font-extrabold shrink-0">{i + 1}</span>
+          <span className="min-w-0">
+            <span className="block text-[13px] font-bold text-[var(--ink)] leading-tight">{s.icon} {s.title}</span>
+            <span className="block text-[11px] text-[var(--ink-2)] leading-snug mt-0.5">{s.d}</span>
+          </span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 /* ---------------- Footer statistics — reworked ---------------- */
-function FooterStats() {
+/* HONESTY RULE: only verifiable, real signals here.
+   The old strip showed hardcoded "89K visitors / 4.2M views / 100+ brands"
+   from a 2026-09-23 preview commit with no evidence — removed as
+   fabricated. Every figure below is computed live from the actual board
+   or is a stated site fact (min bid, human verification). */
+function FooterStats({ spots = [] }) {
+  const brandCount = spots.length;
+  const topBid = spots.reduce((m, s) => Math.max(m, s.amount || 0), 0);
   const items = [
-    { icon: '👥', chip: 'bg-[var(--blaze-soft)]', num: 89, suffix: 'K', decimals: 0, label: 'all-time visitors' },
-    { icon: '👁️', chip: 'bg-[var(--blue-soft)]', num: 4.2, suffix: 'M', decimals: 1, label: 'profile views' },
-    { icon: '⚡', chip: 'bg-[var(--gold-soft)]', num: 100, suffix: '+', decimals: 0, label: 'brands featured' },
-    { icon: '🌎', chip: 'bg-[var(--green-soft)]', text: 'Global', label: 'community worldwide' },
+    { icon: '💰', chip: 'bg-[var(--gold-soft)]', text: '$1', label: 'minimum bid to claim' },
+    { icon: '⚡', chip: 'bg-[var(--blaze-soft)]', num: brandCount, decimals: 0, label: 'brands on the board now' },
+    { icon: '👑', chip: 'bg-[var(--blue-soft)]', num: topBid, decimals: 0, prefix: '$', label: 'highest bid right now' },
+    { icon: '🛡️', chip: 'bg-[var(--green-soft)]', text: '100%', label: 'spots reviewed by hand' },
   ];
   return (
     <section className="border-y border-[var(--line-soft)] bg-[color-mix(in_srgb,var(--surface-2)_60%,transparent)]">
@@ -304,15 +336,17 @@ function FooterStats() {
             key={it.label}
             className="card card-lift rounded-3xl p-5 flex items-center gap-4"
           >
-            <span className={`grid place-items-center w-13 h-13 sm:w-14 sm:h-14 rounded-2xl text-2xl sm:text-[28px] shrink-0 ${it.chip}`} style={{ width: 56, height: 56 }}>
+            <span className={`grid place-items-center rounded-2xl text-2xl sm:text-[28px] shrink-0 ${it.chip}`} style={{ width: 56, height: 56 }}>
               {it.icon}
             </span>
             <div className="leading-tight min-w-0">
               <div className="font-display font-black text-[26px] sm:text-3xl text-[var(--ink)] tracking-tight">
                 {it.text ?? (
-                  <CountUp to={it.num} format={(n) => n.toFixed(it.decimals)} />
+                  <>
+                    {it.prefix && <span className="grad-text">{it.prefix}</span>}
+                    <CountUp to={it.num} format={(n) => n.toFixed(it.decimals)} />
+                  </>
                 )}
-                {!it.text && <span className="grad-text">{it.suffix}</span>}
               </div>
               <div className="text-[11px] font-bold text-[var(--ink-3)] uppercase tracking-[0.12em] mt-0.5">{it.label}</div>
             </div>
@@ -385,6 +419,8 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
                 {hero.ctaSecondary}
               </Link>
             </div>
+            {/* instant explainer: what it is, how it works, what to do */}
+            <HowStepsStrip />
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-7 max-w-lg">
               {BENEFITS.map((b) => (
                 <div key={b.label} className="flex items-center gap-2 bg-[var(--surface)] border border-[var(--line)] rounded-2xl px-3 py-2.5 shadow-[var(--shadow-card)]">
@@ -416,7 +452,7 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
 
       <TopReferrers spots={spots} />
 
-      <FooterStats />
+      <FooterStats spots={spots} />
 
       {/* HOW IT WORKS TEASER */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-14">
@@ -515,7 +551,9 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
           </div>
         </div>
       </section>
-      <OnboardingTour />
+      <Suspense fallback={null}>
+        <OnboardingTour />
+      </Suspense>
     </div>
   );
 }

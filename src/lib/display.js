@@ -20,9 +20,11 @@ export function getDisplayTuning() {
     onlineSmallJitter: 3,
     onlineBigMult: 2.5,         // x2.5..x4 for larger real counts
     onlineBigJitter: 1.5,
-    // amounts
-    amountMult: 1.06,           // +6%
-    amountAdd: 3,               // +$3 flat
+    // amounts — default is NO lift: what visitors see equals the real
+    // amount, so a small launch board reads honestly small. The owner can
+    // still tune this in ⚙️ Settings (stored in localStorage).
+    amountMult: 1,              // x1.0
+    amountAdd: 0,               // +$0 flat
     // seed when there's no real data at all (fresh browser)
     seedOnlineMin: 21,
     seedOnlineMax: 44,
@@ -57,7 +59,8 @@ export function displayOnlineCount(real, tuning) {
   return Math.max(t.onlineFloor, n);
 }
 
-// Compute a displayed amount from the REAL amount ($ spent). Gentle lift.
+// Compute a displayed amount from the REAL amount ($ spent). No lift by
+// default — the owner can add one in ⚙️ Settings.
 export function displayAmount(real, tuning) {
   const t = tuning || getDisplayTuning();
   const r = Math.max(0, Number(real) || 0);

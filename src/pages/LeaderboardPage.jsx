@@ -8,6 +8,7 @@ import DramaTicker from '../components/DramaTicker';
 import ClaimStrip from '../components/ClaimStrip';
 import { money, compact } from '../lib/format';
 import { displayAmount } from '../lib/display';
+import { IS_PREVIEW_DATA } from '../lib/data';
 import { CATEGORIES, categoryOf } from '../lib/data';
 
 const PAGE = 20;
@@ -121,6 +122,9 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
             <span className="live-dot" /> Updated live — every boost re-ranks instantly
           </div>
           <h1 className="font-display font-extrabold text-4xl sm:text-6xl text-[var(--ink)] tracking-tight">The <span className="grad-gold">Leaderboard</span></h1>
+          {IS_PREVIEW_DATA && (
+            <p className="text-xs text-[var(--ink-3)] mt-3">Preview data — demo brands shown for illustration only.</p>
+          )}
           <p className="text-[var(--ink-2)] mt-4">The most competitive page on the internet. More buzz = higher spot. Where do you rank?</p>
           <div className="flex justify-center mt-4 max-w-md mx-auto"><DramaTicker className="w-full" /></div>
           {/* live stat strip */}
@@ -248,7 +252,7 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
           onClick={jumpToBottom}
           aria-label="Jump to the last spot"
           title="Jump to the last spot"
-          className={`fixed z-50 bottom-20 sm:bottom-8 right-4 sm:right-6 rounded-full pl-4 pr-5 py-3 font-display font-extrabold text-sm text-[var(--gold-deep)] dark:text-[#FCD34D] bg-[var(--surface)]/90 backdrop-blur-xl border border-[var(--gold)]/50 shadow-[0_8px_30px_rgba(245,158,11,0.25)] transition-all duration-300 hover:border-[var(--gold)] active:scale-95 ${showJump ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
+          className={`fixed z-50 bottom-20 sm:bottom-8 right-4 sm:right-6 rounded-full pl-4 pr-5 py-3 font-display font-extrabold text-sm text-[var(--gold-deep)] dark:text-[#FCD34D] bg-[color-mix(in_srgb,var(--surface)_90%,transparent)] backdrop-blur-xl border border-[var(--gold)]/50 shadow-[0_8px_30px_rgba(245,158,11,0.25)] transition-all duration-300 hover:border-[var(--gold)] active:scale-95 ${showJump ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
         >
           ↓ {filtered.length}
         </button>

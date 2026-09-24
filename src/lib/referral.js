@@ -6,24 +6,21 @@
 // affiliate stats, matched by member name.
 import { getMember } from './member';
 
-const BOARD_KEY = 'flexspot_referrer_board_v3';
-const BOARD_VERSION = 3;
+const BOARD_KEY = 'flexspot_referrer_board_v4';
+const BOARD_VERSION = 4;
 
-// Curated demo board — members/commission are display seeds. Umar sits at #7
-// per the owner's request (ranks 7–10 zone).
+// Curated demo board — 8 referrers with small, credible 20%-of-payment
+// commissions (e.g. $5.00 = 20% of $25 in referred payments). Umar sits at #7
+// per the owner's request.
 const SEED = [
-  { name: 'Ahmed R.', members: 6, commission: 48.0 },
-  { name: 'CryptoMama', members: 5, commission: 41.5 },
-  { name: 'DXB Hustle', members: 5, commission: 36.0 },
-  { name: 'Lena W.', members: 4, commission: 29.2 },
-  { name: 'Sara K.', members: 4, commission: 24.0 },
-  { name: 'Omar F.', members: 3, commission: 19.8 },
-  { name: 'Umar', members: 3, commission: 15.0 },
-  { name: 'Fatima A.', members: 2, commission: 12.4 },
-  { name: 'Raj P.', members: 2, commission: 9.0 },
-  { name: 'Nina S.', members: 2, commission: 7.2 },
-  { name: 'Khalid M.', members: 1, commission: 5.0 },
-  { name: 'Zoe T.', members: 1, commission: 3.4 },
+  { name: 'Ahmed R.', members: 4, commission: 5.0 },
+  { name: 'CryptoMama', members: 3, commission: 4.2 },
+  { name: 'DXB Hustle', members: 3, commission: 3.6 },
+  { name: 'Lena W.', members: 3, commission: 3.0 },
+  { name: 'Sara K.', members: 2, commission: 2.4 },
+  { name: 'Omar F.', members: 2, commission: 1.8 },
+  { name: 'Umar', members: 2, commission: 1.2 },
+  { name: 'Fatima A.', members: 1, commission: 0.6 },
 ];
 
 function loadBoard() {

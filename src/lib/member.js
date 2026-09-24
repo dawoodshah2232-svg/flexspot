@@ -179,9 +179,12 @@ function seedWalletTxns() {
 export function ensureMemberDemo() {
   try {
     // Production must show the REAL member flow (login with issued
-    // credentials), never the demo account. Set VITE_DEMO_SEED=off in the
-    // production env to disable demo seeding.
-    if (import.meta.env.VITE_DEMO_SEED === 'off') return getMember();
+    // credentials), never the demo account. Demo seeding is ON for local
+    // dev, OFF in production builds unless explicitly forced with
+    // VITE_DEMO_SEED=on. VITE_DEMO_SEED=off always disables it.
+    const flag = import.meta.env.VITE_DEMO_SEED;
+    const demoOn = flag === 'on' || (import.meta.env.DEV && flag !== 'off');
+    if (!demoOn) return getMember();
     if (localStorage.getItem(LS_MEMBER_SEED) !== null) return getMember();
     // A real pending claim takes precedence over the demo member.
     if (getPendingClaim()) return null;

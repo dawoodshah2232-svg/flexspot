@@ -19,7 +19,7 @@ import {
   resetDemoData,
 } from '../lib/store';
 import { CATEGORIES } from '../lib/data';
-import { useLiveOnline, getAnalyticsSummary, getVisitorTrail, clearAnalyticsData } from '../lib/analytics';
+import { useLiveOnline, fetchTrafficStats, fetchVisitorTrail } from '../lib/analytics';
 import { getDisplayTuning, saveDisplayTuning, displayOnlineCount, displayAmount } from '../lib/display';
 import { useSiteSettings, IMAGE_HINTS } from '../lib/siteSettings.jsx';
 import { getPendingClaim, clearPendingClaim, saveMember } from '../lib/member';
@@ -187,7 +187,7 @@ export default function Admin({ spots, refresh }) {
   const [cms, setCms] = useState(null);
   const [cmsMsg, setCmsMsg] = useState('');
   const [trailVid, setTrailVid] = useState(null);
-  const online = useLiveOnline(1000);
+  const online = useLiveOnline(10000);
 
   const reload = () => {
     setSubs(fetchAllSubmissions());
@@ -281,7 +281,23 @@ export default function Admin({ spots, refresh }) {
     reload(); flash('Note saved.');
   };
 
-  const analytics = useMemo(() => getAnalyticsSummary(), [tab, subs, online.length]);
+  // Real site-wide traffic from the server (/api/track → KV). Refreshes every
+  // 15s while the admin is open. Null = still loading.
+  const [traffic, setTraffic] = useState(null);
+  const [trafficErr, setTrafficErr] = useState('');
+  useEffect(() => {
+    if (!ok) return;
+    let alive = true;
+    const load = async () => {
+      try {
+        const t = await fetchTrafficStats(ADMIN_PIN, 7);
+        if (alive) { setTraffic(t); setTrafficErr(''); }
+      } catch { if (alive) setTrafficErr('Traffic feed unavailable — check connection.'); }
+    };
+    load();
+    const iv = setInterval(load, 15000);
+    return () => { alive = false; clearInterval(iv); };
+  }, [ok, tab]);
 
   const referrals = useMemo(() => (tab === 'referrals' ? getAllReferrals() : []), [tab, subs]);
 
@@ -393,7 +409,7 @@ export default function Admin({ spots, refresh }) {
 
         {tab === 'overview' && (
           <OverviewTab
-            online={online} analytics={analytics} live={live} spots={spots}
+            online={online} traffic={traffic} trafficErr={trafficErr} live={live} spots={spots}
             subs={subs} pendingSubs={pendingSubs} revenue={revenue}
             depositsToday={depositsToday} fakeReceipts={fakeReceipts}
             fraudFlags={fraudFlags} refresh={() => { reload(); refresh && refresh(); }}
@@ -405,7 +421,7 @@ export default function Admin({ spots, refresh }) {
         )}
 
         {tab === 'live' && (
-          <LiveTab online={online} onTrail={setTrailVid} />
+          <LiveTab online={traffic?.online || []} onTrail={setTrailVid} />
         )}
 
         {tab === 'deposits' && (
@@ -519,61 +535,75 @@ export default function Admin({ spots, refresh }) {
 
 /* ============================= OVERVIEW ============================= */
 
-function OverviewTab({ online, analytics, live, spots, subs, pendingSubs, revenue, depositsToday, fakeReceipts, fraudFlags, refresh }) {
+function OverviewTab({ online, traffic, trafficErr, live, spots, subs, pendingSubs, revenue, depositsToday, fakeReceipts, fraudFlags, refresh }) {
   const [showManual, setShowManual] = useState(false);
+  const t = traffic;
+  const fmtDur = (ms) => {
+    if (!ms) return '—';
+    const s = Math.round(ms / 1000);
+    if (s < 60) return `${s}s`;
+    return `${Math.floor(s / 60)}m ${s % 60}s`;
+  };
   return (
     <div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
         <StatCard icon="🟢" label="Online now" value={online.length} sub={`Public shows ≈${displayOnlineCount(online.length)}`} real />
-        <StatCard icon="📅" label="Visits today" value={compact(analytics.visitsToday)} sub={`${analytics.visitorsToday} unique`} real />
-        <StatCard icon="🗓️" label="Visits yesterday" value={compact(analytics.visitsYesterday)} sub={`${analytics.visitorsYesterday} unique`} real />
-        <StatCard icon="🌍" label="All-time visitors" value={compact(analytics.visitorsAllTime)} sub={`${compact(analytics.pageViewsAllTime)} page views`} real />
+        <StatCard icon="📅" label="Visitors today" value={compact(t?.today?.visitors ?? 0)} sub={`${compact(t?.today?.views ?? 0)} page views`} real />
+        <StatCard icon="🗓️" label="Visitors yesterday" value={compact(t?.yesterday?.visitors ?? 0)} sub={`${compact(t?.yesterday?.views ?? 0)} page views`} real />
+        <StatCard icon="🌍" label="Visitors · 7 days" value={compact(t?.week?.visitors ?? 0)} sub={`${compact(t?.week?.views ?? 0)} page views`} real />
         <StatCard icon="💰" label="Revenue (approved)" value={money(revenue)} sub="Manual USDT — verify on-chain" real />
         <StatCard icon="💳" label="Deposits today" value={depositsToday} real />
         <StatCard icon="⚠️" label="Flagged receipts" value={fakeReceipts} real />
         <StatCard icon="⏳" label="Pending approvals" value={pendingSubs.length} real />
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4 mb-8">
-        <div className="card p-5">
-          <h3 className="font-bold text-[var(--ink)] mb-1">📄 Top pages{REAL}</h3>
-          <p className="text-[11px] text-[var(--ink-3)] mb-3">Where visitors spend their time</p>
-          {analytics.topPages.length === 0 ? <p className="text-xs text-[var(--ink-3)]">No page views recorded yet.</p> : (
-            <div className="space-y-2">
-              {analytics.topPages.map((r) => (
-                <div key={r.k} className="flex items-center justify-between gap-3 text-sm">
-                  <span className="text-[var(--ink-2)] truncate font-mono text-xs">{r.k}</span>
-                  <span className="font-bold text-[var(--ink)] shrink-0">{compact(r.v)}</span>
-                </div>
-              ))}
-            </div>
-          )}
+      {trafficErr && <p className="text-xs text-red-500 mb-4">⚠️ {trafficErr}</p>}
+      {!t && !trafficErr ? (
+        <div className="card p-5 mb-8"><p className="text-sm text-[var(--ink-3)]">📡 Loading live traffic…</p></div>
+      ) : t && (<>
+        <p className="text-[11px] text-[var(--ink-3)] mb-4">📡 Real site-wide traffic — every visitor on every device, counted on the server. Tracking since 24 Sep 2026; visits before that weren't recorded.</p>
+        <div className="grid md:grid-cols-2 gap-4 mb-8">
+          <div className="card p-5">
+            <h3 className="font-bold text-[var(--ink)] mb-1">📄 Top pages{REAL}</h3>
+            <p className="text-[11px] text-[var(--ink-3)] mb-3">Where visitors go — and how long they stay</p>
+            {t.topPages.length === 0 ? <p className="text-xs text-[var(--ink-3)]">No page views recorded yet — share the site and they'll appear here.</p> : (
+              <div className="space-y-2">
+                {t.topPages.map((r) => (
+                  <div key={r.p} className="flex items-center justify-between gap-3 text-sm">
+                    <span className="text-[var(--ink-2)] truncate font-mono text-xs">{r.p}</span>
+                    <span className="shrink-0 text-[11px] text-[var(--ink-3)]">⏱ {fmtDur(r.avgMs)}</span>
+                    <span className="font-bold text-[var(--ink)] shrink-0">{compact(r.v)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="card p-5">
+            <h3 className="font-bold text-[var(--ink)] mb-1">📱 Device split{REAL}</h3>
+            <p className="text-[11px] text-[var(--ink-3)] mb-3">Mobile vs desktop visitors</p>
+            <DeviceBar devices={t.devices} />
+          </div>
+          <div className="card p-5">
+            <h3 className="font-bold text-[var(--ink)] mb-1">🔗 Traffic sources{REAL}</h3>
+            <p className="text-[11px] text-[var(--ink-3)] mb-3">Where visitors come from</p>
+            {t.topRefs.length === 0 ? <p className="text-xs text-[var(--ink-3)]">No data yet.</p> : (
+              <div className="space-y-2">
+                {t.topRefs.map((r) => (
+                  <div key={r.r} className="flex items-center justify-between gap-3 text-sm">
+                    <span className="text-[var(--ink-2)] truncate">{r.r}</span>
+                    <span className="font-bold text-[var(--ink)] shrink-0">{compact(r.v)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="card p-5">
+            <h3 className="font-bold text-[var(--ink)] mb-1">🎯 Funnel events{REAL}</h3>
+            <p className="text-[11px] text-[var(--ink-3)] mb-3">What visitors actually do</p>
+            <Funnel events={t.events} />
+          </div>
         </div>
-        <div className="card p-5">
-          <h3 className="font-bold text-[var(--ink)] mb-1">📱 Device split{REAL}</h3>
-          <p className="text-[11px] text-[var(--ink-3)] mb-3">Mobile vs desktop visitors</p>
-          <DeviceBar analytics={analytics} />
-        </div>
-        <div className="card p-5">
-          <h3 className="font-bold text-[var(--ink)] mb-1">🔗 Traffic sources{REAL}</h3>
-          <p className="text-[11px] text-[var(--ink-3)] mb-3">Where visitors come from</p>
-          {analytics.topSources.length === 0 ? <p className="text-xs text-[var(--ink-3)]">No data yet.</p> : (
-            <div className="space-y-2">
-              {analytics.topSources.map((r) => (
-                <div key={r.k} className="flex items-center justify-between gap-3 text-sm">
-                  <span className="text-[var(--ink-2)] truncate">{r.k}</span>
-                  <span className="font-bold text-[var(--ink)] shrink-0">{compact(r.v)}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        <div className="card p-5">
-          <h3 className="font-bold text-[var(--ink)] mb-1">🎯 Funnel events{REAL}</h3>
-          <p className="text-[11px] text-[var(--ink-3)] mb-3">What visitors actually do</p>
-          <Funnel analytics={analytics} />
-        </div>
-      </div>
+      </>)}
 
       <h2 className="font-display font-bold text-xl text-[var(--ink)] mb-4">Top brands right now</h2>
       <div className="space-y-2 mb-8">
@@ -604,8 +634,9 @@ function OverviewTab({ online, analytics, live, spots, subs, pendingSubs, revenu
   );
 }
 
-function DeviceBar({ analytics }) {
-  const { mobile, desktop } = analytics.deviceSplit;
+function DeviceBar({ devices }) {
+  const mobile = devices?.mobile || 0;
+  const desktop = devices?.desktop || 0;
   const total = mobile + desktop;
   if (!total) return <p className="text-xs text-[var(--ink-3)]">No data yet.</p>;
   const mp = Math.round((mobile / total) * 100);
@@ -631,12 +662,20 @@ const FUNNEL_LABELS = {
   referral_created: '🤝 Created referral link',
 };
 
-function Funnel({ analytics }) {
-  const rows = Object.entries(FUNNEL_LABELS).map(([k, label]) => ({ k, label, v: analytics.eventsByName[k] || 0 }));
-  const max = Math.max(1, ...rows.map((r) => r.v));
+function Funnel({ events }) {
+  const byName = {};
+  (events || []).forEach((e) => { byName[e.n] = e.v; });
+  const rows = Object.entries(FUNNEL_LABELS).map(([k, label]) => ({ k, label, v: byName[k] || 0 }));
+  const extra = (events || [])
+    .filter((e) => !FUNNEL_LABELS[e.n])
+    .slice(0, 4)
+    .map((e) => ({ k: e.n, label: `⚡ ${e.n.replace(/_/g, ' ')}`, v: e.v }));
+  const all = [...rows, ...extra];
+  const max = Math.max(1, ...all.map((r) => r.v));
+  if (!all.some((r) => r.v > 0)) return <p className="text-xs text-[var(--ink-3)]">No events yet.</p>;
   return (
     <div className="space-y-2.5">
-      {rows.map((r) => (
+      {all.map((r) => (
         <div key={r.k}>
           <div className="flex justify-between text-xs mb-1">
             <span className="text-[var(--ink-2)] font-semibold">{r.label}</span>
@@ -652,27 +691,29 @@ function Funnel({ analytics }) {
 /* ============================= LIVE ============================= */
 
 function LiveTab({ online, onTrail }) {
+  const secs = (ts) => Math.max(0, Math.round((Date.now() - ts) / 1000));
+  const ago = (s) => (s < 8 ? 'just arrived' : s < 60 ? `${s}s here` : `${Math.floor(s / 60)}m here`);
   if (!online.length) {
     return (
       <div>
         <h2 className="font-display font-bold text-xl text-[var(--ink)] mb-2">Live visitors{REAL}</h2>
-        <Empty icon="🟢" text="Nobody online right now — open the site in another tab and you'll appear here within 10 seconds." />
+        <Empty icon="🟢" text="Nobody online right now — open the site in another tab and you'll appear here within seconds." />
       </div>
     );
   }
   return (
     <div>
       <h2 className="font-display font-bold text-xl text-[var(--ink)] mb-2">Live visitors ({online.length}){REAL}</h2>
-      <p className="text-[var(--ink-2)] text-sm mb-5">Refreshing every second. Tap a visitor to see their full trail.</p>
+      <p className="text-[var(--ink-2)] text-sm mb-5">Refreshing every 15 seconds. Tap a visitor to see their full trail.</p>
       <div className="space-y-2">
         {online.map((v) => (
           <button key={v.vid} onClick={() => onTrail(v.vid)}
             className="w-full card p-4 flex items-center gap-3 text-left hover:border-[var(--blaze)] transition-colors min-h-[64px]">
             <span className="live-dot shrink-0" />
             <div className="flex-1 min-w-0">
-              <div className="font-mono text-xs font-bold text-[var(--ink)] truncate">{v.path}</div>
+              <div className="font-mono text-xs font-bold text-[var(--ink)] truncate">{v.page}</div>
               <div className="text-[11px] text-[var(--ink-3)] truncate">
-                {v.device === 'mobile' ? '📱' : '🖥️'} {v.device} · here {v.dwellSec < 5 ? 'just arrived' : `${v.dwellSec}s`} · {v.ref ? `from ${(() => { try { return new URL(v.ref).hostname; } catch { return 'referral'; } })()}` : 'direct'}
+                {v.dev === 'mobile' ? '📱' : '🖥️'} {v.dev} · {ago(secs(v.ts))}
               </div>
             </div>
             <span className="text-xs font-bold text-[var(--blaze)] shrink-0">Trail →</span>
@@ -684,7 +725,14 @@ function LiveTab({ online, onTrail }) {
 }
 
 function VisitorTrailModal({ vid, onClose }) {
-  const trail = useMemo(() => getVisitorTrail(vid), [vid]);
+  const [trail, setTrail] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    fetchVisitorTrail(ADMIN_PIN, vid)
+      .then((tr) => { if (alive) setTrail(tr); })
+      .catch(() => { if (alive) setTrail([]); });
+    return () => { alive = false; };
+  }, [vid]);
   return (
     <div className="fixed inset-0 z-[100] bg-black/60 grid place-items-center p-4" onClick={onClose}>
       <div className="card max-w-lg w-full max-h-[80vh] overflow-y-auto p-6" onClick={(e) => e.stopPropagation()}>
@@ -693,15 +741,15 @@ function VisitorTrailModal({ vid, onClose }) {
           <button onClick={onClose} className="btn-ghost w-11 h-11 rounded-full">✕</button>
         </div>
         <div className="font-mono text-[11px] text-[var(--ink-3)] break-all mb-4">{vid}</div>
-        {trail.length === 0 ? <p className="text-sm text-[var(--ink-3)]">No trail yet.</p> : (
+        {trail === null ? <p className="text-sm text-[var(--ink-3)]">Loading…</p>
+        : trail.length === 0 ? <p className="text-sm text-[var(--ink-3)]">No trail yet.</p> : (
           <div className="space-y-1.5">
-            {trail.map((t, i) => (
+            {trail.map((tr, i) => (
               <div key={i} className="flex items-start gap-3 text-sm rounded-xl bg-[var(--surface-2)] border border-[var(--line)] px-3.5 py-2.5">
-                <span className="text-base shrink-0">{t.kind === 'page' ? '📄' : '⚡'}</span>
+                <span className="text-base shrink-0">{tr.k === 'p' ? '📄' : '⚡'}</span>
                 <div className="min-w-0">
-                  <div className="font-semibold text-[var(--ink)] text-[13px] break-all">{t.kind === 'page' ? t.label : t.label}</div>
-                  {t.props && <div className="text-[11px] text-[var(--ink-3)] font-mono break-all">{JSON.stringify(t.props)}</div>}
-                  <div className="text-[11px] text-[var(--ink-3)]">{timeAgo(t.at)}</div>
+                  <div className="font-semibold text-[var(--ink)] text-[13px] break-all">{tr.p}</div>
+                  <div className="text-[11px] text-[var(--ink-3)]">{timeAgo(tr.t)}</div>
                 </div>
               </div>
             ))}
@@ -942,13 +990,9 @@ function SettingsTab({ flash, reload, refresh }) {
   const num = (v, fb) => { const n = parseFloat(v); return Number.isFinite(n) ? n : fb; };
 
   const wipe = (what) => {
-    if (what === 'analytics') {
-      if (!confirm('Clear all analytics (page views, events, heartbeats)? The site starts counting fresh.')) return;
-      clearAnalyticsData(); flash('✓ Analytics cleared.');
-    } else {
-      if (!confirm('Reset ALL demo data (spots, deposits, boosts, referrals, analytics)? Your site content text is kept.')) return;
-      resetDemoData(); reload(); refresh && refresh(); flash('✓ Demo data reset — reload the page to see a fresh board.');
-    }
+    if (what !== 'demo') return;
+    if (!confirm('Reset ALL demo data (spots, deposits, boosts, referrals)? Your site content text is kept.')) return;
+    resetDemoData(); reload(); refresh && refresh(); flash('✓ Demo data reset — reload the page to see a fresh board.');
   };
 
   return (
@@ -978,9 +1022,8 @@ function SettingsTab({ flash, reload, refresh }) {
 
       <div className="card p-5 sm:p-6">
         <h3 className="font-bold text-[var(--ink)] mb-1">🧹 Danger zone</h3>
-        <p className="text-[11px] text-[var(--ink-3)] mb-4">Irreversible on this browser. Site content text is never touched by these.</p>
+        <p className="text-[11px] text-[var(--ink-3)] mb-4">Irreversible on this browser. Site content text is never touched by these. Traffic stats live on the server and expire automatically after 45 days.</p>
         <div className="flex gap-3 flex-wrap">
-          <button onClick={() => wipe('analytics')} className="btn-ghost px-5 py-3 text-sm min-h-[48px]">Clear analytics</button>
           <button onClick={() => wipe('demo')} className="px-5 py-3 text-sm rounded-[14px] border border-red-400/60 text-red-600 hover:bg-red-500/10 font-bold min-h-[48px]">Reset all demo data</button>
         </div>
       </div>

@@ -50,7 +50,7 @@ import { fetchLeaderboard, fetchPendingSpots, rank, saveRankSnapshot, IS_LIVE } 
 import { LIVE_FEED_POOL } from './lib/data';
 
 import { SiteSettingsProvider } from './lib/siteSettings.jsx';
-import { trackPageView, writeHeartbeat, useLiveOnline } from './lib/analytics';
+import { useLiveOnline, startTracking, stopTracking } from './lib/analytics';
 import { gaPageView } from './lib/ga';
 import CookieConsent from './components/CookieConsent';
 import SecurityGuard from './components/SecurityGuard';
@@ -78,18 +78,18 @@ function ScrollTop() {
   return null;
 }
 
-// Real visitor analytics: page views on every route change + heartbeat
-// every 10s so the admin "online now" count is genuinely live.
+// Real visitor analytics: one server beacon per page view + a 20s heartbeat
+// while the tab is visible, so the admin sees genuine site-wide traffic.
+// Admin pages are never tracked (your own browsing must not pollute stats).
 // Also fires a GA4 page_view per SPA navigation when GA is configured.
 function AnalyticsTracker() {
   const { pathname, search } = useLocation();
   useEffect(() => {
     const path = pathname + search;
-    trackPageView(path, document.title);
+    if (pathname.startsWith('/admin')) { stopTracking(); return; }
+    startTracking(path);
     gaPageView(path);
-    writeHeartbeat(path);
-    const t = setInterval(() => writeHeartbeat(path), 10000);
-    return () => clearInterval(t);
+    return () => stopTracking();
   }, [pathname, search]);
   return null;
 }

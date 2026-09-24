@@ -9,6 +9,10 @@ import { SpotRow, BrandAvatar, useRaceCycle } from '../components/SpotCard';
 import Flee from '../components/Flee';
 import Sway from '../components/Sway';
 import TopReferrers from '../components/TopReferrers';
+import FaqSection from '../components/FaqSection';
+import { GEO_FAQS } from '../lib/geoFaqs';
+import FounderNote from '../components/FounderNote';
+import ExpertVoices from '../components/ExpertVoices';
 import { compact, money } from '../lib/format';
 import { IS_PREVIEW_DATA } from '../lib/data';
 import { IS_LIVE } from '../lib/store';
@@ -518,9 +522,10 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
           </div>
         </div>
       </section>
-      <Suspense fallback={null}>
-        <OnboardingTour />
-      </Suspense>
+      <FounderNote />
+      <ExpertVoices />
+      <FaqSection faqs={GEO_FAQS['/']} />
+
     </div>
   );
 }

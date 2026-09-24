@@ -5,6 +5,8 @@ import { money, compact, copyText } from '../lib/format';
 import { displayAmount } from '../lib/display';
 import { categoryOf, categoryMeta } from '../lib/data';
 import { trackEvent } from '../lib/analytics';
+import FaqSection from '../components/FaqSection';
+import { GEO_FAQS } from '../lib/geoFaqs';
 
 const LS_COMPARE = 'flexspot_compare_v1';
 const MAX_COMPARE = 3;
@@ -297,6 +299,7 @@ export default function ComparePage({ spots }) {
             </button>
           </div>
         )}
+        <FaqSection faqs={GEO_FAQS['/compare']} />
       </div>
     </div>
   );

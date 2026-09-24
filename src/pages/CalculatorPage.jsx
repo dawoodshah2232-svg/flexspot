@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { money, compact } from '../lib/format';
 import { trackEvent } from '../lib/analytics';
+import FaqSection from '../components/FaqSection';
+import { GEO_FAQS } from '../lib/geoFaqs';
 
 const PRESETS = [30, 60, 150, 300];
 
@@ -139,6 +141,7 @@ export default function CalculatorPage({ spots, onClaim }) {
             ⚡ Claim your spot — from $1
           </button>
         </div>
+        <FaqSection faqs={GEO_FAQS['/calculator']} />
       </div>
     </div>
   );

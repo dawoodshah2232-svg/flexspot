@@ -1,4 +1,5 @@
 import { CATEGORIES, FAQS } from './data';
+import { GEO_FAQS } from './geoFaqs';
 import { getPost, publicPosts } from './blog';
 
 // Central route -> SEO/GEO metadata map. One source of truth, applied
@@ -17,66 +18,79 @@ const abs = (path) => url(path);
 // Static route entries: { title, description, robots? , jsonLd?: (path) => object|null }
 export const META = {
   '/': {
+    faqs: GEO_FAQS['/'],
     title: 'FlexSpot.LOL — Bid for Attention | Live Brand Leaderboard',
     description:
       "FlexSpot.LOL — the internet's live spotlight competition. Claim a public leaderboard spot from just $1, pay in USDT crypto, and outbid rivals to take the crown.",
   },
   '/claim': {
+    faqs: GEO_FAQS['/claim'],
     title: 'Claim Your Spot — From Just $1 | FlexSpot.LOL',
     description:
       'Claim your public FlexSpot leaderboard spot in under a minute. Enter your brand details, boost from $1, and start climbing to #1.',
   },
   '/leaderboard': {
+    faqs: GEO_FAQS['/leaderboard'],
     title: 'Live Leaderboard — Who Rules the Spotlight | FlexSpot.LOL',
     description:
       'The live FlexSpot leaderboard: brands, creators, and meme pages ranked by total boosts. Watch the battle in real time and boost your favorite.',
   },
   '/explore': {
+    faqs: GEO_FAQS['/explore'],
     title: 'Explore All Categories | FlexSpot.LOL',
     description:
       'Browse FlexSpot spots by category — startups, creators, gaming, food & drink, fintech, memes, and more. Find a brand to boost or a niche to conquer.',
   },
   '/trending': {
+    faqs: GEO_FAQS['/leaderboard'],
     title: 'Trending Spots Right Now | FlexSpot.LOL',
     description:
       "What's hot on FlexSpot: the spots gaining the most buzz this week. Jump on a rising star or reclaim the crown.",
   },
   '/rising': {
+    faqs: GEO_FAQS['/leaderboard'],
     title: 'Rising Stars — Fastest Climbers | FlexSpot.LOL',
     description:
       'The fastest-climbing FlexSpot spots. These brands are gaining momentum — boost one before they hit #1.',
   },
   '/winners': {
+    faqs: GEO_FAQS['/leaderboard'],
     title: 'Winners — Hall of Fame | FlexSpot.LOL',
     description:
       'The FlexSpot hall of fame: past and present champions who held the crown. This is what $1 of glory looks like.',
   },
   '/new': {
+    faqs: GEO_FAQS['/leaderboard'],
     title: 'Newest Spots — Fresh Claims | FlexSpot.LOL',
     description:
       'The freshest FlexSpot claims. Be the first to boost a brand-new spot and get in before the crowd.',
   },
   '/how-it-works': {
+    faqs: GEO_FAQS['/how-it-works'],
     title: 'How It Works — Claim, Boost, Win | FlexSpot.LOL',
     description:
       'How FlexSpot works: claim a public spot from $1, get boosted by fans and referrals, and climb the live leaderboard to take the crown.',
   },
   '/rewards': {
+    faqs: GEO_FAQS['/rewards'],
     title: 'Rewards — Boosts, Referrals & Crowns | FlexSpot.LOL',
     description:
       'FlexSpot rewards: earn your place with boosts, 20% instant affiliate commission on referred payments, and the champion crown for the top spot.',
   },
   '/compare': {
+    faqs: GEO_FAQS['/compare'],
     title: 'Spot vs Spot — Compare Brands Head-to-Head | FlexSpot.LOL',
     description:
       'Compare any FlexSpot spots side by side: rank, boosts, views, clicks and momentum with live numbers. Settle who really rules the leaderboard.',
   },
   '/calculator': {
+    faqs: GEO_FAQS['/calculator'],
     title: 'Visibility Calculator — What Your Budget Buys | FlexSpot.LOL',
     description:
       'Estimate your FlexSpot spotlight: slide your budget and campaign length to project rank, profile views, clicks and cost per 1k views from live board data.',
   },
   '/top-referrers': {
+    faqs: GEO_FAQS['/top-referrers'],
     title: 'Top Referrers — The People Behind the Traffic | FlexSpot.LOL',
     description:
       'Meet FlexSpot’s top referrers: members who earn 20% instant commission on every payment from people who join through their link.',

@@ -3,6 +3,10 @@ import { motion } from 'framer-motion';
 import { BrandAvatar } from '../components/SpotCard';
 import { REWARDS } from '../lib/data';
 import Flee from '../components/Flee';
+import FaqSection from '../components/FaqSection';
+import { GEO_FAQS } from '../lib/geoFaqs';
+import FounderNote from '../components/FounderNote';
+import ExpertVoices from '../components/ExpertVoices';
 
 const S_TIER = new Set(['top-spot', 'weekly-champion', 'diamond-hands']);
 
@@ -260,6 +264,8 @@ export default function Rewards({ spots, onClaim }) {
         <div className="text-center mt-10">
           <button onClick={onClaim} className="btn-gold px-8 py-3.5">⚡ Claim your spot — from $1</button>
         </div>
+        <ExpertVoices />
+        <FaqSection faqs={GEO_FAQS['/rewards']} />
       </div>
     </div>
   );

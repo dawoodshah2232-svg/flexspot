@@ -5,6 +5,8 @@ import { SpotRow } from '../components/SpotCard';
 import DramaTicker from '../components/DramaTicker';
 import Podium from '../components/Podium';
 import Flee from '../components/Flee';
+import FaqSection from '../components/FaqSection';
+import { GEO_FAQS } from '../lib/geoFaqs';
 
 // SEO discovery pages: /trending /rising /winners /new
 // Each is a crawlable list with its own title + description.
@@ -82,6 +84,7 @@ export default function DiscoveryPage({ mode, spots, moves, onBoost, onClaim }) 
           <p className="text-mist text-sm mt-2">Claim your spot from $1 and start climbing.</p>
           <button onClick={onClaim} className="btn-primary px-8 py-3.5 mt-5">Claim my spot — $1</button>
         </div>
+        <FaqSection faqs={GEO_FAQS['/leaderboard']} />
       </div>
     </div>
   );

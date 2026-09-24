@@ -10,6 +10,8 @@ import { trackEvent } from '../lib/analytics';
 import { REWARDS, DEMO_SPOTS } from '../lib/data';
 import { recordClick, recordReferralClick, recordVisit, getContributions, createReferralIdentity, myReferralCode, trackReferralVisit, getSpotReferrers } from '../lib/store';
 import Flee from '../components/Flee';
+import FaqSection from '../components/FaqSection';
+import { GEO_FAQS } from '../lib/geoFaqs';
 import CelebrationBurst from '../components/CelebrationBurst';
 
 function Sparkline({ data }) {
@@ -387,6 +389,7 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
               ))}
             </div>
           </div>
+          <FaqSection faqs={GEO_FAQS['/spot']} />
         </div>
       </div>
     </div>

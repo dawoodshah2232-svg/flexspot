@@ -8,6 +8,8 @@ import {
   searchPosts,
 } from '../lib/blog';
 import BlogCard from '../components/BlogCard';
+import FaqSection from '../components/FaqSection';
+import { GEO_FAQS } from '../lib/geoFaqs';
 
 const PER_PAGE = 12;
 
@@ -159,6 +161,7 @@ export default function Blog() {
             </button>
           </nav>
         )}
+        <FaqSection faqs={GEO_FAQS['/']} />
       </div>
     </div>
   );

@@ -26,6 +26,18 @@ export default function PageHead({ spots = [] }) {
     const meta = metaForPath(pathname, { spots, categoryOf: categoryBySlug });
     const { pageUrl, canonicalUrl } = metaUrls(meta.path, meta.canonicalPath);
     const jsonLdData = typeof meta.jsonLd === 'function' ? meta.jsonLd(meta.path) : null;
+    // GEO: per-route Q&A also ships as FAQPage structured data so AI
+    // assistants can quote the page's answers directly.
+    const faqLd = meta.faqs && meta.faqs.length ? {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: meta.faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    } : null;
+    const combinedLd = faqLd && jsonLdData ? [jsonLdData, faqLd] : (faqLd || jsonLdData);
     const ogImage = meta.ogImage || OG_IMAGE;
 
     document.title = meta.title;
@@ -60,11 +72,11 @@ export default function PageHead({ spots = [] }) {
     // The static WebSite + Organization blocks in index.html always stay.
     const old = document.getElementById('page-jsonld');
     if (old) old.remove();
-    if (jsonLdData) {
+    if (combinedLd) {
       const script = document.createElement('script');
       script.type = 'application/ld+json';
       script.id = 'page-jsonld';
-      script.textContent = JSON.stringify(jsonLdData);
+      script.textContent = JSON.stringify(combinedLd);
       document.head.appendChild(script);
     }
   }, [pathname, search, spots]);

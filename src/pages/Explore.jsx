@@ -5,6 +5,8 @@ import { SpotRow } from '../components/SpotCard';
 import Flee from '../components/Flee';
 import { allPosts } from '../lib/blog';
 import BlogCard from '../components/BlogCard';
+import FaqSection from '../components/FaqSection';
+import { GEO_FAQS } from '../lib/geoFaqs';
 
 // Explore — category index + discovery links. /explore
 export default function Explore({ spots, onBoost, onClaim }) {
@@ -105,6 +107,7 @@ export default function Explore({ spots, onBoost, onClaim }) {
             Claim my spot — $1
           </button>
         </div>
+        <FaqSection faqs={GEO_FAQS['/explore']} />
       </div>
     </div>
   );

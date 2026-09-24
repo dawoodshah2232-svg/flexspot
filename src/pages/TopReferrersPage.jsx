@@ -4,6 +4,8 @@
 import { Link } from 'react-router-dom';
 import { topReferrers } from '../lib/referral';
 import { money2 } from '../lib/format';
+import FaqSection from '../components/FaqSection';
+import { GEO_FAQS } from '../lib/geoFaqs';
 
 const EXTRA = [
   ['Mariam H.', 1, 2.4], ['Vikram S.', 1, 2.0], ['Dana K.', 1, 1.8], ['Igor V.', 1, 1.5],
@@ -119,6 +121,7 @@ export default function TopReferrersPage() {
       )}
 
       <p className="text-center text-[11px] text-[var(--ink-3)] mt-8">Demo rankings while the live backend ships — your referrals count for real.</p>
+      <FaqSection faqs={GEO_FAQS['/top-referrers']} />
     </div>
   );
 }

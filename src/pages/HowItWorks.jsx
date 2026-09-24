@@ -1,6 +1,10 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Flee from '../components/Flee';
+import FaqSection from '../components/FaqSection';
+import { GEO_FAQS } from '../lib/geoFaqs';
+import FounderNote from '../components/FounderNote';
+import ExpertVoices from '../components/ExpertVoices';
 
 const STEPS = [
   {
@@ -240,6 +244,9 @@ export default function HowItWorks({ onClaim }) {
               <Link to="/leaderboard" className="text-white/80 font-semibold hover:underline">See the leaderboard →</Link>
             </div>
           </div>
+          <FounderNote />
+          <ExpertVoices />
+          <FaqSection faqs={GEO_FAQS['/how-it-works']} />
         </motion.div>
       </div>
     </div>

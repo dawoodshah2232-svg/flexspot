@@ -3,6 +3,8 @@ import { Link, useParams } from 'react-router-dom';
 import { CATEGORIES, categoryOf, IS_PREVIEW_DATA } from '../lib/data';
 import { SpotRow } from '../components/SpotCard';
 import NotFound from './NotFound';
+import FaqSection from '../components/FaqSection';
+import { GEO_FAQS } from '../lib/geoFaqs';
 
 // Category page — /explore/:category
 export default function CategoryPage({ spots, moves, onBoost, onClaim }) {
@@ -69,6 +71,7 @@ export default function CategoryPage({ spots, moves, onBoost, onClaim }) {
             </Link>
           ))}
         </div>
+        <FaqSection faqs={GEO_FAQS['/explore']} />
       </div>
     </div>
   );

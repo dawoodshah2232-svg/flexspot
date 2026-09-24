@@ -6,6 +6,8 @@ import Flee from '../components/Flee';
 import Podium from '../components/Podium';
 import DramaTicker from '../components/DramaTicker';
 import ClaimStrip from '../components/ClaimStrip';
+import FaqSection from '../components/FaqSection';
+import { GEO_FAQS } from '../lib/geoFaqs';
 import { money, compact } from '../lib/format';
 import { displayAmount } from '../lib/display';
 import { IS_PREVIEW_DATA } from '../lib/data';
@@ -256,6 +258,7 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
         >
           ↓ {filtered.length}
         </button>
+        <FaqSection faqs={GEO_FAQS['/leaderboard']} />
       </div>
     </div>
   );

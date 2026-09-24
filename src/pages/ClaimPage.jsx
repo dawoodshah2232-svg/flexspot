@@ -8,6 +8,8 @@ import { USDT_NETWORKS, MIN_SPOT_AMOUNT } from '../lib/payments';
 import { CATEGORIES } from '../lib/data';
 import Celebration from '../components/Celebration';
 import Flee from '../components/Flee';
+import FaqSection from '../components/FaqSection';
+import { GEO_FAQS } from '../lib/geoFaqs';
 import { useUnofficialHost } from '../components/SecurityGuard';
 import { currentHost } from '../lib/security';
 import { trackEvent } from '../lib/analytics';
@@ -738,6 +740,7 @@ export default function ClaimPage({ spots, onSubmitted }) {
             </div>
           </div>
         )}
+        <FaqSection faqs={GEO_FAQS['/claim']} />
       </div>
     </div>
   );

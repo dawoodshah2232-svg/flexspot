@@ -110,3 +110,36 @@ export async function listMembers() {
 
 export const emailNotConfigured = (r) =>
   !!(r && r.error && /RESEND_API_KEY|ADMIN_EMAIL|not configured/i.test(r.error));
+
+// ── central submission queue (server-side, shared buyer ↔ admin) ──────────
+
+/** Save a claim/boost submission to the central queue (fire-and-forget). */
+export async function saveSubmissionCentral(sub) {
+  return post('/api/submissions', sub);
+}
+
+/** Admin: list central submissions by status. */
+export async function listCentralSubmissions(status = 'pending') {
+  try {
+    const r = await fetch(`/api/submissions?status=${encodeURIComponent(status)}&adminPin=${encodeURIComponent(ADMIN_PIN)}`);
+    const data = await r.json().catch(() => ({}));
+    return { ok: r.ok, submissions: data.submissions || [], error: data.error };
+  } catch (e) {
+    return { ok: false, submissions: [], error: e.message || 'network error' };
+  }
+}
+
+/** Admin: record a decision on the central queue. */
+export async function decideCentral(id, decision, note) {
+  try {
+    const r = await fetch('/api/submissions', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminPin: ADMIN_PIN, id, decision, note }),
+    });
+    const data = await r.json().catch(() => ({}));
+    return { ok: r.ok, status: r.status, ...data };
+  } catch (e) {
+    return { ok: false, error: e.message || 'network error' };
+  }
+}

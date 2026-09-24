@@ -23,8 +23,8 @@ import { useLiveOnline, getAnalyticsSummary, getVisitorTrail, clearAnalyticsData
 import { getDisplayTuning, saveDisplayTuning, displayOnlineCount, displayAmount } from '../lib/display';
 import { useSiteSettings, IMAGE_HINTS } from '../lib/siteSettings.jsx';
 import { getPendingClaim, clearPendingClaim, saveMember } from '../lib/member';
-import { approveAndNotifyMember, rejectAndNotify, emailNotConfigured, listMembers, sendEngagement, spotUrl } from '../lib/emailClient';
-import { projectedRank } from '../lib/store';
+import { approveAndNotifyMember, rejectAndNotify, emailNotConfigured, listMembers, sendEngagement, spotUrl, listCentralSubmissions, decideCentral } from '../lib/emailClient';
+import { projectedRank, importSubmissions } from '../lib/store';
 
 // Fail closed: a static SPA cannot hold a real secret, and silently falling
 // back to '1234' would ship an open admin gate. No PIN configured → the
@@ -180,13 +180,38 @@ export default function Admin({ spots, refresh }) {
   const [msg, setMsg] = useState('');
   const [subs, setSubs] = useState([]);
   const [notes, setNotes] = useState({});
+  const [queueNote, setQueueNote] = useState('');
   const [shotView, setShotView] = useState(null);
   const [cms, setCms] = useState(null);
   const [cmsMsg, setCmsMsg] = useState('');
   const [trailVid, setTrailVid] = useState(null);
   const online = useLiveOnline(1000);
 
-  const reload = () => setSubs(fetchAllSubmissions());
+  const reload = () => {
+    setSubs(fetchAllSubmissions());
+    // Pull the central queue (submissions from buyer devices) and merge it
+    // into the local admin queue. Silent when offline / not configured.
+    (async () => {
+      try {
+        const lists = await Promise.all([
+          listCentralSubmissions('pending'),
+          listCentralSubmissions('approved'),
+          listCentralSubmissions('rejected'),
+          listCentralSubmissions('changes-requested'),
+        ]);
+        const all = [];
+        lists.forEach((x) => { if (x && x.ok) all.push(...x.submissions); });
+        if (all.length > 0) {
+          const n = importSubmissions(all);
+          if (n > 0) {
+            setSubs(fetchAllSubmissions());
+            setQueueNote(`⤵ Synced ${n} submission${n > 1 ? 's' : ''} from buyer devices`);
+            setTimeout(() => setQueueNote(''), 5000);
+          }
+        }
+      } catch { /* local queue still works */ }
+    })();
+  };
   useEffect(() => { reload(); }, []);
 
   const flash = (m) => { setMsg(m); setTimeout(() => setMsg(''), 3200); };
@@ -199,6 +224,9 @@ export default function Admin({ spots, refresh }) {
     if (decision !== 'approved' && !note) { flash('Add a note explaining the decision first.'); return; }
     if (decision === 'rejected' && !confirm('Reject this submission?')) return;
     const updated = reviewSubmission(id, decision, note);
+    // Mirror the decision to the central queue (buyer devices / audit trail).
+    // Fire-and-forget: the local decision above is the source of truth here.
+    try { decideCentral(id, decision, note); } catch {}
     let emailHandled = false;
     if (decision === 'approved' && updated && !updated.isBoost) {
       // Close the two-step member loop: the dashboard was showing
@@ -288,7 +316,9 @@ export default function Admin({ spots, refresh }) {
       }
     });
     subs.filter((s) => s.status === 'pending').forEach((s) => {
-      if (!s.paymentScreenshot) flags.push({ type: 'Missing payment screenshot', detail: `${s.brandName} — no screenshot uploaded`, id: s.id });
+      // Central-queue submissions keep the screenshot on the buyer's device;
+      // the flag + transaction ID is the verifiable proof there.
+      if (!s.paymentScreenshot && !s.hasRemoteScreenshot) flags.push({ type: 'Missing payment screenshot', detail: `${s.brandName} — no screenshot uploaded`, id: s.id });
       if (s.amount >= 500) flags.push({ type: 'High-value claim', detail: `${s.brandName} — ${money(s.amount)} deserves a manual check`, id: s.id });
     });
     return flags;
@@ -375,7 +405,9 @@ export default function Admin({ spots, refresh }) {
         {tab === 'deposits' && (
           <div>
             <h2 className="font-display font-bold text-xl text-[var(--ink)] mb-2">Deposits & receipts{REAL}</h2>
-            <p className="text-[var(--ink-2)] text-sm mb-5">Every claim/boost submission with its payment receipt. Approve → the amount credits the leaderboard automatically. Reject → marked and out of the queue.</p>
+            <p className="text-[var(--ink-2)] text-sm mb-1">Every claim/boost submission with its payment receipt. Approve → the amount credits the leaderboard automatically. Reject → marked and out of the queue.</p>
+            {queueNote && <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-4">{queueNote}</p>}
+            {!queueNote && <div className="mb-4" />}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
               <StatCard icon="⏳" label="Awaiting review" value={pendingSubs.length} real />
               <StatCard icon="✅" label="Approved" value={approvedSubs.length} real />
@@ -978,6 +1010,9 @@ function SubmissionCard({ s, notes, setNotes, onDecide, onAddNote, setShotView, 
               <button onClick={() => setShotView(s.paymentScreenshot)} className="min-h-[44px]">
                 <img src={s.paymentScreenshot} alt="proof" className="w-16 h-16 object-cover rounded-lg border border-[var(--line)]" />
               </button>
+            )}
+            {!s.paymentScreenshot && s.hasRemoteScreenshot && (
+              <span className="text-[11px] font-semibold text-[var(--ink-2)] bg-[var(--surface-2)] border border-[var(--line)] rounded-lg px-2 py-1">🧾 Screenshot on buyer's device — verify via TxID</span>
             )}
             {(s.fraudFlags || []).length > 0 && (
               <span className="text-[11px] font-bold text-red-600">⚠️ {s.fraudFlags.join(', ')}</span>

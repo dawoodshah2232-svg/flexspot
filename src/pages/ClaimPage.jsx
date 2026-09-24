@@ -12,7 +12,7 @@ import { useUnofficialHost } from '../components/SecurityGuard';
 import { currentHost } from '../lib/security';
 import { trackEvent } from '../lib/analytics';
 import { stagePendingClaim } from '../lib/member';
-import { notifyClaimSubmitted } from '../lib/emailClient';
+import { notifyClaimSubmitted, saveSubmissionCentral } from '../lib/emailClient';
 
 const AMOUNTS = [1, 5, 10, 25, 50, 100];
 
@@ -235,6 +235,24 @@ export default function ClaimPage({ spots, onSubmitted }) {
       // admin alert with the proof details. Works in demo + live mode.
       try {
         const claimRef = 'FS-' + Date.now().toString(36).toUpperCase();
+        // Central queue (server-side, shared with the admin across devices).
+        saveSubmissionCentral({
+          id: submission.id,
+          brandName: name,
+          slug,
+          amount: amt,
+          email: isBoost ? '' : form.email.trim(),
+          name: isBoost ? (contribName.trim() || 'Booster') : form.name.trim(),
+          tagline: submission.tagline,
+          website: submission.website,
+          category: submission.category,
+          isBoost,
+          boostSlug: isBoost ? boostSpot.slug : '',
+          network: activeNetwork.name,
+          txId: txId.trim(),
+          hasScreenshot: !!screenshot,
+          claimRef,
+        }).then((r) => { if (!r.ok) console.warn('[queue] central save failed', r.error); });
         notifyClaimSubmitted({
           buyerName: isBoost ? (contribName.trim() || 'Booster') : form.name.trim(),
           buyerEmail: isBoost ? '' : form.email.trim(),

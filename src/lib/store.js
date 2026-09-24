@@ -117,6 +117,61 @@ export function fetchAllSubmissions() {
   return readLS(LS_SUBMISSIONS, []);
 }
 
+// Merge submissions from the CENTRAL server queue (other devices) into the
+// local admin queue. Central records win on id conflicts when their decision
+// is newer. Screenshots stay on the buyer's device (too large for KV) — the
+// `hasRemoteScreenshot` flag + transaction ID is what the admin verifies.
+export function importSubmissions(list) {
+  if (IS_LIVE || !Array.isArray(list) || !list.length) return 0;
+  const subs = readLS(LS_SUBMISSIONS, []);
+  const byId = new Map(subs.map((s) => [s.id, s]));
+  let n = 0;
+  for (const c of list) {
+    if (!c || !c.id) continue;
+    const existing = byId.get(c.id);
+    if (!existing) {
+      byId.set(c.id, {
+        id: c.id,
+        slug: c.slug || '',
+        brandName: c.brandName || 'Untitled',
+        tagline: c.tagline || '',
+        description: '',
+        logo: null,
+        website: c.website || '',
+        socials: {},
+        email: c.email || '',
+        amount: Number(c.amount) || 0,
+        category: c.category || 'startups',
+        paymentMethod: c.network || '',
+        paymentTxId: c.txId || '',
+        paymentScreenshot: null,
+        hasRemoteScreenshot: !!c.hasScreenshot,
+        claimRef: c.claimRef || '',
+        status: c.status || 'pending',
+        adminNotes: [],
+        fraudFlags: [],
+        history: c.history || [{ at: c.createdAt || Date.now(), event: 'submitted' }],
+        createdAt: c.createdAt || Date.now(),
+        reviewedAt: c.reviewedAt || null,
+        isBoost: !!c.isBoost,
+        boostSlug: c.boostSlug || '',
+        remote: true,
+      });
+      n++;
+    } else if (c.status && c.status !== existing.status && (c.reviewedAt || 0) >= (existing.reviewedAt || 0)) {
+      byId.set(c.id, {
+        ...existing,
+        status: c.status,
+        reviewedAt: c.reviewedAt || Date.now(),
+        history: c.history || existing.history,
+      });
+      n++;
+    }
+  }
+  writeLS(LS_SUBMISSIONS, [...byId.values()]);
+  return n;
+}
+
 // --- Extended submission lifecycle ----------------------------------------
 // Statuses: pending → approved | rejected | changes-requested
 // A submitted claim carries payment proof, an admin note trail, and optional

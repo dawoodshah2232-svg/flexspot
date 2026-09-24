@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://dawoodshah2232-svg.github.io/flexspot/sitemap.xml
+Sitemap: https://flexspot.lol/sitemap.xml

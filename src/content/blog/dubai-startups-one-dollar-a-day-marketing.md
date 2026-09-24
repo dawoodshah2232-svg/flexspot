@@ -29,7 +29,7 @@ Your $1/day anchor is a **live leaderboard spot** on FlexSpot. One dollar claims
 
 The $1 is the anchor, not the whole plan. Stack these free Dubai-specific channels around it:
 
-1. **Your referral link.** Every FlexSpot member gets one; visits through it earn $1 each and rank you on the public Top Referrers board. Drop it in your WhatsApp broadcast list (see [WhatsApp marketing compliance for the UAE](/blog/sms-whatsapp-broadcast-compliance-uae) — the rules here are strict, follow them).
+1. **Your referral link.** Every FlexSpot member gets one; each visit through it adds $1 to your spot's leaderboard total and ranks you on the public Top Referrers board. Drop it in your WhatsApp broadcast list (see [WhatsApp marketing compliance for the UAE](/blog/sms-whatsapp-broadcast-compliance-uae) — the rules here are strict, follow them).
 2. **Founder WhatsApp/Telegram groups.** Dubai runs on groups. Share your leaderboard rank jumps, not your link — "we just hit #4 on the startup board" gets clicks; "check out my link" gets you removed.
 3. **Local directories & Google Business Profile.** Free, and [most Dubai small businesses set it up wrong](/blog/google-business-profile-for-small-business). Fix yours in an afternoon.
 4. **Community proof.** Your first 100 customers in Dubai come from community, not ads — [here's the full breakdown](/blog/how-to-get-your-first-100-customers-in-dubai).

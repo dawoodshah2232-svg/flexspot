@@ -38,7 +38,7 @@ Even the clicks that were real buyers bounce — 97% of first-time visitors don'
 Brands winning on tiny budgets stopped renting clicks and started buying **position and attention**:
 
 - **$1 leaderboard spots** instead of $3 clicks — a visible rank on a public board every visitor sees, not an invisible auction entry ([why this beats banners](/blog/why-nobody-clicks-banner-ads-anymore)).
-- **Referral economics** — pay per referred visit to people motivated to send traffic, not per click to Google ([how referral links pay](/blog/how-to-start-a-referral-program)).
+- **Referral economics** — reward referrers with $0.01 per new referred member plus 20% of everything that member spends, instead of paying Google per click ([how referral links pay](/blog/how-to-start-a-referral-program)).
 - **$1/day experiments** with honest measurement before scaling anything ([the full framework](/blog/measuring-roi-of-one-dollar-ad-experiments)).
 
 ## The 5-minute audit

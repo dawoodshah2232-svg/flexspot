@@ -30,6 +30,14 @@ export const GEO_FAQS = {
     { q: 'How and when do I get paid?', a: 'Commissions land in your member wallet as they happen, and you withdraw to USDT from your dashboard.' },
     { q: 'Who are the top referrers?', a: 'The Top Referrers board ranks members by referred members and commission earned \u2014 real referral performance, updated live.' },
   ],
+  '/auction': [
+    { q: 'What is the FlexSpot Spotlight Auction?', a: 'A weekly auction for three homepage spotlight placements. The highest bidder on each slot owns that spotlight for 7 days. New rounds start every Monday 00:00 UTC.' },
+    { q: 'How much does it cost to bid?', a: 'Each slot opens at a $25 reserve. Every new bid must beat the current top bid by at least $5.' },
+    { q: 'How do I place a bid?', a: 'Enter your brand name, email, and bid amount on the auction page, then send the amount in USDT and upload a screenshot of the payment \u2014 exactly like claiming a spot.' },
+    { q: 'Are bids verified?', a: 'Yes. A real person checks every bid\u2019s payment proof before it counts \u2014 no bots, no auto-approvals. You\u2019ll be emailed if someone outbids you.' },
+    { q: 'What does the winner get?', a: 'The top bidder when the round ends holds the homepage spotlight for a full 7 days \u2014 the most-viewed placement on FlexSpot.' },
+    { q: 'Are auction payments refundable?', a: 'Crypto payments are final once sent, so double-check the network and address before transferring.' },
+  ],
   '/leaderboard': [
     { q: 'How is the FlexSpot leaderboard ranked?', a: 'By total verified boosts, highest first \u2014 updated live as money moves.' },
     { q: 'Can the rankings change?', a: 'Constantly. Every new boost can reshuffle the board. That\u2019s the whole game.' },

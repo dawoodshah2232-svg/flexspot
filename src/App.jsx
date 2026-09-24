@@ -45,6 +45,7 @@ const ComparePage = lazyRetry(() => import('./pages/ComparePage'));
 const CalculatorPage = lazyRetry(() => import('./pages/CalculatorPage'));
 const Dashboard = lazyRetry(() => import('./pages/Dashboard'));
 const Admin = lazyRetry(() => import('./pages/Admin'));
+const AuctionPage = lazyRetry(() => import('./pages/AuctionPage'));
 import { fetchLeaderboard, fetchPendingSpots } from './lib/store';
 
 import { SiteSettingsProvider } from './lib/siteSettings.jsx';
@@ -166,6 +167,7 @@ function Shell() {
           <Route path="/s/:slug" element={<SpotProfile spots={spots} onClaim={openClaim} onBoost={openBoost} refresh={load} />} />
           <Route path="/top-referrers" element={<TopReferrersPage />} />
           <Route path="/dashboard" element={<Dashboard spots={spots} onClaim={openClaim} />} />
+          <Route path="/auction" element={<AuctionPage />} />
           <Route path="/admin" element={<Admin spots={spots} pending={pending} refresh={load} />} />
           {/* Root profiles — static routes always win over /:slug in React Router ranking */}
           <Route path="/:slug" element={<RootProfile spots={spots} onClaim={openClaim} onBoost={openBoost} />} />

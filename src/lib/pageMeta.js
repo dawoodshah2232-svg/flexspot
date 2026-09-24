@@ -77,6 +77,12 @@ export const META = {
     description:
       'FlexSpot rewards: earn your place with boosts, 20% instant affiliate commission on referred payments, and the champion crown for the top spot.',
   },
+  '/auction': {
+    faqs: GEO_FAQS['/auction'],
+    title: 'Spotlight Auction — Own the Homepage | FlexSpot.LOL',
+    description:
+      'Bid for a FlexSpot homepage spotlight: weekly auctions, $25 reserve, $5 minimum raise. Highest bidder holds the spotlight for 7 days.',
+  },
   '/compare': {
     faqs: GEO_FAQS['/compare'],
     title: 'Spot vs Spot — Compare Brands Head-to-Head | FlexSpot.LOL',

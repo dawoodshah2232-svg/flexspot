@@ -143,3 +143,37 @@ export async function decideCentral(id, decision, note) {
     return { ok: false, error: e.message || 'network error' };
   }
 }
+
+// ── Spotlight Auction ─────────────────────────────────────────────────────
+
+/** Public auction state: round, slots, top bids, winners. Never throws. */
+export async function auctionState() {
+  try {
+    const r = await fetch('/api/auction');
+    const data = await r.json().catch(() => ({}));
+    return { ok: r.ok && data.ok !== false, status: r.status, ...data };
+  } catch (e) {
+    return { ok: false, error: e.message || 'network error' };
+  }
+}
+
+/** Place a bid (public, rate-limited). */
+export async function placeBid(payload) {
+  return post('/api/auction', { action: 'place', ...payload });
+}
+
+/** Admin: approve / reject / settle auction bids. */
+export async function auctionAdmin(action, payload = {}) {
+  return post('/api/auction', { action, adminPin: ADMIN_PIN, ...payload });
+}
+
+/** Public Founding-100 list. Never throws. */
+export async function foundersList() {
+  try {
+    const r = await fetch('/api/founders');
+    const data = await r.json().catch(() => ({}));
+    return { ok: r.ok && data.ok !== false, status: r.status, ...data };
+  } catch (e) {
+    return { ok: false, error: e.message || 'network error' };
+  }
+}

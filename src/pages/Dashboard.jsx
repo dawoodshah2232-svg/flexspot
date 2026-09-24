@@ -140,6 +140,14 @@ export default function Dashboard({ spots = [], onClaim }) {
             <div className="inline-flex items-center gap-2 pill pill-gold mb-3">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Member account active
             </div>
+            {serverMember.founderNo && (
+              <div className="mb-3">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-[#F59E0B]/60 bg-[#FEF3C7] dark:bg-[#F59E0B]/15 px-4 py-1.5 text-sm font-extrabold text-[#92600A] dark:text-[#FCD34D]">
+                  🏅 Founding member #{serverMember.founderNo}
+                </span>
+                <div className="text-[11px] text-[var(--ink-3)] mt-1">One of the first 100 brands on FlexSpot</div>
+              </div>
+            )}
             <h1 className="font-display font-extrabold text-2xl text-[var(--ink)]">{serverMember.brandName}</h1>
             <p className="text-sm text-[var(--ink-3)] mt-1">{serverMember.email}</p>
             <div className="grid grid-cols-3 gap-3 mt-6">

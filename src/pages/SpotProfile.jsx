@@ -10,6 +10,7 @@ import { trackEvent } from '../lib/analytics';
 import { REWARDS, DEMO_SPOTS } from '../lib/data';
 import { recordClick, recordReferralClick, recordVisit, getContributions, createReferralIdentity, myReferralCode, trackReferralVisit, getSpotReferrers } from '../lib/store';
 import Flee from '../components/Flee';
+import FounderBadge from '../components/FounderBadge';
 import FaqSection from '../components/FaqSection';
 import { GEO_FAQS } from '../lib/geoFaqs';
 import CelebrationBurst from '../components/CelebrationBurst';
@@ -134,6 +135,7 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
               <div className="flex items-center gap-3 flex-wrap">
                 <RankBadge rank={spot.rank} size="lg" />
                 <h1 className="font-display font-bold text-3xl sm:text-4xl text-snow">{spot.name}</h1>
+                <FounderBadge slug={spot.slug} />
                 {spot.rank === 1 && <Flee><span className="text-3xl crown-bob inline-block">👑</span></Flee>}
               </div>
               {isDemo && (

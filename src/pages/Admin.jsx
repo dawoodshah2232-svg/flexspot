@@ -2,7 +2,7 @@
 // EVERYTHING here is REAL: real visitors, real page views, real deposits,
 // real referrals. The public site shows tasteful display-lifted numbers
 // (see src/lib/display.js); this dashboard never does.
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BrandAvatar, RankBadge } from '../components/SpotCard';
 import { money, compact, timeAgo } from '../lib/format';
 import {
@@ -23,7 +23,7 @@ import { useLiveOnline, fetchTrafficStats, fetchVisitorTrail, fetchVisitors, res
 import { getDisplayTuning, saveDisplayTuning, displayOnlineCount, displayAmount } from '../lib/display';
 import { useSiteSettings, IMAGE_HINTS } from '../lib/siteSettings.jsx';
 import { getPendingClaim, clearPendingClaim, saveMember } from '../lib/member';
-import { approveAndNotifyMember, rejectAndNotify, emailNotConfigured, listMembers, sendEngagement, spotUrl, listCentralSubmissions, decideCentral } from '../lib/emailClient';
+import { approveAndNotifyMember, rejectAndNotify, emailNotConfigured, listMembers, sendEngagement, spotUrl, listCentralSubmissions, decideCentral, auctionState, auctionAdmin } from '../lib/emailClient';
 import { projectedRank, importSubmissions } from '../lib/store';
 import { adminCreateSpot, adminUpdateSpot, adminDeleteSpot, adminRestoreSpot, adminListAllSpots, fileToDataUrl as fileToResizedDataUrl } from '../lib/spotApi';
 
@@ -38,6 +38,7 @@ const TABS = [
   { id: 'live', label: '🟢 Live visitors' },
   { id: 'visitors', label: '🧭 Visitors' },
   { id: 'deposits', label: '💳 Deposits & receipts' },
+  { id: 'auction', label: '🔨 Auction' },
   { id: 'members', label: '👥 Members' },
   { id: 'referrals', label: '🔗 Referrals' },
   { id: 'content', label: '🎨 Site Content' },
@@ -221,8 +222,18 @@ export default function Admin({ spots, refresh }) {
 
   const pendingSubs = useMemo(() => subs.filter((s) => s.status === 'pending'), [subs]);
   const decidedSubs = useMemo(() => subs.filter((s) => s.status !== 'pending'), [subs]);
+  // Auction bids are decided in the 🔨 Auction tab, not here.
+  const pendingBids = useMemo(() => pendingSubs.filter((s) => s.kind === 'bid'), [pendingSubs]);
+  const pendingDeposits = useMemo(() => pendingSubs.filter((s) => s.kind !== 'bid'), [pendingSubs]);
 
   const decide = (id, decision) => {
+    // Auction bids carry top-bid invariants — they are decided ONLY in the
+    // 🔨 Auction tab via /api/auction, never through the claim/boost flow.
+    const target = subs.find((s) => s.id === id);
+    if (target && target.kind === 'bid') {
+      flash('That\u2019s an auction bid — approve or reject it in the 🔨 Auction tab.');
+      return;
+    }
     const note = (notes[id] || '').trim();
     if (decision !== 'approved' && !note) { flash('Add a note explaining the decision first.'); return; }
     if (decision === 'rejected' && !confirm('Reject this submission?')) return;
@@ -442,10 +453,19 @@ export default function Admin({ spots, refresh }) {
               <StatCard icon="💰" label="Deposits today" value={depositsToday} real />
               <StatCard icon="⚠️" label="Flagged receipts" value={fakeReceipts} sub="Marked suspicious — check below" real />
             </div>
-            <h3 className="font-bold text-[var(--ink)] mb-3">Pending review ({pendingSubs.length})</h3>
-            {pendingSubs.length === 0 ? <Empty icon="✅" text="All clear — no deposits waiting." /> : (
+            <h3 className="font-bold text-[var(--ink)] mb-3">Pending review ({pendingDeposits.length})</h3>
+            {pendingBids.length > 0 && (
+              <button onClick={() => setTab('auction')} className="mb-4 w-full text-left card p-4 flex items-center gap-3 hover:border-[var(--gold)] transition-colors">
+                <span className="text-2xl">🔨</span>
+                <div className="flex-1">
+                  <div className="font-bold text-[var(--ink)] text-sm">{pendingBids.length} auction bid{pendingBids.length > 1 ? 's' : ''} waiting</div>
+                  <div className="text-xs text-[var(--ink-3)]">Bids are approved in the Auction tab — tap to review →</div>
+                </div>
+              </button>
+            )}
+            {pendingDeposits.length === 0 ? <Empty icon="✅" text="All clear — no deposits waiting." /> : (
               <div className="space-y-4 mb-10">
-                {pendingSubs.map((s) => (
+                {pendingDeposits.map((s) => (
                   <SubmissionCard key={s.id} s={s} notes={notes} setNotes={setNotes}
                     onDecide={decide} onAddNote={addNote} setShotView={setShotView} allSubs={subs} />
                 ))}
@@ -486,6 +506,10 @@ export default function Admin({ spots, refresh }) {
               </div>
             )}
           </div>
+        )}
+
+        {tab === 'auction' && (
+          <AuctionTab flash={flash} />
         )}
 
         {tab === 'members' && (
@@ -1117,6 +1141,143 @@ function SettingsTab({ flash, reload, refresh }) {
           <button onClick={() => wipe('demo')} className="px-5 py-3 text-sm rounded-[14px] border border-red-400/60 text-red-600 hover:bg-red-500/10 font-bold min-h-[48px]">Reset all demo data</button>
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ============================= SPOTLIGHT AUCTION ============================= */
+// Weekly homepage spotlight auction admin: pending bids are approved/rejected
+// here (via /api/auction, which keeps the top-bid invariants), slots are
+// settled into winners at round end. Every figure is real — never seeded.
+const SLOT_TITLES = { 'spotlight-1': '🥇 Champion Spotlight', 'spotlight-2': '🥈 Runner-up Spotlight', 'spotlight-3': '🥉 Rising Spotlight' };
+
+function AuctionTab({ flash }) {
+  const [data, setData] = useState(null);
+  const [bids, setBids] = useState([]);
+  const [busy, setBusy] = useState('');
+  const [rejectNote, setRejectNote] = useState('');
+
+  const load = useCallback(async () => {
+    const [a, q] = await Promise.all([auctionState(), listCentralSubmissions('pending')]);
+    if (a && a.ok) setData(a);
+    if (q && q.ok) setBids((q.submissions || []).filter((s) => s.kind === 'bid'));
+  }, []);
+  useEffect(() => { load(); }, [load]);
+
+  const run = async (action, payload, busyLabel) => {
+    if (action === 'reject' && !rejectNote.trim()) { flash('Add a rejection note first — the bidder sees it.'); return; }
+    if (action === 'settle' && !confirm(`Settle ${SLOT_TITLES[payload.slot] || payload.slot}? The top bid becomes this round\u2019s winner.`)) return;
+    setBusy(busyLabel);
+    try {
+      const r = await auctionAdmin(action, action === 'reject' ? { ...payload, note: rejectNote.trim() } : payload);
+      if (r && r.ok) {
+        flash(action === 'approve' ? `\u2713 Bid approved — now the top bid on ${SLOT_TITLES[payload.slot] || payload.slot}.`
+          : action === 'reject' ? 'Bid rejected — bidder notified.' : '\u2713 Slot settled — winner recorded.');
+        setRejectNote('');
+        load();
+      } else {
+        flash(`Auction action failed: ${(r && r.error) || 'unknown error'}`);
+      }
+    } catch (e) {
+      flash(`Auction action failed: ${e.message || 'network error'}`);
+    } finally {
+      setBusy('');
+    }
+  };
+
+  return (
+    <div>
+      <h2 className="font-display font-bold text-xl text-[var(--ink)] mb-2">Spotlight Auction{REAL}</h2>
+      <p className="text-[var(--ink-2)] text-sm mb-5">
+        Approve a bid → it becomes the slot's top bid (previous top bidder is emailed an outbid notice). Reject → out of the queue. Settle at round end → winner recorded + emailed. Reserve $25 · min raise $5.
+      </p>
+      <button onClick={() => { load(); flash('Auction reloaded.'); }} className="btn-ghost px-4 py-2 text-sm mb-6">↻ Refresh auction</button>
+
+      {/* slots */}
+      <h3 className="font-bold text-[var(--ink)] mb-3">Slots {data ? <span className="text-xs font-semibold text-[var(--ink-3)]">· round {data.roundId} · ends {new Date(data.endsAt).toUTCString()}</span> : ''}</h3>
+      <div className="grid sm:grid-cols-3 gap-3 mb-8">
+        {(data ? data.slots : []).map((s) => (
+          <div key={s.slot} className="card p-5">
+            <div className="font-extrabold text-[var(--ink)] text-sm mb-2">{s.emoji} {s.title}</div>
+            {s.topBid ? (
+              <>
+                <div className="font-display font-black text-2xl text-[var(--gold-deep)]">${Number(s.topBid.amount).toFixed(2)}</div>
+                <div className="text-xs font-bold text-[var(--ink)] truncate mt-0.5">{s.topBid.brandName}</div>
+                <div className="text-[11px] text-[var(--ink-3)] mt-1">Min next: ${Number(s.minNextBid).toFixed(2)}</div>
+                <button
+                  onClick={() => run('settle', { slot: s.slot }, `settle-${s.slot}`)}
+                  disabled={busy !== ''}
+                  className="btn-gold w-full py-2.5 text-xs font-extrabold mt-4"
+                >
+                  {busy === `settle-${s.slot}` ? 'Settling…' : '🏁 Settle slot'}
+                </button>
+              </>
+            ) : (
+              <div className="text-xs text-[var(--ink-2)] py-2">No approved bids yet — opens at the $25 reserve.</div>
+            )}
+          </div>
+        ))}
+        {!data && <Empty icon="🔨" text="Loading auction state…" />}
+      </div>
+
+      {/* pending bids */}
+      <h3 className="font-bold text-[var(--ink)] mb-3">Pending bids ({bids.length})</h3>
+      {bids.length === 0 ? <Empty icon="✅" text="No bids waiting — the queue is clear." /> : (
+        <div className="space-y-3 mb-8">
+          {bids.map((b) => (
+            <div key={b.id} className="card p-5 border-l-4" style={{ borderLeftColor: '#F59E0B' }}>
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="min-w-0">
+                  <div className="font-bold text-[var(--ink)] text-sm truncate">{b.brandName}</div>
+                  <div className="text-xs text-[var(--ink-3)]">{SLOT_TITLES[b.slot] || b.slot} · round {b.roundId} · {timeAgo(b.createdAt)}</div>
+                </div>
+                <div className="font-display font-black text-xl text-[var(--gold-deep)] shrink-0">${Number(b.amount).toFixed(2)}</div>
+              </div>
+              <div className="text-xs text-[var(--ink-2)] mb-3 break-words">
+                {b.email} · {b.website || 'no site'} · tx: {b.txId || '—'} · {b.hasScreenshot ? '🧾 screenshot attached' : '⚠️ no screenshot'}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => run('approve', { submissionId: b.id }, `approve-${b.id}`)}
+                  disabled={busy !== ''}
+                  className="btn-primary px-5 py-2.5 text-xs font-extrabold"
+                >
+                  {busy === `approve-${b.id}` ? 'Approving…' : '✓ Approve bid'}
+                </button>
+                <button
+                  onClick={() => run('reject', { submissionId: b.id }, `reject-${b.id}`)}
+                  disabled={busy !== ''}
+                  className="px-5 py-2.5 text-xs rounded-xl border border-red-400/60 text-red-600 hover:bg-red-500/10 font-bold"
+                >
+                  {busy === `reject-${b.id}` ? 'Rejecting…' : '✕ Reject'}
+                </button>
+              </div>
+            </div>
+          ))}
+          <div>
+            <label className="label">Rejection note (required to reject — bidder sees this)</label>
+            <input className="field" placeholder="e.g. payment screenshot unclear — please resubmit" value={rejectNote} onChange={(e) => setRejectNote(e.target.value)} />
+          </div>
+        </div>
+      )}
+
+      {/* winners */}
+      <h3 className="font-bold text-[var(--ink)] mb-3">🏆 Past winners</h3>
+      {!data || data.winners.length === 0 ? (
+        <Empty icon="👑" text="No settled winners yet — settle a slot after its round ends." />
+      ) : (
+        <div className="grid sm:grid-cols-3 gap-3">
+          {data.winners.map((w) => (
+            <div key={w.slot} className="card p-4 text-center">
+              <div className="text-2xl">{w.emoji}</div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--ink-3)] mt-1">{w.title}</div>
+              <div className="font-bold text-[var(--ink)] text-sm truncate mt-1">{w.brandName}</div>
+              <div className="font-display font-black text-lg text-[var(--gold-deep)]">${Number(w.amount).toFixed(2)}</div>
+              <div className="text-[11px] text-[var(--ink-3)]">Round {w.roundId}</div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -15,6 +15,7 @@ import { currentHost } from '../lib/security';
 import { trackEvent } from '../lib/analytics';
 import { stagePendingClaim } from '../lib/member';
 import { notifyClaimSubmitted, saveSubmissionCentral } from '../lib/emailClient';
+import { useFounders } from '../components/FounderBadge';
 
 const AMOUNTS = [1, 5, 10, 25, 50, 100];
 
@@ -95,6 +96,8 @@ export default function ClaimPage({ spots, onSubmitted }) {
   // Boost contributor shout-out — shown on the brand's page.
   const [contribName, setContribName] = useState('');
   const [contribHandle, setContribHandle] = useState('');
+  // Founding 100 — live count for the done-screen scarcity note.
+  const founders = useFounders();
 
   const activeNetwork = USDT_NETWORKS.find((n) => n.id === network) || USDT_NETWORKS[0];
 
@@ -325,6 +328,14 @@ export default function ClaimPage({ spots, onSubmitted }) {
                 : 'Our team is reviewing your payment proof. Most submissions are reviewed within 24 hours.'}
               {!IS_LIVE && !isBoost && ' This is preview mode — approve it in the admin dashboard to see it go live.'}
             </p>
+            {!isBoost && founders && founders.claimed < founders.total && (
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#F59E0B]/50 bg-[#FEF3C7] dark:bg-[#F59E0B]/10 px-4 py-2">
+                <span className="text-base">🏅</span>
+                <span className="text-xs font-extrabold text-[#92600A] dark:text-[#FCD34D]">
+                  Founding 100 · {founders.claimed}/{founders.total} claimed — your spot locks in a founder badge
+                </span>
+              </div>
+            )}
             <div className="rounded-2xl bg-[var(--surface-2)] border border-[var(--line)] p-5 text-left space-y-3 mb-6">
               {[
                 ['Submitted', '✓ Just now'],

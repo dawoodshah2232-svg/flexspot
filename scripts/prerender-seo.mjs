@@ -190,6 +190,18 @@ const META = {
     ],
     faqKey: '/',
   },
+  '/auction': {
+    title: 'Spotlight Auction \u2014 Own the Homepage | FlexSpot.LOL',
+    description:
+      'Bid for a FlexSpot homepage spotlight: weekly auctions, $25 reserve, $5 minimum raise. Highest bidder holds the spotlight for 7 days.',
+    h1: 'Own the homepage for 7 days: outbid everyone in the Spotlight Auction.',
+    lede: [
+      'Three homepage spotlight placements go to the highest bidder every week. Rounds run Monday 00:00 to Monday 00:00 UTC.',
+      'Each slot opens at a $25 reserve and every new bid must beat the top by at least $5. Bids carry payment proof and are verified by a real person before they count \u2014 no bots, no auto-approvals.',
+      'The top bidder when the round ends holds the homepage spotlight \u2014 the most-viewed placement on FlexSpot \u2014 for a full 7 days.',
+    ],
+    faqKey: '/auction',
+  },
 };
 
 // Internal links: crawlers walk these to discover and re-read pages.
@@ -203,6 +215,7 @@ const NAV_LINKS = [
   ['/compare', 'Compare spots'],
   ['/calculator', 'Calculator'],
   ['/top-referrers', 'Top referrers'],
+  ['/auction', 'Spotlight auction'],
   ['/faq', 'FAQ'],
   ['/blog', 'Blog'],
 ];

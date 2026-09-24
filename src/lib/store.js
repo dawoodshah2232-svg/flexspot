@@ -192,6 +192,11 @@ export function importSubmissions(list) {
         reviewedAt: c.reviewedAt || null,
         isBoost: !!c.isBoost,
         boostSlug: c.boostSlug || '',
+        // Submission kind: claims/boosts are decided here; auction bids are
+        // decided ONLY via /api/auction (see the Admin Auction tab).
+        kind: ['claim', 'boost', 'bid'].includes(c.kind) ? c.kind : (c.isBoost ? 'boost' : 'claim'),
+        slot: c.slot || '',
+        roundId: c.roundId || '',
         remote: true,
       });
       n++;

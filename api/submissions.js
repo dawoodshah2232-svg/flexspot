@@ -44,6 +44,11 @@ export default async function handler(req, res) {
       category: String(b.category || 'startups').slice(0, 40),
       isBoost: !!b.isBoost,
       boostSlug: String(b.boostSlug || '').slice(0, 120),
+      // Submission kind: claims and boosts approve here; auction bids are
+      // created by /api/auction and decided ONLY there (see PATCH guard).
+      kind: ['claim', 'boost', 'bid'].includes(b.kind) ? b.kind : (b.isBoost ? 'boost' : 'claim'),
+      slot: String(b.slot || '').slice(0, 40),
+      roundId: String(b.roundId || '').slice(0, 12),
       network: String(b.network || '').slice(0, 40),
       txId: String(b.txId || '').slice(0, 120),
       hasScreenshot: !!b.hasScreenshot,
@@ -90,6 +95,11 @@ export default async function handler(req, res) {
     let sub = null;
     try { sub = b && b.id ? await kvs.get(`sub:${b.id}`) : null; } catch {}
     if (!sub) return json(res, 404, { ok: false, error: 'submission not found' });
+    // Auction bids carry top-bid invariants — they may only be approved or
+    // rejected through /api/auction, which keeps the round state consistent.
+    if (sub.kind === 'bid') {
+      return json(res, 400, { ok: false, error: 'approve bids via /api/auction' });
+    }
     if (!['approved', 'rejected', 'changes-requested'].includes(b.decision)) {
       return json(res, 400, { ok: false, error: 'bad decision' });
     }

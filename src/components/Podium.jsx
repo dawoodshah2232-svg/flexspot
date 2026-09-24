@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { BrandAvatar, MoveIndicator } from './SpotCard';
 import Flee from './Flee';
+import FounderBadge from './FounderBadge';
 import { money, compact } from '../lib/format';
 import { displayAmount } from '../lib/display';
 
@@ -86,6 +87,7 @@ export default function Podium({ spots, onBoost }) {
             <div className={`font-display font-extrabold mt-3 truncate group-hover:underline ${isFirst ? 'text-2xl text-white' : 'text-xl text-[var(--ink)]'}`}>
               {s.name}
             </div>
+            <div className="mt-1.5 flex justify-center"><FounderBadge slug={s.slug} /></div>
             <p className={`text-sm mt-0.5 truncate font-medium ${isFirst ? 'text-[#FCD34D]' : 'text-[var(--ink-2)]'}`}>{s.tagline}</p>
             {s.pending && (
               <span className="inline-block mt-1.5 text-[10px] font-extrabold uppercase tracking-wider text-amber-300 bg-amber-500/15 border border-amber-500/40 rounded-full px-2.5 py-0.5" title="Payment under review">
@@ -242,7 +244,10 @@ export default function Podium({ spots, onBoost }) {
               </span>
               <BrandAvatar spot={s} size={44} />
               <div className="min-w-0 flex-1">
-                <div className="font-display font-bold text-[15px] text-[var(--ink)] truncate">{s.name}</div>
+                <div className="font-display font-bold text-[15px] text-[var(--ink)] truncate flex items-center gap-1.5">
+                  <span className="truncate">{s.name}</span>
+                  <FounderBadge slug={s.slug} />
+                </div>
                 <div className="text-xs text-[var(--ink-3)] truncate">{money(displayAmount(s.amount))} · 👁 {compact(s.views)} views</div>
               </div>
               <span className="shrink-0 text-[11px] font-extrabold text-[var(--blaze)] border border-[var(--blaze)]/40 rounded-full px-3 py-1.5">⚔️ Challenge</span>

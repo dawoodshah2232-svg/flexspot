@@ -10,6 +10,7 @@ import {
   kv, json, getIp, ADMIN_PIN, APP_URL,
   genPassword, genIB, hashPassword, verifyPassword, signSession, verifySession,
 } from './_lib/mail.js';
+import { FOUNDERS_TOTAL } from './_lib/auction.js';
 
 async function loginRateOk(ip) {
   try {
@@ -26,6 +27,7 @@ function publicMember(m) {
   return {
     email: m.email, ib: m.ib, brandName: m.brandName, slug: m.slug,
     amount: m.amount, createdAt: m.createdAt, status: m.status,
+    founderNo: m.founderNo || null,
     spotUrl: `${APP_URL}/s/${m.slug}`,
   };
 }
@@ -62,9 +64,19 @@ export default async function handler(req, res) {
       createdAt: (existing && existing.createdAt) || Date.now(),
       status: 'active',
     };
+    // Founding 100: the first 100 issued members keep a founder number.
+    // Re-issues never burn a number — an existing founder keeps theirs.
+    let founderNo = (existing && existing.founderNo) || null;
+    if (!founderNo) {
+      try {
+        const cur = Number(await store.get('founders:count')) || 0;
+        if (cur < FOUNDERS_TOTAL) founderNo = await store.incr('founders:count');
+      } catch { /* founder counter unavailable — member still issued */ }
+    }
+    if (founderNo) member.founderNo = founderNo;
     await store.set(key, member);
     await store.sadd('members', email);
-    return json(res, 200, { ok: true, password, ib: member.ib, email });
+    return json(res, 200, { ok: true, password, ib: member.ib, email, founderNo: member.founderNo || null });
   }
 
   // ── login ─────────────────────────────────────────────────────────────
@@ -93,6 +105,13 @@ export default async function handler(req, res) {
       return json(res, 401, { ok: false, error: 'session expired' });
     }
     return json(res, 200, { ok: true, member: publicMember(member) });
+  }
+
+  // ── founders (public) — how many of the 100 founder badges are claimed ──
+  if (action === 'founders') {
+    let claimed = 0;
+    try { claimed = Math.min(Number(await store.get('founders:count')) || 0, FOUNDERS_TOTAL); } catch {}
+    return json(res, 200, { ok: true, claimed, total: FOUNDERS_TOTAL });
   }
 
   // ── list (admin) ──────────────────────────────────────────────────────

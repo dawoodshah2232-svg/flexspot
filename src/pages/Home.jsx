@@ -23,6 +23,8 @@ const OnboardingTour = lazy(() => import('../components/OnboardingTour'));
 import { useSiteSettings } from '../lib/siteSettings.jsx';
 import { useDisplayOnline, displayAmount } from '../lib/display';
 import { getOnlineCount } from '../lib/analytics';
+import { auctionState } from '../lib/emailClient';
+import { useFounders } from '../components/FounderBadge';
 
 /* ---------------- Floating live-stats pill ---------------- */
 // Only real numbers here: online now (analytics) and brands live (board).
@@ -262,6 +264,91 @@ function LeaderboardSection({ spots, onBoost, onClaim }) {
   );
 }
 
+/* ---------------- Spotlight Auction teaser ---------------- */
+// Compact preview of the weekly auction: 3 slot cards + live countdown + CTA.
+// Hidden entirely when the auction feed is unreachable — never fake numbers.
+function AuctionTeaser() {
+  const [data, setData] = useState(null);
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    let alive = true;
+    auctionState().then((r) => { if (alive && r.ok) setData(r); }).catch(() => {});
+    const tick = setInterval(() => setNow(Date.now()), 1000);
+    return () => { alive = false; clearInterval(tick); };
+  }, []);
+  if (!data) return null;
+  const ms = Math.max(0, data.endsAt - now);
+  const cd = `${Math.floor(ms / 864e5)}d ${String(Math.floor((ms % 864e5) / 36e5)).padStart(2, '0')}h ${String(Math.floor((ms % 36e5) / 6e4)).padStart(2, '0')}m ${String(Math.floor((ms % 6e4) / 1000)).padStart(2, '0')}s`;
+  return (
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+      <div className="text-center mb-6">
+        <div className="text-[10px] font-bold tracking-[0.2em] text-[var(--blaze)] uppercase mb-2">🔨 Spotlight Auction</div>
+        <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--ink)]">
+          Three spotlights. One week. <span className="grad-text">Highest bidder wins.</span>
+        </h2>
+        <p className="text-[var(--ink-2)] mt-2 text-sm flex items-center justify-center gap-2">
+          <span className="live-dot" /> Round ends in <b className="text-[var(--ink)] font-mono">{cd}</b>
+        </p>
+      </div>
+      <div className="grid sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
+        {data.slots.map((s) => (
+          <div key={s.slot} className="card p-5">
+            <div className="text-sm font-extrabold text-[var(--ink)] mb-1">{s.emoji} {s.title}</div>
+            {s.topBid ? (
+              <>
+                <div className="font-display font-black text-2xl text-[var(--gold-deep)]">${Number(s.topBid.amount).toFixed(2)}</div>
+                <div className="text-xs text-[var(--ink-2)] truncate mt-0.5">by <b className="text-[var(--ink)]">{s.topBid.brandName}</b></div>
+                <div className="text-[11px] text-[var(--ink-3)] mt-1">Min next: ${Number(s.minNextBid).toFixed(2)}</div>
+              </>
+            ) : (
+              <>
+                <div className="font-display font-black text-2xl text-[var(--ink-3)]">$25.00</div>
+                <div className="text-xs text-[var(--ink-2)] mt-0.5">No bids yet — opens at reserve</div>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="text-center">
+        <Link to="/auction" className="btn-gold px-8 py-4 text-base font-extrabold">
+          Bid for the spotlight →
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+/* ---------------- Founding 100 scarcity pill ---------------- */
+// Live count from /api/founders. Hidden when unreachable — never fake.
+function FoundingPill() {
+  const data = useFounders();
+  if (!data) return null;
+  const left = Math.max(0, data.total - data.claimed);
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-2 -mt-2">
+      <div className="flex justify-center">
+        <Link
+          to="/claim"
+          className="inline-flex items-center gap-2.5 rounded-full border border-[#F59E0B]/50 bg-[#FEF3C7] dark:bg-[#F59E0B]/10 px-5 py-2.5 shadow-[var(--shadow-card)] hover:-translate-y-0.5 transition-transform"
+        >
+          <span className="text-lg">🏅</span>
+          <span className="text-sm font-extrabold text-[#92600A] dark:text-[#FCD34D]">
+            Founding 100 · {data.claimed}/{data.total} claimed
+          </span>
+          {left > 0 && (
+            <span className="text-[11px] font-bold text-[var(--ink-2)]">
+              {left} left — claim yours to lock founder status →
+            </span>
+          )}
+          {left === 0 && (
+            <span className="text-[11px] font-bold text-[var(--ink-2)]">all founders locked in</span>
+          )}
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 /* ---------------- How it works in 10 seconds — instant clarity for first-timers ---------------- */
 const HOW_STEPS = [
   { icon: '🎯', title: 'Claim a spot from $1', d: 'Pay in USDT crypto. Your amount is your ranking power.' },
@@ -418,6 +505,9 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 -mt-4 pb-2">
         <LiveStatsPill realViewers={viewers} brandCount={spots.length} />
       </div>
+
+      <AuctionTeaser />
+      <FoundingPill />
 
       <LeaderboardSection spots={spots} onBoost={onBoost} onClaim={onClaim} />
 

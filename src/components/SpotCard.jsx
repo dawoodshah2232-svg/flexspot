@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { money, money2, compact, gradientFor, initials } from '../lib/format';
 import { displayAmount } from '../lib/display';
 import Flee from './Flee';
+import FounderBadge from './FounderBadge';
 
 export function BrandAvatar({ spot, size = 44, ring = false }) {
   const [g1, g2] = gradientFor(spot.slug || spot.name);
@@ -142,6 +143,7 @@ export function SpotRow({ spot, move, onBoost, highlight, race, count = null, ov
           <div className="flex items-center gap-2">
             <h3 className="font-display font-bold text-[var(--ink)] truncate text-[15px]">{spot.name}</h3>
             {spot.rank === 1 && <span className="text-sm">👑</span>}
+            <FounderBadge slug={spot.slug} />
             {spot.pending && (
               <span className="shrink-0 text-[10px] font-extrabold uppercase tracking-wider text-amber-700 dark:text-amber-300 bg-amber-500/15 border border-amber-500/40 rounded-full px-2 py-0.5" title="Payment under review">
                 ⏳ Pending

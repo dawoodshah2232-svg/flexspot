@@ -12,6 +12,7 @@ import { useUnofficialHost } from '../components/SecurityGuard';
 import { currentHost } from '../lib/security';
 import { trackEvent } from '../lib/analytics';
 import { stagePendingClaim } from '../lib/member';
+import { notifyClaimSubmitted } from '../lib/emailClient';
 
 const AMOUNTS = [1, 5, 10, 25, 50, 100];
 
@@ -229,6 +230,24 @@ export default function ClaimPage({ spots, onSubmitted }) {
       }
       setResult({ submission, amount: amt, name });
       trackEvent('deposit_submit', { amount: amt, isBoost, spotSlug: slug });
+      // Email notifications (fire-and-forget — never blocks the UX):
+      // buyer gets "payment received, pending verification", Dawood gets an
+      // admin alert with the proof details. Works in demo + live mode.
+      try {
+        const claimRef = 'FS-' + Date.now().toString(36).toUpperCase();
+        notifyClaimSubmitted({
+          buyerName: isBoost ? (contribName.trim() || 'Booster') : form.name.trim(),
+          buyerEmail: isBoost ? '' : form.email.trim(),
+          brandName: name,
+          amount: amt,
+          network: activeNetwork.name,
+          txId: txId.trim(),
+          hasScreenshot: !!screenshot,
+          claimRef,
+        }).then((r) => {
+          if (!r.adminAlertSent) console.warn('[email] admin alert not sent', r.errors);
+        });
+      } catch (e) { console.warn('[email] notify failed', e); }
       if (!isBoost) {
         // Stage the account: payment under review → member access activates
         // after admin approval. The dashboard gate shows this two-step state.

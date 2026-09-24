@@ -14,6 +14,7 @@ import {
   getPendingClaim, SUPPORT_EMAIL, USDT_NETWORKS, MIN_WITHDRAWAL,
 } from '../lib/member';
 import { myReferralCode } from '../lib/store';
+import { memberLogin, memberMe, memberLogout } from '../lib/emailClient';
 
 const TABS = [
   { id: 'overview', label: 'Overview', icon: '📊' },
@@ -41,7 +42,8 @@ function Stat({ icon, label, value, sub }) {
 }
 
 function useMember() {
-  const [member, setMember] = useState(null);
+  // undefined = still loading; null = loaded, no member; object = logged in.
+  const [member, setMember] = useState(undefined);
   const [wallet, setWallet] = useState(null);
   const [spot, setSpot] = useState(null);
   const refresh = () => {
@@ -64,9 +66,57 @@ function fileToDataUrl(file) {
   });
 }
 
+// Member login — for brand owners approved by the admin. The approval email
+// contains the login ID (their email) and a one-time-issued password.
+function MemberLoginCard({ onLoggedIn }) {
+  const [email, setEmail] = useState('');
+  const [pw, setPw] = useState('');
+  const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!email.trim() || !pw) { setErr('Enter your email and password.'); return; }
+    setBusy(true); setErr('');
+    const r = await memberLogin(email.trim(), pw);
+    setBusy(false);
+    if (r.ok) onLoggedIn(r.member);
+    else setErr(r.error || 'Login failed — check your details and try again.');
+  };
+  return (
+    <div className={card + ' mt-8 text-left'}>
+      <div className="text-2xl mb-2">🔑</div>
+      <h2 className={h2}>Member login</h2>
+      <p className="text-sm text-[var(--ink-2)] mt-1 mb-4">Approved brand owners: log in with the email and password from your approval email.</p>
+      <form onSubmit={submit} className="space-y-3">
+        <div>
+          <label className={label}>Email (your login ID)</label>
+          <input type="email" className={field} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" autoComplete="email" />
+        </div>
+        <div>
+          <label className={label}>Password</label>
+          <input type="password" className={field} value={pw} onChange={(e) => setPw(e.target.value)} placeholder="XXXX-XXXX-XXXX" autoComplete="current-password" />
+        </div>
+        {err && <div className="text-sm font-semibold text-red-500">{err}</div>}
+        <button type="submit" disabled={busy} className="btn-primary w-full py-3 disabled:opacity-60">
+          {busy ? 'Logging in…' : 'Log in'}
+        </button>
+      </form>
+    </div>
+  );
+}
+
 export default function Dashboard({ spots = [], onClaim }) {
   const { member, wallet, spot, refresh } = useMember();
   const [tab, setTab] = useState('overview');
+  // Server-issued member session (email + password from the approval email).
+  const [serverMember, setServerMember] = useState(null);
+  const [serverChecked, setServerChecked] = useState(false);
+  useEffect(() => {
+    memberMe().then((r) => {
+      if (r.ok) setServerMember(r.member);
+      setServerChecked(true);
+    });
+  }, []);
 
   const rank = useMemo(() => {
     if (!member || !spots.length) return null;
@@ -74,9 +124,50 @@ export default function Dashboard({ spots = [], onClaim }) {
     return i === -1 ? null : i + 1;
   }, [member, spots]);
 
-  if (member === null) return null; // loading
+  if (member === undefined) return null; // loading
   if (!member) {
     const pending = getPendingClaim();
+    // Logged in with server-issued credentials (approval email) — show the
+    // member's brand panel with IB number, rank and spot URL.
+    if (serverMember) {
+      const i = (spots || []).findIndex((s) => s.slug === serverMember.slug);
+      const r = i === -1 ? null : i + 1;
+      return (
+        <div className="pt-[110px] pb-20 px-4 sm:px-6 max-w-2xl mx-auto">
+          <div className="card p-6 sm:p-8 text-center relative overflow-hidden">
+            <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#7C3AED] via-[#F5C044] to-[#7C3AED]" />
+            <div className="text-5xl mb-3">👑</div>
+            <div className="inline-flex items-center gap-2 pill pill-gold mb-3">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Member account active
+            </div>
+            <h1 className="font-display font-extrabold text-2xl text-[var(--ink)]">{serverMember.brandName}</h1>
+            <p className="text-sm text-[var(--ink-3)] mt-1">{serverMember.email}</p>
+            <div className="grid grid-cols-3 gap-3 mt-6">
+              <div className="rounded-2xl bg-[var(--surface-2)] p-4">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--ink-3)]">Rank</div>
+                <div className="font-display font-extrabold text-2xl text-[var(--ink)]">{r ? `#${r}` : 'LIVE'}</div>
+              </div>
+              <div className="rounded-2xl bg-[var(--surface-2)] p-4">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--ink-3)]">Spot value</div>
+                <div className="font-display font-extrabold text-2xl text-[var(--ink)]">{money2(serverMember.amount || 0)}</div>
+              </div>
+              <div className="rounded-2xl bg-[var(--surface-2)] p-4">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--ink-3)]">IB №</div>
+                <div className="font-mono font-extrabold text-lg text-[var(--gold)] mt-1">{serverMember.ib}</div>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 mt-6">
+              <Link to={`/s/${serverMember.slug}`} className="btn-primary px-6 py-3 text-sm flex-1">View my brand page →</Link>
+              <Link to="/leaderboard" className="btn-ghost px-6 py-3 text-sm flex-1">Leaderboard</Link>
+            </div>
+            <button
+              onClick={() => { memberLogout(); setServerMember(null); }}
+              className="text-sm font-semibold text-[var(--ink-3)] hover:text-[var(--ink)] px-3 py-2.5 mt-4"
+            >Log out</button>
+          </div>
+        </div>
+      );
+    }
     if (pending) {
       return (
         <div className="pt-[110px] pb-20 px-4 max-w-lg mx-auto text-center">
@@ -104,6 +195,7 @@ export default function Dashboard({ spots = [], onClaim }) {
           <b className="text-[var(--ink)]">automatically</b>. Wallet, referral stats and USDT withdrawals included.
         </p>
         <button onClick={onClaim} className="btn-primary px-8 py-3 mt-6">Claim your spot — $1</button>
+        <MemberLoginCard onLoggedIn={setServerMember} />
       </div>
     );
   }

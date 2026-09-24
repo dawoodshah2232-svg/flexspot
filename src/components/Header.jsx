@@ -25,7 +25,7 @@ export function Logo({ compact = false }) {
         className="w-9 h-9 sm:w-11 sm:h-11 rounded-[12px] sm:rounded-[14px] object-cover shadow-[0_6px_16px_rgba(124,58,237,0.45)] ring-1 ring-white/20 group-hover:scale-[1.06] group-hover:rotate-[-3deg] transition-transform duration-300"
       />
       {!compact && (
-        <span className="leading-none hidden min-[380px]:block">
+        <span className="leading-none hidden min-[500px]:block">
           <span className="block font-display font-extrabold text-[22px] tracking-tight text-[var(--ink)]">
             Flex<span className="grad-text">Spot</span><span className="lol-sticker" aria-hidden="true"><span className="lol-dot">.</span><span className="lol-l">L</span><span className="lol-l">O</span><span className="lol-l">L</span></span>
           </span>

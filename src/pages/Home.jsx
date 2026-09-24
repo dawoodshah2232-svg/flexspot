@@ -357,13 +357,17 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
             { emoji: '👑', left: '90%', top: '72%', size: 30, cls: 'hidden lg:block', opacity: 0.4 },
             { emoji: '😂', left: '3%', top: '78%', size: 26, cls: 'hidden lg:block', opacity: 0.35 },
             { emoji: '💎', left: '52%', top: '88%', size: 22, opacity: 0.4 },
+            // mobile-only: tucked in the right gutter where the headline lines don't reach
+            { emoji: '🔥', left: '87%', top: '7%', size: 22, opacity: 0.5, cls: 'sm:hidden' },
+            { emoji: '🚀', left: '91%', top: '13%', size: 20, opacity: 0.45, cls: 'sm:hidden' },
+            { emoji: '💰', left: '86%', top: '19%', size: 20, opacity: 0.45, cls: 'sm:hidden' },
           ]}
         />
         <div className="blob w-[420px] h-[420px] bg-[#F59E0B]/15 -top-20 -left-32" />
         <div className="blob w-[380px] h-[380px] bg-[#F59E0B]/15 top-40 right-[-120px]" style={{ animationDelay: '-6s' }} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-16 grid lg:grid-cols-2 gap-8 lg:gap-10 items-center relative">
           <div className="min-w-0">
-            <div className="inline-flex items-center gap-2 bg-[var(--surface)] border border-[var(--line)] rounded-full px-4 py-1.5 text-[11px] font-bold tracking-[0.14em] text-[var(--ink-2)] mb-5 shadow-[var(--shadow-card)] max-w-full">
+            <div className="inline-flex items-center gap-2 bg-[var(--surface)] border border-[var(--line)] rounded-full px-4 py-1.5 text-[10px] min-[400px]:text-[11px] font-bold tracking-[0.08em] min-[400px]:tracking-[0.14em] text-[var(--ink-2)] mb-5 shadow-[var(--shadow-card)] max-w-full">
               <span className="live-dot" /> <span className="truncate">{hero.eyebrow}</span>
             </div>
             <h1 className="font-display font-extrabold text-[38px] min-[400px]:text-[44px] sm:text-6xl lg:text-[72px] leading-[1.02] tracking-tight text-balance">
@@ -483,10 +487,10 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
           <div className="absolute -top-24 left-1/4 w-72 h-72 bg-[#F59E0B]/25 rounded-full blur-3xl" aria-hidden="true" />
           <div className="absolute -bottom-24 right-1/4 w-72 h-72 bg-[#7C3AED]/40 rounded-full blur-3xl" aria-hidden="true" />
           <div className="relative">
-            <Flee className="absolute left-[8%] top-6 hidden sm:block"><span className="anim-floaty block text-4xl drop-shadow-[0_8px_14px_rgba(0,0,0,0.45)]">✨</span></Flee>
-            <Flee className="absolute right-[10%] top-16 hidden sm:block"><span className="anim-floaty block text-4xl drop-shadow-[0_8px_14px_rgba(0,0,0,0.45)]" style={{ animationDelay: '-1.4s' }}>👑</span></Flee>
-            <Flee className="absolute left-[14%] bottom-16 hidden sm:block"><span className="anim-floaty block text-4xl drop-shadow-[0_8px_14px_rgba(0,0,0,0.45)]" style={{ animationDelay: '-2.2s' }}>⚡</span></Flee>
-            <Flee className="absolute right-[7%] bottom-8 hidden sm:block"><span className="anim-floaty block text-4xl drop-shadow-[0_8px_14px_rgba(0,0,0,0.45)]" style={{ animationDelay: '-0.8s' }}>✨</span></Flee>
+            <Flee className="absolute left-[8%] top-6"><span className="anim-floaty block text-3xl sm:text-4xl drop-shadow-[0_8px_14px_rgba(0,0,0,0.45)]">✨</span></Flee>
+            <Flee className="absolute right-[10%] top-16"><span className="anim-floaty block text-3xl sm:text-4xl drop-shadow-[0_8px_14px_rgba(0,0,0,0.45)]" style={{ animationDelay: '-1.4s' }}>👑</span></Flee>
+            <Flee className="absolute left-[14%] bottom-16"><span className="anim-floaty block text-3xl sm:text-4xl drop-shadow-[0_8px_14px_rgba(0,0,0,0.45)]" style={{ animationDelay: '-2.2s' }}>⚡</span></Flee>
+            <Flee className="absolute right-[7%] bottom-8"><span className="anim-floaty block text-3xl sm:text-4xl drop-shadow-[0_8px_14px_rgba(0,0,0,0.45)]" style={{ animationDelay: '-0.8s' }}>✨</span></Flee>
             <div className="relative inline-block mb-5">
               <div className="absolute -inset-5 bg-[#F59E0B]/40 blur-2xl rounded-full" aria-hidden="true" />
               <Flee><div className="relative text-7xl sm:text-8xl anim-floaty drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]">👑</div></Flee>

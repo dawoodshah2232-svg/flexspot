@@ -1,0 +1,112 @@
+// Frontend client for the FlexSpot email + member APIs (/api/*).
+// All calls are fire-and-forget safe: they never throw, they return
+// { ok, ... } and degrade gracefully when email/KV isn't configured yet.
+import { appBase } from './format';
+
+const ADMIN_PIN = import.meta.env.VITE_ADMIN_PIN || '';
+
+async function post(path, body) {
+  try {
+    const r = await fetch(path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await r.json().catch(() => ({}));
+    return { ok: r.ok && data.ok !== false, status: r.status, ...data };
+  } catch (e) {
+    return { ok: false, error: e.message || 'network error' };
+  }
+}
+
+export const spotUrl = (slug) => `${appBase()}/s/${slug}`;
+
+const firstName = (name) => String(name || 'there').trim().split(' ')[0] || 'there';
+
+/** Fired right after a claim/boost payment proof is submitted. */
+export async function notifyClaimSubmitted({ buyerName, buyerEmail, brandName, amount, network, txId, hasScreenshot, claimRef }) {
+  const submittedAt = new Date().toLocaleString();
+  // Boosts have no buyer email — only the admin alert fires for them.
+  const buyer = buyerEmail
+    ? post('/api/email', {
+        template: 'payment-received',
+        to: buyerEmail,
+        data: { buyerName: firstName(buyerName), brandName, amount, claimRef },
+      })
+    : Promise.resolve({ ok: true, skipped: true });
+  const admin = post('/api/email', {
+    template: 'admin-payment-alert',
+    data: { buyerName, buyerEmail, brandName, amount, network, txId, hasScreenshot: !!hasScreenshot, claimRef, submittedAt },
+  });
+  const [b, a] = await Promise.all([buyer, admin]);
+  return { buyerEmailSent: !!b.ok, adminAlertSent: !!a.ok, errors: [b.error, a.error].filter(Boolean) };
+}
+
+/**
+ * Called from Admin on approval. Creates the member account (email = login
+ * ID, fresh password + IB number) then emails everything to the buyer.
+ */
+export async function approveAndNotifyMember({ email, buyerName, brandName, slug, amount, rank }) {
+  const issued = await post('/api/member', {
+    action: 'issue', adminPin: ADMIN_PIN, email, brandName, slug, amount,
+  });
+  if (!issued.ok) return { ok: false, error: issued.error || 'member issue failed', emailSent: false };
+  const sent = await post('/api/email', {
+    template: 'member-approved',
+    adminPin: ADMIN_PIN,
+    to: email,
+    data: {
+      buyerName: firstName(buyerName), brandName, rank, amount,
+      spotUrl: spotUrl(slug), email,
+      password: issued.password, ib: issued.ib,
+    },
+  });
+  return { ok: true, ib: issued.ib, emailSent: !!sent.ok, error: sent.error };
+}
+
+/** Called from Admin on rejection. */
+export async function rejectAndNotify({ email, buyerName, brandName, reason }) {
+  const sent = await post('/api/email', {
+    template: 'member-rejected',
+    adminPin: ADMIN_PIN,
+    to: email,
+    data: { buyerName: firstName(buyerName), brandName, reason },
+  });
+  return { ok: !!sent.ok, error: sent.error };
+}
+
+/** Manual engagement sends from Admin (welcome / milestone / digest). */
+export async function sendEngagement({ template, to, data }) {
+  return post('/api/email', { template, adminPin: ADMIN_PIN, to, data });
+}
+
+// ── member session (Dashboard login) ──────────────────────────────────────
+const LS_SESSION = 'flexspot_member_session';
+
+export async function memberLogin(email, password) {
+  const r = await post('/api/member', { action: 'login', email, password });
+  if (r.ok && r.token) {
+    try { localStorage.setItem(LS_SESSION, r.token); } catch {}
+  }
+  return r;
+}
+
+export async function memberMe() {
+  let token = null;
+  try { token = localStorage.getItem(LS_SESSION); } catch {}
+  if (!token) return { ok: false };
+  const r = await post('/api/member', { action: 'me', token });
+  if (!r.ok) { try { localStorage.removeItem(LS_SESSION); } catch {} }
+  return r;
+}
+
+export function memberLogout() {
+  try { localStorage.removeItem(LS_SESSION); } catch {}
+}
+
+export async function listMembers() {
+  return post('/api/member', { action: 'list', adminPin: ADMIN_PIN });
+}
+
+export const emailNotConfigured = (r) =>
+  !!(r && r.error && /RESEND_API_KEY|ADMIN_EMAIL|not configured/i.test(r.error));

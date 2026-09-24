@@ -23,6 +23,8 @@ import { useLiveOnline, getAnalyticsSummary, getVisitorTrail, clearAnalyticsData
 import { getDisplayTuning, saveDisplayTuning, displayOnlineCount, displayAmount } from '../lib/display';
 import { useSiteSettings, IMAGE_HINTS } from '../lib/siteSettings.jsx';
 import { getPendingClaim, clearPendingClaim, saveMember } from '../lib/member';
+import { approveAndNotifyMember, rejectAndNotify, emailNotConfigured, listMembers, sendEngagement, spotUrl } from '../lib/emailClient';
+import { projectedRank } from '../lib/store';
 
 // Fail closed: a static SPA cannot hold a real secret, and silently falling
 // back to '1234' would ship an open admin gate. No PIN configured → the
@@ -91,6 +93,80 @@ function CopyBtn({ text, label }) {
 
 /* ============================= MAIN ============================= */
 
+// Login accounts (server-issued member logins) + engagement emails.
+// Members are created automatically when a claim is approved: the buyer gets
+// an email with their login (email = ID), password and IB number.
+function LoginAccounts({ spots, flash }) {
+  const [accounts, setAccounts] = useState(null);
+  const [err, setErr] = useState('');
+  const [sending, setSending] = useState('');
+  const load = async () => {
+    setErr('');
+    const r = await listMembers();
+    if (r.ok) setAccounts(r.members || []);
+    else { setAccounts([]); setErr(r.error || 'could not load'); }
+  };
+  useEffect(() => { load(); }, []);
+  const rankOf = (slug) => {
+    const i = (spots || []).findIndex((s) => s.slug === slug);
+    return i === -1 ? null : i + 1;
+  };
+  const send = async (m, template) => {
+    const key = m.email + ':' + template;
+    setSending(key);
+    try {
+      const name = String(m.brandName || '').split(' ')[0] || 'there';
+      const url = spotUrl(m.slug);
+      const data = template === 'welcome'
+        ? { buyerName: name, brandName: m.brandName, spotUrl: url, ib: m.ib }
+        : template === 'rank-milestone'
+          ? { buyerName: name, brandName: m.brandName, rank: rankOf(m.slug) || '—', amount: m.amount || 0, spotUrl: url }
+          : { buyerName: name, brandName: m.brandName, rank: rankOf(m.slug), amount: m.amount || 0, views: '—', spotUrl: url };
+      const r = await sendEngagement({ template, to: m.email, data });
+      flash(r.ok ? `✓ "${template}" sent to ${m.email}` : `Email failed: ${r.error || 'not configured'}`);
+    } finally { setSending(''); }
+  };
+  return (
+    <div className="card p-5 mt-6">
+      <div className="flex items-center justify-between mb-1">
+        <h3 className="font-display font-bold text-base text-[var(--ink)]">🔑 Login accounts</h3>
+        <button onClick={load} className="btn-ghost px-3 py-1.5 text-xs">↻ Refresh</button>
+      </div>
+      <p className="text-xs text-[var(--ink-2)] mb-4">Issued automatically on approval. Email = login ID · password + IB number sent in the approval email.</p>
+      {accounts === null && <div className="text-sm text-[var(--ink-3)]">Loading…</div>}
+      {accounts !== null && accounts.length === 0 && (
+        <div className="text-sm text-[var(--ink-3)]">
+          {err === 'member store not connected (connect Vercel KV)' || /not connected/i.test(err)
+            ? 'Member store not connected yet — connect Vercel KV to enable logins (approval emails still work once RESEND_API_KEY is set).'
+            : err ? `Couldn't load accounts: ${err}` : 'No login accounts yet — approve a claim to create the first one.'}
+        </div>
+      )}
+      {accounts !== null && accounts.length > 0 && (
+        <div className="space-y-2">
+          {accounts.map((m) => (
+            <div key={m.email} className="rounded-xl border border-[var(--line)] p-3 flex flex-wrap items-center gap-3">
+              <div className="flex-1 min-w-[180px]">
+                <div className="font-bold text-sm text-[var(--ink)] truncate">{m.brandName}</div>
+                <div className="text-xs text-[var(--ink-3)] truncate">{m.email} · <span className="font-mono font-bold text-[var(--ink-2)]">{m.ib}</span></div>
+              </div>
+              <div className="flex gap-1.5 flex-wrap">
+                {[['welcome', '👋 Welcome'], ['rank-milestone', '🏆 Milestone'], ['weekly-digest', '📊 Digest']].map(([t, label]) => (
+                  <button
+                    key={t}
+                    disabled={sending === m.email + ':' + t}
+                    onClick={() => send(m, t)}
+                    className="btn-ghost px-2.5 py-1.5 text-[11px] font-bold disabled:opacity-50"
+                  >{sending === m.email + ':' + t ? '…' : label}</button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Admin({ spots, refresh }) {
   const [pin, setPin] = useState('');
   const [authed, setAuthed] = useState(() => {
@@ -123,6 +199,7 @@ export default function Admin({ spots, refresh }) {
     if (decision !== 'approved' && !note) { flash('Add a note explaining the decision first.'); return; }
     if (decision === 'rejected' && !confirm('Reject this submission?')) return;
     const updated = reviewSubmission(id, decision, note);
+    let emailHandled = false;
     if (decision === 'approved' && updated && !updated.isBoost) {
       // Close the two-step member loop: the dashboard was showing
       // "Payment under review" from the staged pending claim — clear it now
@@ -130,10 +207,38 @@ export default function Admin({ spots, refresh }) {
       const pc = getPendingClaim();
       if (pc && pc.slug === updated.slug) clearPendingClaim();
       saveMember({ name: updated.brandName, email: updated.email || '', spotSlug: updated.slug, createdAt: Date.now() });
+      // Email: issue the member's login credentials + IB number, then send
+      // the "you're live" email (rank, spot URL, credentials). Async — the
+      // approval itself is already saved above.
+      if (updated.email) {
+        emailHandled = true;
+        (async () => {
+          try {
+            const withNew = [...(spots || []), { slug: updated.slug, amount: updated.amount, joinedAt: updated.createdAt }];
+            const { rank: newRank } = projectedRank(withNew, updated.slug, 0);
+            const r = await approveAndNotifyMember({
+              email: updated.email, buyerName: updated.brandName, brandName: updated.brandName,
+              slug: updated.slug, amount: updated.amount, rank: newRank,
+            });
+            if (r.ok && r.emailSent) flash(`✓ Approved — live at #${newRank}. Login email sent to buyer (IB ${r.ib}).`);
+            else if (r.ok) flash(`✓ Approved — live at #${newRank}. Member created (IB ${r.ib}) but email failed: ${r.error || 'email not configured'}.`);
+            else if (emailNotConfigured(r)) flash(`✓ Approved — live at #${newRank}. Email not configured yet (add RESEND_API_KEY).`);
+            else flash(`✓ Approved — live at #${newRank}. Member email failed: ${r.error || 'unknown'}.`);
+          } catch (e) { flash('✓ Approved — but the login email failed to send.'); }
+        })();
+      }
+    } else if (decision === 'rejected' && updated && updated.email) {
+      emailHandled = true;
+      (async () => {
+        try {
+          const r = await rejectAndNotify({ email: updated.email, buyerName: updated.brandName, brandName: updated.brandName, reason: note });
+          flash(r.ok ? 'Submission rejected — buyer notified by email.' : `Rejected. (Email failed: ${r.error || 'not configured'})`);
+        } catch (e) { flash('Rejected. (Email failed to send.)'); }
+      })();
     }
     setNotes((n) => ({ ...n, [id]: '' }));
     reload(); refresh && refresh();
-    flash(decision === 'approved' ? '✓ Approved — spot is now live on the leaderboard.'
+    if (!emailHandled) flash(decision === 'approved' ? '✓ Approved — spot is now live on the leaderboard.'
       : decision === 'rejected' ? 'Submission rejected.'
       : 'Changes requested — saved on this submission (no email sent in preview).');
   };
@@ -344,6 +449,7 @@ export default function Admin({ spots, refresh }) {
                 ))}
               </div>
             )}
+            <LoginAccounts spots={spots} flash={flash} />
           </div>
         )}
 

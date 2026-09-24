@@ -8,7 +8,7 @@
     "prebuild": "node scripts/generate-sitemap.mjs",
     "build": "vite build",
     "preview": "vite preview",
-    "postbuild": "cp dist/index.html dist/404.html"
+    "postbuild": "cp dist/index.html dist/404.html && node scripts/prerender-seo.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

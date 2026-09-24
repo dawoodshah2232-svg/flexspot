@@ -212,7 +212,7 @@ function LeaderboardSection({ spots, onBoost, onClaim }) {
         ]}
       />
       <div className="text-center mb-8 relative">
-        <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--ink)]">🏆 Live Leaderboard</h2>
+        <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--ink)]">🏆 Every rank on this leaderboard was paid for</h2>
         <p className="text-[var(--ink-2)] mt-2 flex items-center justify-center gap-2 text-sm">
           <span className="live-dot" /> Updates every few seconds · highest amount wins · ties go to whoever got there first
         </p>
@@ -464,7 +464,7 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
           <div className="flex items-end justify-between gap-4 mb-8">
             <div>
               <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--ink)]">
-                From the <span className="grad-text">blog</span>
+                Notes on winning the <span className="grad-text">internet's attention</span>
               </h2>
               <p className="text-[var(--ink-2)] mt-2 max-w-xl">
                 Playbooks for getting seen — bidding tactics, marketing guides, and winner stories.

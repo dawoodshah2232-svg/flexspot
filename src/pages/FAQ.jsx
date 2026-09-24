@@ -35,7 +35,7 @@ export default function FAQ({ onClaim }) {
   return (
     <div className="pt-[92px]">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-12 sm:pt-16">
-        <h1 className="font-display font-bold text-4xl sm:text-5xl text-snow tracking-tight text-center">Frequently asked <span className="grad-text">questions</span></h1>
+        <h1 className="font-display font-bold text-4xl sm:text-5xl text-snow tracking-tight text-center">FlexSpot questions, <span className="grad-text">answered straight.</span></h1>
         <p className="text-mist text-center mt-3 mb-10">Everything you need to know before you claim the spotlight.</p>
         <div className="space-y-3">
           {FAQS.map((f, i) => (

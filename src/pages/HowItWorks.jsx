@@ -86,7 +86,7 @@ export default function HowItWorks({ onClaim }) {
           transition={{ delay: 0.05 }}
           className="font-display font-extrabold text-4xl sm:text-6xl text-[var(--ink)] tracking-tight"
         >
-          Five steps to <span className="grad-text">internet fame.</span>
+          How FlexSpot works: <span className="grad-text">claim a spot from $1 and outrank everyone.</span>
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 16 }}
@@ -94,7 +94,7 @@ export default function HowItWorks({ onClaim }) {
           transition={{ delay: 0.1 }}
           className="text-[var(--ink-2)] mt-4 max-w-xl mx-auto text-base sm:text-lg"
         >
-          No ads account. No marketing degree. Just $1, a little nerve, and the guts to outrank everyone else.
+          Five steps to internet fame. No ads account, no marketing degree — just $1, a little nerve, and the guts to outrank everyone else.
         </motion.p>
         <motion.p
           initial={{ opacity: 0, y: 16 }}

@@ -28,7 +28,9 @@ export default async function handler(req, res) {
     const b = parseBody(req);
     if (!b) return json(res, 400, { ok: false, error: 'bad json' });
     if (!b.brandName || !b.amount) return json(res, 400, { ok: false, error: 'brandName and amount required' });
-    const id = String(b.id || newId());
+    // Submission IDs are always server-generated — a client-supplied id
+    // could overwrite another submission's record (untrusted storage key).
+    const id = newId();
     const now = Date.now();
     const sub = {
       id,

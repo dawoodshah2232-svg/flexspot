@@ -53,6 +53,9 @@ export default async function handler(req, res) {
       email,
       passHash: hashPassword(password),
       ib: (existing && existing.ib) || genIB(),
+      // Session epoch: bumped on every (re-)issue so previously issued
+      // session tokens stop working the moment credentials change.
+      sessEpoch: ((existing && existing.sessEpoch) || 0) + 1,
       brandName: String(body.brandName || 'Your brand').slice(0, 80),
       slug: String(body.slug || ''),
       amount: Number(body.amount) || 0,
@@ -74,17 +77,21 @@ export default async function handler(req, res) {
       return json(res, 401, { ok: false, error: 'Invalid email or password.' });
     }
     let token;
-    try { token = signSession(email); }
+    try { token = signSession(email, member.sessEpoch || 0); }
     catch { return json(res, 503, { ok: false, error: 'sessions not configured (MEMBER_SECRET)' }); }
     return json(res, 200, { ok: true, token, member: publicMember(member) });
   }
 
   // ── me ────────────────────────────────────────────────────────────────
   if (action === 'me') {
-    const email = verifySession(body.token || '');
-    if (!email) return json(res, 401, { ok: false, error: 'session expired' });
-    const member = await store.get(`member:${email}`);
-    if (!member || member.status !== 'active') return json(res, 401, { ok: false, error: 'account not found' });
+    const sess = verifySession(body.token || '');
+    if (!sess) return json(res, 401, { ok: false, error: 'session expired' });
+    const member = await store.get(`member:${sess.email}`);
+    // Epoch mismatch = credentials were re-issued after this token was
+    // signed → the old session is dead (login-replay protection).
+    if (!member || member.status !== 'active' || (member.sessEpoch || 0) !== sess.epoch) {
+      return json(res, 401, { ok: false, error: 'session expired' });
+    }
     return json(res, 200, { ok: true, member: publicMember(member) });
   }
 

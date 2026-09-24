@@ -15,6 +15,10 @@ export {
   beatNow,
   fetchTrafficStats,
   fetchVisitorTrail,
+  fetchVisitors,
+  resetTraffic,
+  countryFlag,
+  countryName,
   useServerOnline as useLiveOnline,
 } from './tracker.js';
 

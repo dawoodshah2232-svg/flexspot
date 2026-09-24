@@ -19,7 +19,7 @@ import {
   resetDemoData,
 } from '../lib/store';
 import { CATEGORIES } from '../lib/data';
-import { useLiveOnline, fetchTrafficStats, fetchVisitorTrail } from '../lib/analytics';
+import { useLiveOnline, fetchTrafficStats, fetchVisitorTrail, fetchVisitors, resetTraffic, countryFlag, countryName } from '../lib/analytics';
 import { getDisplayTuning, saveDisplayTuning, displayOnlineCount, displayAmount } from '../lib/display';
 import { useSiteSettings, IMAGE_HINTS } from '../lib/siteSettings.jsx';
 import { getPendingClaim, clearPendingClaim, saveMember } from '../lib/member';
@@ -36,6 +36,7 @@ const TABS = [
   { id: 'overview', label: '📊 Overview' },
   { id: 'spots', label: '🏆 Spots' },
   { id: 'live', label: '🟢 Live visitors' },
+  { id: 'visitors', label: '🧭 Visitors' },
   { id: 'deposits', label: '💳 Deposits & receipts' },
   { id: 'members', label: '👥 Members' },
   { id: 'referrals', label: '🔗 Referrals' },
@@ -425,6 +426,10 @@ export default function Admin({ spots, refresh }) {
           <LiveTab online={traffic?.online || []} onTrail={setTrailVid} />
         )}
 
+        {tab === 'visitors' && (
+          <VisitorsTab onTrail={setTrailVid} />
+        )}
+
         {tab === 'deposits' && (
           <div>
             <h2 className="font-display font-bold text-xl text-[var(--ink)] mb-2">Deposits & receipts{REAL}</h2>
@@ -538,7 +543,20 @@ export default function Admin({ spots, refresh }) {
 
 function OverviewTab({ online, traffic, trafficErr, live, spots, subs, pendingSubs, revenue, depositsToday, fakeReceipts, fraudFlags, refresh }) {
   const [showManual, setShowManual] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const [resetMsg, setResetMsg] = useState('');
   const t = traffic;
+  const doReset = async () => {
+    if (!window.confirm('Wipe ALL recorded traffic and start from zero? This cannot be undone.')) return;
+    setResetting(true);
+    try {
+      const n = await resetTraffic(ADMIN_PIN);
+      setResetMsg(`✅ Traffic wiped (${n} records removed) — counting fresh from zero.`);
+    } catch {
+      setResetMsg('⚠️ Reset failed — check connection and try again.');
+    }
+    setResetting(false);
+  };
   const fmtDur = (ms) => {
     if (!ms) return '—';
     const s = Math.round(ms / 1000);
@@ -562,7 +580,14 @@ function OverviewTab({ online, traffic, trafficErr, live, spots, subs, pendingSu
       {!t && !trafficErr ? (
         <div className="card p-5 mb-8"><p className="text-sm text-[var(--ink-3)]">📡 Loading live traffic…</p></div>
       ) : t && (<>
-        <p className="text-[11px] text-[var(--ink-3)] mb-4">📡 Real site-wide traffic — every human visitor on every device, counted on the server. Bots and search-engine crawlers are excluded. Tracking since 24 Sep 2026; visits before that weren't recorded.</p>
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <p className="text-[11px] text-[var(--ink-3)]">📡 Real site-wide traffic — every human visitor on every device, counted on the server. Bots and search-engine crawlers are excluded. Countries come from the visitor's network (their IP is never stored). Tracking since 24 Sep 2026; visits before that weren't recorded.</p>
+          <button onClick={doReset} disabled={resetting}
+            className="shrink-0 text-[11px] font-bold px-3 py-2 rounded-lg border border-red-500/40 text-red-500 hover:bg-red-500/10 transition-colors min-h-[36px] disabled:opacity-50">
+            {resetting ? 'Resetting…' : '🧹 Reset to zero'}
+          </button>
+        </div>
+        {resetMsg && <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-4">{resetMsg}</p>}
         <div className="grid md:grid-cols-2 gap-4 mb-8">
           <div className="card p-5">
             <h3 className="font-bold text-[var(--ink)] mb-1">📄 Top pages{REAL}</h3>
@@ -602,6 +627,20 @@ function OverviewTab({ online, traffic, trafficErr, live, spots, subs, pendingSu
             <h3 className="font-bold text-[var(--ink)] mb-1">🎯 Funnel events{REAL}</h3>
             <p className="text-[11px] text-[var(--ink-3)] mb-3">What visitors actually do</p>
             <Funnel events={t.events} />
+          </div>
+          <div className="card p-5">
+            <h3 className="font-bold text-[var(--ink)] mb-1">🌍 Top countries{REAL}</h3>
+            <p className="text-[11px] text-[var(--ink-3)] mb-3">Where your visitors come from</p>
+            {(!t.topCountries || t.topCountries.length === 0) ? <p className="text-xs text-[var(--ink-3)]">No data yet.</p> : (
+              <div className="space-y-2">
+                {t.topCountries.map((r) => (
+                  <div key={r.c} className="flex items-center justify-between gap-3 text-sm">
+                    <span className="text-[var(--ink-2)] truncate">{countryFlag(r.c)} {countryName(r.c)}</span>
+                    <span className="font-bold text-[var(--ink)] shrink-0">{compact(r.v)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </>)}
@@ -714,13 +753,63 @@ function LiveTab({ online, onTrail }) {
             <div className="flex-1 min-w-0">
               <div className="font-mono text-xs font-bold text-[var(--ink)] truncate">{v.page}</div>
               <div className="text-[11px] text-[var(--ink-3)] truncate">
-                {v.dev === 'mobile' ? '📱' : '🖥️'} {v.dev} · {ago(secs(v.ts))}
+                {v.ctry ? <>{countryFlag(v.ctry)} {countryName(v.ctry)} · </> : null}{v.dev === 'mobile' ? '📱' : '🖥️'} {v.dev} · {ago(secs(v.ts))}
               </div>
             </div>
             <span className="text-xs font-bold text-[var(--blaze)] shrink-0">Trail →</span>
           </button>
         ))}
       </div>
+    </div>
+  );
+}
+
+/* ============================= VISITORS ============================= */
+
+function VisitorsTab({ onTrail }) {
+  const [list, setList] = useState(null);
+  const [err, setErr] = useState('');
+  useEffect(() => {
+    let alive = true;
+    fetchVisitors(ADMIN_PIN, 7)
+      .then((v) => { if (alive) { setList(v); setErr(''); } })
+      .catch(() => { if (alive) setErr('Could not load visitors — check connection.'); });
+    return () => { alive = false; };
+  }, []);
+  const ago = (ts) => {
+    if (!ts) return 'unknown';
+    const s = Math.max(0, Math.round((Date.now() - ts) / 1000));
+    if (s < 60) return 'just now';
+    if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+    if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+    return `${Math.floor(s / 86400)}d ago`;
+  };
+  if (err) return <div><h2 className="font-display font-bold text-xl text-[var(--ink)] mb-2">Visitors{REAL}</h2><p className="text-xs text-red-500">⚠️ {err}</p></div>;
+  if (!list) return <div><h2 className="font-display font-bold text-xl text-[var(--ink)] mb-2">Visitors{REAL}</h2><p className="text-sm text-[var(--ink-3)]">Loading…</p></div>;
+  return (
+    <div>
+      <h2 className="font-display font-bold text-xl text-[var(--ink)] mb-2">Visitors ({list.length}){REAL}</h2>
+      <p className="text-[var(--ink-2)] text-sm mb-5">Every human visitor from the last 7 days — flag, country, device, and what they did. Tap one to see their full page trail.</p>
+      {list.length === 0 ? (
+        <Empty icon="🧭" text="No visitors yet — share the site and they'll appear here with their country flag." />
+      ) : (
+        <div className="space-y-2">
+          {list.map((v) => (
+            <button key={v.vid} onClick={() => onTrail(v.vid)}
+              className="w-full card p-4 flex items-center gap-3 text-left hover:border-[var(--blaze)] transition-colors min-h-[64px]">
+              <span className="text-2xl shrink-0">{countryFlag(v.ctry)}</span>
+              <div className="flex-1 min-w-0">
+                <div className="font-bold text-sm text-[var(--ink)] truncate">{countryName(v.ctry)}</div>
+                <div className="text-[11px] text-[var(--ink-3)] truncate">
+                  {v.dev === 'mobile' ? '📱' : '🖥️'} {v.dev} · 📄 {v.pages} page{v.pages === 1 ? '' : 's'} · ⚡ {v.events} action{v.events === 1 ? '' : 's'} · {ago(v.last)}
+                </div>
+              </div>
+              <span className="font-mono text-[10px] text-[var(--ink-3)] shrink-0 hidden sm:block">{String(v.vid).slice(0, 12)}…</span>
+              <span className="text-xs font-bold text-[var(--blaze)] shrink-0">Trail →</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

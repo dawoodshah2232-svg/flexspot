@@ -106,6 +106,42 @@ export function stopTracking() {
   if (typeof window !== 'undefined') window.removeEventListener('pagehide', onHide);
 }
 
+/** Admin: recent visitors with country/device/activity (needs PIN). */
+export async function fetchVisitors(pin, days = 7) {
+  const r = await fetch(`/api/track?visitors=1&days=${days}`, { headers: { 'x-admin-pin': pin }, cache: 'no-store' });
+  const j = await r.json();
+  if (!j || !j.ok) throw new Error(j?.error || 'visitors unavailable');
+  return j.visitors || [];
+}
+
+/** Admin: wipe every recorded traffic key and start from zero (needs PIN). */
+export async function resetTraffic(pin) {
+  const r = await fetch('/api/track?reset=1', { headers: { 'x-admin-pin': pin }, cache: 'no-store' });
+  const j = await r.json();
+  if (!j || !j.ok) throw new Error(j?.error || 'reset failed');
+  return j.deleted || 0;
+}
+
+/** Flag emoji for a 2-letter country code. */
+export function countryFlag(code) {
+  const c = String(code || '').toUpperCase();
+  if (!/^[A-Z]{2}$/.test(c)) return '🏳️';
+  return String.fromCodePoint(...[...c].map((ch) => 127397 + ch.charCodeAt(0)));
+}
+
+let _regionNames = null;
+/** Full country name for a 2-letter code (browser Intl — no table needed). */
+export function countryName(code) {
+  const c = String(code || '').toUpperCase();
+  if (!/^[A-Z]{2}$/.test(c)) return 'Unknown';
+  try {
+    if (!_regionNames && typeof Intl !== 'undefined' && Intl.DisplayNames) {
+      _regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+    }
+    return (_regionNames && _regionNames.of(c)) || c;
+  } catch { return c; }
+}
+
 /** Live online-visitor list from the server (public count endpoint). */
 export function useServerOnline(pollMs = 10000) {
   const [online, setOnline] = useState([]);

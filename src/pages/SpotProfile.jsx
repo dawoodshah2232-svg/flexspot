@@ -294,7 +294,7 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
 
           {/* referral rewards */}
           <div className="rounded-3xl bg-gradient-to-br from-[var(--blaze-soft)] to-card border border-[var(--blaze)] p-6">
-            <h2 className="font-display font-bold text-lg text-snow mb-1">🔗 Refer & earn $1 per visit</h2>
+            <h2 className="font-display font-bold text-lg text-snow mb-1">🔗 Refer & add $1 per visit</h2>
             <p className="text-mist text-sm mb-4">
               Create your personal link and share it anywhere — Facebook, Telegram, WhatsApp.
               Every visit through it adds <b className="text-snow">$1</b> to {spot.name}'s total

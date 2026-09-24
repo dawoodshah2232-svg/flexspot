@@ -23,6 +23,12 @@ const isTestVid = (vid) => TEST_VIDS.has(vid) || /^v-test-/i.test(String(vid || 
 const isTestPage = (page) => page === '/test-page' || String(page || '').startsWith('/test-page?') || String(page || '').startsWith('/test/');
 const isTestRef = (host) => /test/i.test(String(host || ''));
 
+// Bot/crawler traffic — never counted. Search engines execute the tracking JS
+// while crawling (Googlebot/Bingbot run headless Chrome), so without this
+// filter every sitemap submission shows up as a wave of fake "visitors".
+const BOT_UA = /bot|crawl|spider|slurp|mediapartners|baidu|yandex|sogou|exabot|facebot|ia_archiver|semrush|ahrefs|mj12|dotbot|petalbot|bytespider|gptbot|claudebot|ccbot|anthropic|cohere|diffbot|headless|phantom|selenium|puppeteer|playwright|lighthouse|pagespeed|pingdom|uptimerobot|screaming/i;
+const isBot = (ua) => BOT_UA.test(String(ua || ''));
+
 const dayKey = (ts) => new Date(ts).toISOString().slice(0, 10);
 const K = {
   pv: (d) => `trk:pv:${d}`,
@@ -155,6 +161,7 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     const body = parseBody(req);
     if (!body) return json(res, 400, { ok: false });
+    if (isBot(req.headers['user-agent'])) return json(res, 200, { ok: true }); // bots: never counted
     if (!store) return json(res, 200, { ok: true }); // KV missing — never break the site
     try { await record(store, body); } catch { /* never break the site */ }
     return json(res, 200, { ok: true });

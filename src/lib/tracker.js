@@ -36,6 +36,9 @@ export function isMobileDevice() {
 
 function send(payload) {
   try {
+    // Headless automation (lighthouse, scrapers, bots driving real Chrome)
+    // never counts as a visitor. The server also filters crawler UAs.
+    if (typeof navigator !== 'undefined' && (navigator.webdriver === true || /headless/i.test(navigator.userAgent || ''))) return;
     const body = JSON.stringify(payload);
     if (navigator.sendBeacon) {
       navigator.sendBeacon('/api/track', new Blob([body], { type: 'application/json' }));

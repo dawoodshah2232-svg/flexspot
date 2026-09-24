@@ -562,7 +562,7 @@ function OverviewTab({ online, traffic, trafficErr, live, spots, subs, pendingSu
       {!t && !trafficErr ? (
         <div className="card p-5 mb-8"><p className="text-sm text-[var(--ink-3)]">📡 Loading live traffic…</p></div>
       ) : t && (<>
-        <p className="text-[11px] text-[var(--ink-3)] mb-4">📡 Real site-wide traffic — every visitor on every device, counted on the server. Tracking since 24 Sep 2026; visits before that weren't recorded.</p>
+        <p className="text-[11px] text-[var(--ink-3)] mb-4">📡 Real site-wide traffic — every human visitor on every device, counted on the server. Bots and search-engine crawlers are excluded. Tracking since 24 Sep 2026; visits before that weren't recorded.</p>
         <div className="grid md:grid-cols-2 gap-4 mb-8">
           <div className="card p-5">
             <h3 className="font-bold text-[var(--ink)] mb-1">📄 Top pages{REAL}</h3>

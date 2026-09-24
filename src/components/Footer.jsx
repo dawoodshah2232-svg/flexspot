@@ -16,7 +16,7 @@ export default function Footer({ onClaim }) {
     }
   };
   return (
-    <footer className="relative overflow-hidden border-t border-[var(--line-soft)] bg-[var(--surface)] mt-20">
+    <footer className="relative overflow-hidden border-t border-[var(--line-soft)] bg-[var(--surface)] mt-20 pb-24 lg:pb-10">
       <Floaties
         items={[
           { emoji: '👑', left: '2%', top: '18%', size: 26, cls: 'hidden md:block', opacity: 0.35 },

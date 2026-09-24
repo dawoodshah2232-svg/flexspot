@@ -48,7 +48,7 @@ export default function Header({ onClaim }) {
   const avatar = member && (member.logoUrl || member.avatarUrl);
   return (
     <header className="fixed top-3 inset-x-3 sm:inset-x-6 z-40">
-      <div className="header-glass max-w-7xl mx-auto bg-[var(--surface)]/80 backdrop-blur-2xl border border-[var(--line)] rounded-2xl shadow-[var(--shadow-lift)]">
+      <div className="header-glass max-w-7xl mx-auto bg-[color-mix(in_srgb,var(--surface)_80%,transparent)] backdrop-blur-2xl border border-[var(--line)] rounded-2xl shadow-[var(--shadow-lift)]">
         <div className="px-3 sm:px-5 h-[60px] sm:h-[68px] flex items-center justify-between gap-2 sm:gap-3">
           <Logo />
           <nav className="hidden lg:flex items-center gap-1" aria-label="Primary">

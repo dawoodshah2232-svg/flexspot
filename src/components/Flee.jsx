@@ -48,9 +48,16 @@ export default function Flee({ children, className = '', style, radius = RADIUS,
       raf = requestAnimationFrame(tick);
     };
     window.addEventListener('mousemove', onMove, { passive: true });
+    // touch taps fire one synthetic mousemove and then go quiet — without a
+    // reset the emoji would stay pushed forever. Same on scroll.
+    const reset = () => { tx = 0; ty = 0; };
+    window.addEventListener('touchend', reset, { passive: true });
+    window.addEventListener('scroll', reset, { passive: true });
     raf = requestAnimationFrame(tick);
     return () => {
       window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('touchend', reset);
+      window.removeEventListener('scroll', reset);
       cancelAnimationFrame(raf);
     };
   }, [radius, push]);

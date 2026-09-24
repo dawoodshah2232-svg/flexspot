@@ -41,7 +41,7 @@ function LiveStatsPill({ realViewers, brandCount }) {
       <p className="text-center text-[11px] font-bold tracking-[0.18em] uppercase text-[var(--ink-3)] mb-3">
         Real brands. Real bids. Live now.
       </p>
-      <div className="grid grid-cols-2 min-[420px]:flex min-[420px]:flex-wrap justify-center items-center gap-x-5 gap-y-3 min-[420px]:gap-y-2 sm:gap-8 bg-[var(--surface)]/90 backdrop-blur border border-[var(--line)] rounded-3xl min-[420px]:rounded-full px-5 min-[420px]:px-4 min-[420px]:pl-5 min-[420px]:pr-6 sm:pl-6 sm:pr-8 py-3 min-[420px]:py-2.5 shadow-[var(--shadow-card)] max-w-full">
+      <div className="grid grid-cols-2 min-[420px]:flex min-[420px]:flex-wrap justify-center items-center gap-x-5 gap-y-3 min-[420px]:gap-y-2 sm:gap-8 bg-[color-mix(in_srgb,var(--surface)_90%,transparent)] backdrop-blur border border-[var(--line)] rounded-3xl min-[420px]:rounded-full px-5 min-[420px]:px-4 min-[420px]:pl-5 min-[420px]:pr-6 sm:pl-6 sm:pr-8 py-3 min-[420px]:py-2.5 shadow-[var(--shadow-card)] max-w-full">
         {stats.map((s, i) => (
           <div key={s.label} className="flex items-center gap-2.5 min-w-0">
             {i > 0 && <span className="hidden min-[420px]:block w-px h-6 bg-[var(--line)] -ml-2.5 sm:-ml-4 shrink-0" aria-hidden="true" />}
@@ -135,7 +135,7 @@ function ChampionStage({ leader, onClaim }) {
         )}
         {/* champion ribbon — top-left of the photo */}
         <div className="absolute top-4 left-4">
-          <div className="inline-flex items-center gap-2 bg-black/70 backdrop-blur-md text-[#FBBF24] border border-[#F59E0B]/60 font-black text-[11px] sm:text-xs uppercase tracking-[0.2em] rounded-full px-5 py-2 shadow-[0_8px_24px_-6px_rgba(245,158,11,0.7)]">
+          <div className="inline-flex items-center gap-2 bg-black/70 backdrop-blur-md text-[#FBBF24] border border-[#F59E0B]/60 font-black text-[10px] min-[420px]:text-[11px] sm:text-xs uppercase tracking-[0.2em] rounded-full px-3 min-[420px]:px-5 py-2 shadow-[0_8px_24px_-6px_rgba(245,158,11,0.7)]">
             <span>👑</span> Reigning champion <span>👑</span>
           </div>
         </div>
@@ -151,15 +151,15 @@ function ChampionStage({ leader, onClaim }) {
         {champion.showLeaderCard && leader && (
           <Link to={`/s/${leader.slug}`} className="group relative block rounded-3xl border-2 border-[#FBBF24] bg-gradient-to-br from-[#7C3AED]/30 via-white/[0.07] to-[#F59E0B]/20 backdrop-blur-md p-4 sm:p-5 overflow-hidden hover:border-[#FCD34D] transition-colors shadow-[0_0_44px_-8px_rgba(251,191,36,0.55)]">
             <div className="podium-shine" aria-hidden="true" />
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
               <BrandAvatar spot={leader} size={64} ring />
               <div className="min-w-0 flex-1">
                 <div className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#FCD34D]">Champion of the internet</div>
-                <div className="font-display font-extrabold text-xl sm:text-2xl text-white truncate group-hover:underline">{leader.name}</div>
+                <div className="font-display font-extrabold text-lg sm:text-2xl text-white truncate group-hover:underline">{leader.name}</div>
                 <div className="text-sm text-white/60 truncate">{leader.tagline}</div>
               </div>
               <div className="text-right shrink-0">
-                <div className="font-display font-black text-2xl sm:text-3xl text-[#FCD34D]">{money(displayAmount(leader.amount))}</div>
+                <div className="font-display font-black text-xl sm:text-3xl text-[#FCD34D]">{money(displayAmount(leader.amount))}</div>
                 <div className="text-[10px] uppercase tracking-widest text-white/50 font-bold">spot value</div>
                 <div className="text-xs font-bold text-white/70 mt-1">👁 {compact(leader.views)} views</div>
               </div>
@@ -185,7 +185,7 @@ function HeroVisual({ leader, onClaim }) {
     <div className="relative">
       <ChampionStage leader={leader} onClaim={onClaim} />
       {/* claim card overlapping the bottom edge */}
-      <div className="relative z-10 -mt-10 mx-4 sm:mx-10 bg-[var(--surface)]/95 backdrop-blur border border-[var(--line)] rounded-3xl shadow-[var(--shadow-lift)] p-5">
+      <div className="relative z-10 -mt-10 mx-4 sm:mx-10 bg-[color-mix(in_srgb,var(--surface)_95%,transparent)] backdrop-blur border border-[var(--line)] rounded-3xl shadow-[var(--shadow-lift)] p-5">
         <div className="flex items-center justify-between gap-3">
           <div>
             <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--ink-3)]">{claimCard.tagline}</div>
@@ -297,7 +297,7 @@ function FooterStats() {
     { icon: '🌎', chip: 'bg-[var(--green-soft)]', text: 'Global', label: 'community worldwide' },
   ];
   return (
-    <section className="border-y border-[var(--line-soft)] bg-[var(--surface-2)]/60">
+    <section className="border-y border-[var(--line-soft)] bg-[color-mix(in_srgb,var(--surface-2)_60%,transparent)]">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {items.map((it) => (
           <div
@@ -372,7 +372,7 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
             </div>
             <h1 className="font-display font-extrabold text-[38px] min-[400px]:text-[44px] sm:text-6xl lg:text-[72px] leading-[1.02] tracking-tight text-balance">
               <span className="block sheen-light pb-1">{hero.titleA}</span>
-              <span className="block grad-text-anim pb-2">{hero.titleB}</span>
+              <span className="block grad-text-anim pb-3">{hero.titleB}</span>
             </h1>
             <p className="text-[var(--ink-2)] text-base sm:text-lg mt-4 max-w-lg leading-relaxed">
               {hero.subtitle}

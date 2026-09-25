@@ -27,7 +27,10 @@ export default async function handler(req, res) {
     }
     const b = parseBody(req);
     if (!b) return json(res, 400, { ok: false, error: 'bad json' });
-    if (!b.brandName || !b.amount) return json(res, 400, { ok: false, error: 'brandName and amount required' });
+    // Free founding claims (brand claiming its pre-seeded founding spot)
+    // carry amount 0 and no payment proof — everything else needs an amount.
+    const foundingFree = b.foundingFree === true || b.foundingFree === 1 || b.foundingFree === 'true';
+    if (!b.brandName || (!b.amount && !foundingFree)) return json(res, 400, { ok: false, error: 'brandName and amount required' });
     // Submission IDs are always server-generated — a client-supplied id
     // could overwrite another submission's record (untrusted storage key).
     const id = newId();
@@ -54,6 +57,8 @@ export default async function handler(req, res) {
       hasScreenshot: !!b.hasScreenshot,
       claimRef: String(b.claimRef || '').slice(0, 24),
       rsvId: String(b.rsvId || '').slice(0, 40),
+      foundingFree,
+      note: String(b.note || '').slice(0, 500),
       status: 'pending',
       history: [{ at: now, event: 'submitted' }],
       createdAt: now,
@@ -114,6 +119,17 @@ export default async function handler(req, res) {
       await kvs.set(`sub:${sub.id}`, sub);
       await kvs.zrem('subs:idx:pending', sub.id);
       await kvs.zadd(`subs:idx:${b.decision}`, { score: now, member: sub.id });
+      // A free founding claim transfers the pre-seeded spot to the brand:
+      // mark it claimed so the "unclaimed" banner disappears automatically,
+      // no matter who approves it (Dawood from his phone, or the agent).
+      if (b.decision === 'approved' && sub.foundingFree && sub.slug) {
+        try {
+          const cur = await kvs.get(`spot:${sub.slug}`);
+          if (cur && !cur.hidden) {
+            await kvs.set(`spot:${sub.slug}`, { ...cur, unclaimed: false, updatedAt: now });
+          }
+        } catch {}
+      }
       // A decided claim releases its name reservation — the spot is now
       // either live (approved) or the name is back in the pool.
       if (sub.rsvId) {

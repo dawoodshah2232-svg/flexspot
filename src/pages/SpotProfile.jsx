@@ -135,7 +135,7 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
               <div className="flex items-center gap-3 flex-wrap">
                 <RankBadge rank={spot.rank} size="lg" />
                 <h1 className="font-display font-bold text-3xl sm:text-4xl text-snow">{spot.name}</h1>
-                <FounderBadge slug={spot.slug} />
+                <FounderBadge slug={spot.slug} n={spot.foundingNo} />
                 {spot.rank === 1 && <Flee><span className="text-3xl crown-bob inline-block">👑</span></Flee>}
               </div>
               {isDemo && (
@@ -164,6 +164,18 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
                 <p className="text-mist text-sm mt-1 leading-relaxed">
                   This spot is live on the leaderboard with its pledged amount. The badge clears once our team verifies the payment — usually within 24 hours.
                 </p>
+              </div>
+            </div>
+          )}
+          {spot.unclaimed && spot.foundingNo && (
+            <div className="mt-6 rounded-2xl bg-gradient-to-r from-gold/25 via-gold/10 to-transparent border border-gold/50 p-4 sm:p-5 flex items-start gap-3">
+              <span className="text-2xl">🏅</span>
+              <div className="flex-1">
+                <div className="font-bold text-snow text-sm">Founding spot #{spot.foundingNo} — unclaimed</div>
+                <p className="text-mist text-sm mt-1 leading-relaxed">
+                  We listed {spot.name} as one of FlexSpot's first 100 brands. Work there? Claim it <b className="text-snow">free</b> — verify you're with the brand and it's yours to manage.
+                </p>
+                <Link to={`/claim?claim=${spot.slug}`} className="btn-gold inline-flex items-center gap-2 px-5 py-2.5 mt-3 text-sm font-bold">⚡ Claim this spot FREE</Link>
               </div>
             </div>
           )}

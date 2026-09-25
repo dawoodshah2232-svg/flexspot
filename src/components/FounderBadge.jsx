@@ -31,12 +31,12 @@ function loadFounders() {
   return inflight;
 }
 
-export default function FounderBadge({ slug }) {
+export default function FounderBadge({ slug, n: directN }) {
   const [map, setMap] = useState(cache);
   useEffect(() => {
     if (!cache) loadFounders().then(setMap);
   }, []);
-  const n = slug && map ? map[slug] : null;
+  const n = directN || (slug && map ? map[slug] : null);
   if (!n) return null;
   return (
     <span

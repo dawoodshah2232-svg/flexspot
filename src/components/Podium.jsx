@@ -87,7 +87,7 @@ export default function Podium({ spots, onBoost }) {
             <div className={`font-display font-extrabold mt-3 truncate group-hover:underline ${isFirst ? 'text-2xl text-white' : 'text-xl text-[var(--ink)]'}`}>
               {s.name}
             </div>
-            <div className="mt-1.5 flex justify-center"><FounderBadge slug={s.slug} /></div>
+            <div className="mt-1.5 flex justify-center"><FounderBadge slug={s.slug} n={s.foundingNo} /></div>
             <p className={`text-sm mt-0.5 truncate font-medium ${isFirst ? 'text-[#FCD34D]' : 'text-[var(--ink-2)]'}`}>{s.tagline}</p>
             {s.pending && (
               <span className="inline-block mt-1.5 text-[10px] font-extrabold uppercase tracking-wider text-amber-300 bg-amber-500/15 border border-amber-500/40 rounded-full px-2.5 py-0.5" title="Payment under review">
@@ -246,7 +246,7 @@ export default function Podium({ spots, onBoost }) {
               <div className="min-w-0 flex-1">
                 <div className="font-display font-bold text-[15px] text-[var(--ink)] truncate flex items-center gap-1.5">
                   <span className="truncate">{s.name}</span>
-                  <FounderBadge slug={s.slug} />
+                  <FounderBadge slug={s.slug} n={s.foundingNo} />
                 </div>
                 <div className="text-xs text-[var(--ink-3)] truncate">{money(displayAmount(s.amount))} · 👁 {compact(s.views)} views</div>
               </div>

@@ -66,6 +66,14 @@ function cleanSpot(b, isNew) {
   }
   if (b.category !== undefined) s.category = str(b.category, 40) || 'startups';
   if (b.hidden !== undefined) s.hidden = b.hidden === true || b.hidden === 1 || b.hidden === 'true';
+  // Founding 100: foundingNo (1-100) marks a founding spot; unclaimed=true
+  // means it was seeded by FlexSpot and is waiting for the brand to claim it.
+  if (b.foundingNo !== undefined) {
+    const n = Math.floor(Number(b.foundingNo));
+    s.foundingNo = Number.isFinite(n) && n >= 1 && n <= 100 ? n : 0;
+    if (!s.foundingNo) delete s.foundingNo;
+  }
+  if (b.unclaimed !== undefined) s.unclaimed = b.unclaimed === true || b.unclaimed === 1 || b.unclaimed === 'true';
   return { spot: s };
 }
 

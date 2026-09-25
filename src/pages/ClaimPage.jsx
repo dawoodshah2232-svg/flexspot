@@ -19,6 +19,118 @@ import { useFounders } from '../components/FounderBadge';
 
 const AMOUNTS = [1, 5, 10, 25, 50, 100];
 
+// ── FREE FOUNDING CLAIM ──────────────────────────────────────────────
+// A brand claiming its pre-seeded founding spot (?claim=<slug>).
+// No amount step, no payment step: confirm identity → submit → done.
+// The submission carries foundingFree:true + amount 0; approving it flips
+// the spot's unclaimed flag server-side (see api/submissions.js).
+function FreeFoundingClaim({ spot }) {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [role, setRole] = useState('');
+  const [agreed, setAgreed] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [done, setDone] = useState(false);
+
+  const submit = async () => {
+    setError('');
+    if (!name.trim()) { setError('Please tell us your name.'); return; }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) { setError('Please enter a valid work email.'); return; }
+    if (!agreed) { setError('Please confirm you work for this brand or are authorized to claim it.'); return; }
+    setBusy(true);
+    try {
+      const claimRef = 'FS-' + Date.now().toString(36).toUpperCase();
+      const r = await saveSubmissionCentral({
+        brandName: spot.name,
+        slug: spot.slug,
+        amount: 0,
+        foundingFree: true,
+        email: email.trim().toLowerCase(),
+        name: name.trim(),
+        tagline: spot.tagline || '',
+        website: spot.website || '',
+        category: spot.category || 'startups',
+        hasScreenshot: false,
+        claimRef,
+        note: role.trim() ? `Role: ${role.trim().slice(0, 120)}` : '',
+      });
+      if (!r.ok) throw new Error(r.error || 'Submission failed');
+      try {
+        await notifyClaimSubmitted({
+          buyerName: name.trim(), buyerEmail: email.trim().toLowerCase(),
+          brandName: spot.name, amount: 0, network: 'Free founding claim',
+          txId: '', hasScreenshot: false, claimRef,
+        });
+      } catch {}
+      trackEvent('founding_claim_submit', { slug: spot.slug });
+      setDone(true);
+    } catch (e) {
+      setError(e.message || 'Something went wrong. Try again.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (done) {
+    return (
+      <div className="pt-[92px] min-h-screen px-4">
+        <Celebration />
+        <div className="max-w-lg mx-auto py-12">
+          <div className="card p-8 sm:p-10 text-center">
+            <Flee><div className="text-6xl mb-4">🏅</div></Flee>
+            <h1 className="font-display font-extrabold text-3xl text-[var(--ink)] mb-3">Claim received</h1>
+            <p className="text-[var(--ink-2)] text-sm leading-relaxed mb-6">
+              <b className="text-[var(--ink)]">{spot.name}</b> · Founding spot #{spot.foundingNo} · <b className="text-[var(--ink)]">FREE</b>
+              <br />Our team verifies every claim by hand — usually within 24 hours. We'll email you at <b className="text-[var(--ink)]">{email.trim()}</b> once it's yours.
+            </p>
+            <Link to={`/s/${spot.slug}`} className="btn-ghost px-6 py-3 text-sm">← Back to {spot.name}'s spot</Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="pt-[92px] min-h-screen px-4">
+      <div className="max-w-lg mx-auto py-12">
+        <div className="card p-8 sm:p-10">
+          <div className="inline-flex items-center gap-2 pill pill-gold mb-5">
+            <span>🏅</span> Founding spot #{spot.foundingNo} · FREE forever
+          </div>
+          <h1 className="font-display font-extrabold text-3xl text-[var(--ink)] mb-2">Claim {spot.name}</h1>
+          <p className="text-[var(--ink-2)] text-sm leading-relaxed mb-6">
+            This brand is listed as one of FlexSpot's first 100 founding brands. Confirm you're with the brand and it's yours to manage — <b className="text-[var(--ink)]">no payment, ever</b> for founding spots.
+          </p>
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs font-bold uppercase tracking-wider text-[var(--ink-2)]">Your name</label>
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Jane Founder" className="mt-1.5 w-full rounded-xl border border-[var(--line)] bg-[var(--surface-2)] px-4 py-3 text-[15px] text-[var(--ink)]" />
+            </div>
+            <div>
+              <label className="text-xs font-bold uppercase tracking-wider text-[var(--ink-2)]">Work email</label>
+              <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="jane@company.com" inputMode="email" className="mt-1.5 w-full rounded-xl border border-[var(--line)] bg-[var(--surface-2)] px-4 py-3 text-[15px] text-[var(--ink)]" />
+            </div>
+            <div>
+              <label className="text-xs font-bold uppercase tracking-wider text-[var(--ink-2)]">Your role <span className="normal-case font-semibold opacity-60">(optional)</span></label>
+              <input value={role} onChange={(e) => setRole(e.target.value)} placeholder="Founder, Marketing lead…" className="mt-1.5 w-full rounded-xl border border-[var(--line)] bg-[var(--surface-2)] px-4 py-3 text-[15px] text-[var(--ink)]" />
+            </div>
+            <label className="flex items-start gap-3 cursor-pointer rounded-xl border border-[var(--line)] bg-[var(--surface-2)] p-4">
+              <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="mt-1 h-4 w-4 accent-[#F59E0B]" />
+              <span className="text-sm text-[var(--ink-2)] leading-relaxed">I work for <b className="text-[var(--ink)]">{spot.name}</b> (or I'm authorized by them) and I want to manage this FlexSpot listing.</span>
+            </label>
+            {error && <p className="text-sm font-semibold text-red-500">{error}</p>}
+            <button onClick={submit} disabled={busy} className="btn-gold w-full py-3.5 text-[15px] font-bold disabled:opacity-60">
+              {busy ? 'Submitting…' : '⚡ Claim this spot FREE'}
+            </button>
+            <p className="text-xs text-[var(--ink-3)] text-center">No payment · No card · Verified by a human within 24h</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const fileToDataUrl = (file) =>
   new Promise((resolve, reject) => {
     const r = new FileReader();
@@ -311,6 +423,27 @@ export default function ClaimPage({ spots, onSubmitted }) {
         </div>
       </div>
     );
+  }
+
+  // ── Free founding claim (?claim=<slug>) ────────────────────────────
+  // Only valid for a live, unclaimed founding spot. Anything else falls
+  // through to an honest "not eligible" card — never the paid flow.
+  const claimSlug = params.get('claim');
+  if (claimSlug && !isBoost) {
+    const claimSpot = getSpot(claimSlug, spots);
+    if (!claimSpot || !claimSpot.unclaimed || !claimSpot.foundingNo) {
+      return (
+        <div className="pt-[92px] min-h-screen grid place-items-center px-4">
+          <div className="card p-10 text-center max-w-sm">
+            <Flee><div className="text-5xl mb-4">🏅</div></Flee>
+            <h1 className="font-display font-bold text-xl text-[var(--ink)] mb-2">Not a founding spot</h1>
+            <p className="text-sm text-[var(--ink-2)] mb-6">This spot is already claimed or isn't part of the Founding 100 — free claims don't apply to it.</p>
+            <Link to="/leaderboard" className="btn-primary px-6 py-3 text-sm">Back to leaderboard</Link>
+          </div>
+        </div>
+      );
+    }
+    return <FreeFoundingClaim spot={claimSpot} />;
   }
 
   // STEP 4 — Pending Approval (terminal, honest)

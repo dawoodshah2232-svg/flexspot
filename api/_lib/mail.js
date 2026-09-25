@@ -116,23 +116,76 @@ function clientIp(req) {
   return (typeof fwd === 'string' ? fwd.split(',')[0] : req.socket?.remoteAddress || 'unknown').trim();
 }
 
-/** Send one email through Resend. Returns { ok, id } or { ok:false, error }. */
-export async function sendEmail({ to, subject, html }) {
+/** Parse "Name <addr>" into { name, email } for providers that need it split. */
+function splitFrom(from) {
+  const m = String(from || '').match(/^(.*)<([^>]+)>\s*$/);
+  if (m) return { name: m[1].trim().replace(/^"|"$/g, '') || undefined, email: m[2].trim() };
+  return { name: undefined, email: String(from || '').trim() };
+}
+
+async function sendViaResend({ to, subject, html }) {
   const key = process.env.RESEND_API_KEY || '';
-  if (!key) return { ok: false, error: 'RESEND_API_KEY not configured' };
+  if (!key) return { ok: false, error: 'RESEND_API_KEY not configured', skipped: true };
+  const r = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from: EMAIL_FROM, to: [to], subject, html }),
+  });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) return { ok: false, error: data?.message || `resend ${r.status}` };
+  return { ok: true, id: data?.id };
+}
+
+async function sendViaBrevo({ to, subject, html }) {
+  const key = process.env.BREVO_API_KEY || '';
+  if (!key) return { ok: false, error: 'BREVO_API_KEY not configured', skipped: true };
+  const from = splitFrom(EMAIL_FROM);
+  const r = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: { 'api-key': key, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      sender: { email: from.email, ...(from.name ? { name: from.name } : {}) },
+      to: [{ email: to }],
+      subject,
+      htmlContent: html,
+    }),
+  });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) return { ok: false, error: data?.message || `brevo ${r.status}` };
+  return { ok: true, id: data?.messageId };
+}
+
+// NOTE: Maileroo provider lands here once the free account + API docs are in
+// hand (signup in progress). Shape: sendViaMaileroo({to,subject,html}).
+
+const PROVIDERS = [
+  ['resend', sendViaResend],
+  ['brevo', sendViaBrevo],
+];
+
+/** Send one email with automatic provider failover.
+ *  Chain: Resend -> Brevo -> (Maileroo, when wired). Providers without a
+ *  configured API key are skipped. Returns { ok, id, provider } or
+ *  { ok:false, error } with the last provider's error. */
+export async function sendEmail({ to, subject, html }) {
   if (!to) return { ok: false, error: 'missing recipient' };
-  try {
-    const r = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: EMAIL_FROM, to: [to], subject, html }),
-    });
-    const data = await r.json().catch(() => ({}));
-    if (!r.ok) return { ok: false, error: data?.message || `resend ${r.status}` };
-    return { ok: true, id: data?.id };
-  } catch (e) {
-    return { ok: false, error: e.message || 'send failed' };
+  let lastError = 'no email provider configured';
+  for (const [name, sender] of PROVIDERS) {
+    let r;
+    try {
+      r = await sender({ to, subject, html });
+    } catch (e) {
+      r = { ok: false, error: e.message || 'send failed' };
+    }
+    if (r.ok) {
+      console.log(`[mail] sent via ${name} id=${r.id || 'n/a'}`);
+      return { ok: true, id: r.id, provider: name };
+    }
+    if (r.skipped) continue;
+    lastError = `${name}: ${r.error}`;
+    console.warn(`[mail] ${name} failed (${r.error}), trying next provider`);
   }
+  return { ok: false, error: lastError };
 }
 
 export function json(res, status, body) {

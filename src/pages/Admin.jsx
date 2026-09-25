@@ -23,7 +23,7 @@ import { useLiveOnline, fetchTrafficStats, fetchVisitorTrail, fetchVisitors, res
 import { getDisplayTuning, saveDisplayTuning, displayOnlineCount, displayAmount } from '../lib/display';
 import { useSiteSettings, IMAGE_HINTS } from '../lib/siteSettings.jsx';
 import { getPendingClaim, clearPendingClaim, saveMember } from '../lib/member';
-import { approveAndNotifyMember, rejectAndNotify, emailNotConfigured, listMembers, sendEngagement, spotUrl, listCentralSubmissions, decideCentral, auctionState, auctionAdmin } from '../lib/emailClient';
+import { approveAndNotifyMember, rejectAndNotify, emailNotConfigured, listMembers, sendEngagement, spotUrl, listCentralSubmissions, decideCentral, auctionState, auctionAdmin, reserveAdmin } from '../lib/emailClient';
 import { projectedRank, importSubmissions } from '../lib/store';
 import { adminCreateSpot, adminUpdateSpot, adminDeleteSpot, adminRestoreSpot, adminListAllSpots, fileToDataUrl as fileToResizedDataUrl } from '../lib/spotApi';
 
@@ -39,6 +39,7 @@ const TABS = [
   { id: 'visitors', label: '🧭 Visitors' },
   { id: 'deposits', label: '💳 Deposits & receipts' },
   { id: 'auction', label: '🔨 Auction' },
+  { id: 'reservations', label: '🔒 Reservations' },
   { id: 'members', label: '👥 Members' },
   { id: 'referrals', label: '🔗 Referrals' },
   { id: 'content', label: '🎨 Site Content' },
@@ -510,6 +511,10 @@ export default function Admin({ spots, refresh }) {
 
         {tab === 'auction' && (
           <AuctionTab flash={flash} />
+        )}
+
+        {tab === 'reservations' && (
+          <ReservationsTab flash={flash} />
         )}
 
         {tab === 'members' && (
@@ -1141,6 +1146,88 @@ function SettingsTab({ flash, reload, refresh }) {
           <button onClick={() => wipe('demo')} className="px-5 py-3 text-sm rounded-[14px] border border-red-400/60 text-red-600 hover:bg-red-500/10 font-bold min-h-[48px]">Reset all demo data</button>
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ============================= RESERVATIONS ============================= */
+// 24h free name holds ("reserve now, pay later"). Read-only list + manual
+// release; holds auto-expire via the daily cron + lazy expiry on reads.
+const timeLeft = (ts) => {
+  const s = Math.max(0, Math.floor((new Date(ts).getTime() - Date.now()) / 1000));
+  if (s <= 0) return 'expired';
+  if (s < 3600) return `${Math.floor(s / 60)}m left`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ${Math.floor((s % 3600) / 60)}m left`;
+  return `${Math.floor(s / 86400)}d ${Math.floor((s % 86400) / 3600)}h left`;
+};
+function ReservationsTab({ flash }) {
+  const [rows, setRows] = useState(null);
+  const [busy, setBusy] = useState('');
+  const load = useCallback(async () => {
+    const r = await reserveAdmin('list');
+    if (r.ok) setRows(r.reservations || []);
+    else { setRows([]); flash(r.error || 'Could not load reservations.'); }
+  }, [flash]);
+  useEffect(() => { load(); }, [load]);
+  const release = async (id) => {
+    if (!confirm('Release this hold? The name goes back to the pool immediately.')) return;
+    setBusy(id);
+    const r = await reserveAdmin('release', { id });
+    setBusy('');
+    if (r.ok) { flash('Hold released.'); load(); }
+    else flash(r.error || 'Release failed.');
+  };
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="font-display font-bold text-xl text-[var(--ink)]">Name reservations{REAL}</h2>
+        <button onClick={load} className="btn-ghost text-xs px-3 py-1.5">↻ Refresh</button>
+      </div>
+      <p className="text-xs text-[var(--ink-2)] mb-4">
+        Free 24-hour holds from the homepage reserve widget. Holders get an email with a one-tap link to complete their claim. Holds auto-expire; a decided claim releases its hold automatically.
+      </p>
+      {rows === null ? (
+        <div className="text-sm text-[var(--ink-2)] py-6 text-center">Loading…</div>
+      ) : rows.length === 0 ? (
+        <div className="text-sm text-[var(--ink-2)] py-6 text-center border border-dashed border-[var(--line)] rounded-2xl">No active holds right now.</div>
+      ) : (
+        <div className="overflow-x-auto rounded-2xl border border-[var(--line)]">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left text-[11px] uppercase tracking-wider text-[var(--ink-3)] border-b border-[var(--line)]">
+                <th className="px-4 py-3">Brand</th>
+                <th className="px-4 py-3">Slug</th>
+                <th className="px-4 py-3">Email</th>
+                <th className="px-4 py-3">Expires</th>
+                <th className="px-4 py-3">Reminded</th>
+                <th className="px-4 py-3"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.id} className="border-b border-[var(--line)] last:border-0">
+                  <td className="px-4 py-3 font-bold">{r.brandName}</td>
+                  <td className="px-4 py-3 font-mono text-xs">{r.slug}</td>
+                  <td className="px-4 py-3 text-[var(--ink-2)]">{r.email}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <span className={r.expired ? 'text-red-500 font-bold' : ''}>{timeLeft(r.expiresAt)}</span>
+                    <div className="text-[11px] text-[var(--ink-3)]">{new Date(r.expiresAt).toLocaleString()}</div>
+                  </td>
+                  <td className="px-4 py-3">{r.reminded ? '✓' : '—'}</td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      onClick={() => release(r.id)} disabled={busy === r.id}
+                      className="text-xs font-bold text-red-500 hover:underline disabled:opacity-50"
+                    >
+                      {busy === r.id ? '…' : 'Release'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

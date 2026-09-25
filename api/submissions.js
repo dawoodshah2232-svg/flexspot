@@ -53,6 +53,7 @@ export default async function handler(req, res) {
       txId: String(b.txId || '').slice(0, 120),
       hasScreenshot: !!b.hasScreenshot,
       claimRef: String(b.claimRef || '').slice(0, 24),
+      rsvId: String(b.rsvId || '').slice(0, 40),
       status: 'pending',
       history: [{ at: now, event: 'submitted' }],
       createdAt: now,
@@ -113,6 +114,17 @@ export default async function handler(req, res) {
       await kvs.set(`sub:${sub.id}`, sub);
       await kvs.zrem('subs:idx:pending', sub.id);
       await kvs.zadd(`subs:idx:${b.decision}`, { score: now, member: sub.id });
+      // A decided claim releases its name reservation — the spot is now
+      // either live (approved) or the name is back in the pool.
+      if (sub.rsvId) {
+        try {
+          const r = await kvs.get(`rsv:${sub.rsvId}`);
+          if (r) {
+            await kvs.set(`rsv:${sub.rsvId}`, { ...r, status: 'released', releasedAt: now });
+            await kvs.srem('rsv:active', sub.rsvId);
+          }
+        } catch {}
+      }
     } catch {
       return json(res, 500, { ok: false, error: 'queue write failed' });
     }

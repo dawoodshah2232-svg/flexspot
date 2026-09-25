@@ -177,3 +177,36 @@ export async function foundersList() {
     return { ok: false, error: e.message || 'network error' };
   }
 }
+
+// ── Spot-name reservations ("reserve now, pay later") ────────────────────
+
+/** Hold a brand name for 24h (public, rate-limited). Never throws. */
+export async function reserveSpot({ brandName, email }) {
+  return post('/api/reserve', { action: 'reserve', brandName, email });
+}
+
+/** Check whether a brand name / slug is free. Never throws. */
+export async function checkNameAvailable(name) {
+  try {
+    const r = await fetch('/api/reserve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'check', brandName: name }),
+    });
+    const data = await r.json().catch(() => ({}));
+    return { ok: r.ok && data.ok !== false, ...data };
+  } catch (e) {
+    return { ok: false, error: e.message || 'network error' };
+  }
+}
+
+/** Fetch a reservation for claim prefill. Never throws. */
+export async function getReservation(id) {
+  if (!id) return { ok: false, error: 'no reservation id' };
+  return post('/api/reserve', { action: 'get', id });
+}
+
+/** Admin: list / release reservations. */
+export async function reserveAdmin(action, payload = {}) {
+  return post('/api/reserve', { action, adminPin: ADMIN_PIN, ...payload });
+}

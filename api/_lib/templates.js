@@ -262,6 +262,40 @@ export const TEMPLATES = {
         ${cta(d.spotUrl, 'Check my rank')}`,
     }),
   };},
+
+  // ── 8. Reservation held (24h, no payment yet) ─────────────────────────
+  'reserve-held': (d) => ({
+    subject: `${d.brandName} — your spot name is held for 24 hours`,
+    html: wrap({
+      title: 'Spot name held', preheader: `${d.brandName} is reserved for you until ${d.expiresAt}. Complete your claim to lock it in.`,
+      body: `
+        ${h1('Your name is held 🔒')}
+        ${greet(d.buyerName)}
+        ${p(`Good news — ${w(esc(d.brandName))} is reserved for you on FlexSpot. Nobody else can take this name while your hold is active.`)}
+        ${statRow([
+          { label: 'BRAND', value: esc(d.brandName) },
+          { label: 'YOUR LINK', value: `flexspot.lol/s/${esc(d.slug)}` },
+          { label: 'HOLD ENDS', value: esc(d.expiresAt) },
+        ])}
+        ${p(`To lock it in permanently, complete your claim — pick your amount, send USDT, and upload the payment screenshot. It takes about two minutes.`)}
+        ${cta(`${APP_URL}/claim?rsv=${esc(d.rsvId)}`, 'Complete my claim →')}
+        ${note(`If the hold expires, the name goes back to the pool and anyone can take it.`) }`,
+    }),
+  }),
+
+  // ── 9. Reservation expiring reminder ──────────────────────────────────
+  'reserve-reminder': (d) => ({
+    subject: `⏰ ${d.brandName} — your hold expires soon`,
+    html: wrap({
+      title: 'Hold expiring', preheader: `Your reservation for ${d.brandName} expires at ${d.expiresAt}. Complete your claim now.`,
+      body: `
+        ${h1('Your hold is almost up ⏰')}
+        ${greet(d.buyerName)}
+        ${p(`Just a heads-up — your reservation for ${w(esc(d.brandName))} expires at ${gold(esc(d.expiresAt))}. After that, the name goes back to the pool.`)}
+        ${p(`Two minutes is all it takes: complete your claim now and the spot is yours for good.`)}
+        ${cta(`${APP_URL}/claim?rsv=${esc(d.rsvId)}`, 'Lock in my spot →')}`,
+    }),
+  }),
 };
 
 export const TEMPLATE_IDS = Object.keys(TEMPLATES);

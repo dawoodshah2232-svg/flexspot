@@ -10,6 +10,8 @@ export const GEO_FAQS = {
     { q: 'What can I promote with a spot?', a: 'Almost anything with a link: your personal brand, company, website, social profile, startup, creator page, product, event, or community.' },
     { q: 'Do I need an account to claim a spot?', a: 'No. Claiming takes under a minute: enter your details, choose your boost starting at $1, and complete payment. You also get a member account (email login and an IB number like FS-XXXXXX) to manage your spot and referrals.' },
     { q: 'How do I get more people to see my spot?', a: 'Boost it, share your public profile link anywhere, and use your referral link \u2014 you earn 20% instant commission on every payment made by someone who joins through it.' },
+    { q: 'Can I reserve my brand name before paying?', a: 'Yes \u2014 enter your brand name and email on the homepage and FlexSpot holds it free for 24 hours. Nobody else can take it while you decide. Complete your claim before the hold expires to lock it in.' },
+    { q: 'How does the rank predictor work?', a: 'Type your brand name and pick a boost amount on the homepage, and FlexSpot shows the exact rank your spot would debut at \u2014 using the same live ranking rule as the real leaderboard.' },
   ],
   '/how-it-works': [
     { q: 'How do I claim a spot?', a: 'Enter your brand details, choose your starting boost from $1, and complete payment. Your public profile goes live and you appear on the leaderboard.' },

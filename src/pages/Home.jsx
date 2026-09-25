@@ -9,6 +9,8 @@ import { SpotRow, BrandAvatar, useRaceCycle } from '../components/SpotCard';
 import Flee from '../components/Flee';
 import Sway from '../components/Sway';
 import TopReferrers from '../components/TopReferrers';
+import ReserveWidget from '../components/ReserveWidget';
+import RankPredictor from '../components/RankPredictor';
 import FaqSection from '../components/FaqSection';
 import { GEO_FAQS } from '../lib/geoFaqs';
 import FounderNote from '../components/FounderNote';
@@ -510,6 +512,10 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
       <FoundingPill />
 
       <LeaderboardSection spots={spots} onBoost={onBoost} onClaim={onClaim} />
+
+      <RankPredictor spots={spots} />
+
+      <ReserveWidget />
 
       <TopReferrers spots={spots} />
 

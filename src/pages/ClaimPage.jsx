@@ -14,7 +14,7 @@ import { useUnofficialHost } from '../components/SecurityGuard';
 import { currentHost } from '../lib/security';
 import { trackEvent } from '../lib/analytics';
 import { stagePendingClaim } from '../lib/member';
-import { notifyClaimSubmitted, saveSubmissionCentral } from '../lib/emailClient';
+import { notifyClaimSubmitted, saveSubmissionCentral, getReservation } from '../lib/emailClient';
 import { useFounders } from '../components/FounderBadge';
 
 const AMOUNTS = [1, 5, 10, 25, 50, 100];
@@ -98,6 +98,20 @@ export default function ClaimPage({ spots, onSubmitted }) {
   const [contribHandle, setContribHandle] = useState('');
   // Founding 100 — live count for the done-screen scarcity note.
   const founders = useFounders();
+  // Reservation (?rsv=<id>) — prefill from a 24h name hold.
+  const rsvId = params.get('rsv');
+  const [reservation, setReservation] = useState(null);
+  useEffect(() => {
+    if (!rsvId || isBoost) return;
+    getReservation(rsvId).then((r) => {
+      if (r.ok && r.reservation) {
+        setReservation(r.reservation);
+        setForm((f) => ({ ...f, name: r.reservation.brandName, email: r.reservation.email || f.email }));
+        trackEvent('reserve_redeem', { slug: r.reservation.slug });
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rsvId]);
 
   const activeNetwork = USDT_NETWORKS.find((n) => n.id === network) || USDT_NETWORKS[0];
 
@@ -212,6 +226,7 @@ export default function ClaimPage({ spots, onSubmitted }) {
         paymentTxId: txId.trim(),
         paymentScreenshot: screenshot,
         ...(isBoost ? { isBoost: true, boostSlug: boostSpot.slug, contributorName: contribName.trim(), contributorHandle: contribHandle.trim() } : {}),
+        ...(rsvId && !isBoost ? { rsvId } : {}),
       };
       let submission;
       if (IS_LIVE) {
@@ -377,6 +392,12 @@ export default function ClaimPage({ spots, onSubmitted }) {
               ? 'Chip in $1+ to push them up the board — your name shows on their page instantly. 🚀'
               : 'Submit your brand, verify payment, and get approved onto the live leaderboard.'}
           </p>
+          {!isBoost && reservation && (
+            <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-4 py-2 text-sm font-bold text-[var(--ink)]">
+              🔒 “{reservation.brandName}” is reserved for you until{' '}
+              {new Date(reservation.expiresAt).toLocaleString()} — complete payment to lock it in.
+            </div>
+          )}
         </div>
 
         {/* progress — labeled steps */}

@@ -10,7 +10,6 @@ import FaqSection from '../components/FaqSection';
 import { GEO_FAQS } from '../lib/geoFaqs';
 import { money, compact } from '../lib/format';
 import { displayAmount } from '../lib/display';
-import { IS_PREVIEW_DATA } from '../lib/data';
 import { CATEGORIES, categoryOf } from '../lib/data';
 
 const PAGE = 20;
@@ -124,9 +123,6 @@ export default function LeaderboardPage({ spots, moves, onBoost, onClaim }) {
             <span className="live-dot" /> Updated live — every boost re-ranks instantly
           </div>
           <h1 className="font-display font-extrabold text-4xl sm:text-6xl text-[var(--ink)] tracking-tight">The <span className="grad-gold">Leaderboard</span></h1>
-          {IS_PREVIEW_DATA && (
-            <p className="text-xs text-[var(--ink-3)] mt-3">Preview data — demo brands shown for illustration only.</p>
-          )}
           <p className="text-[var(--ink-2)] mt-4">The most competitive page on the internet. More buzz = higher spot. Where do you rank?</p>
           <div className="flex justify-center mt-4 max-w-md mx-auto"><DramaTicker className="w-full" /></div>
           {/* live stat strip */}

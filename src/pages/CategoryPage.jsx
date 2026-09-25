@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { CATEGORIES, categoryOf, IS_PREVIEW_DATA } from '../lib/data';
+import { CATEGORIES, categoryOf } from '../lib/data';
 import { SpotRow } from '../components/SpotCard';
 import NotFound from './NotFound';
 import FaqSection from '../components/FaqSection';
@@ -36,9 +36,6 @@ export default function CategoryPage({ spots, moves, onBoost, onClaim }) {
           {meta.name}
         </h1>
         <p className="text-[var(--ink-2)] mt-3 max-w-xl leading-relaxed">{meta.blurb}</p>
-        {IS_PREVIEW_DATA && (
-          <p className="text-xs text-[var(--ink-3)] mt-2">Preview data — live spots appear after approval.</p>
-        )}
 
         <div className="mt-8 space-y-2">
           {list.map((s) => (

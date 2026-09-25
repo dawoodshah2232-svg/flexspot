@@ -16,7 +16,6 @@ import { GEO_FAQS } from '../lib/geoFaqs';
 import FounderNote from '../components/FounderNote';
 import ExpertVoices from '../components/ExpertVoices';
 import { compact, money } from '../lib/format';
-import { IS_PREVIEW_DATA } from '../lib/data';
 import { IS_LIVE } from '../lib/store';
 import { allPosts } from '../lib/blog';
 import BlogCard from '../components/BlogCard';
@@ -216,7 +215,7 @@ function LeaderboardSection({ spots, onBoost, onClaim }) {
         ]}
       />
       <div className="text-center mb-8 relative">
-        <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--ink)]">🏆 Every rank on this leaderboard was paid for</h2>
+        <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--ink)]">🏆 Every rank on this leaderboard is up for grabs</h2>
         <p className="text-[var(--ink-2)] mt-2 flex items-center justify-center gap-2 text-sm">
           <span className="live-dot" /> Updates every few seconds · highest amount wins · ties go to whoever got there first
         </p>
@@ -492,9 +491,6 @@ export default function Home({ spots, onClaim, onBoost, viewers }) {
             </div>
             <div className="mt-7 max-w-md space-y-3">
               <DramaTicker />
-              {IS_PREVIEW_DATA && (
-                <p className="text-[11px] text-[var(--ink-3)]">Preview data — demo brands shown for illustration only.</p>
-              )}
             </div>
           </div>
           <div className="pb-2 min-w-0">

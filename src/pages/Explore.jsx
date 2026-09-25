@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { CATEGORIES, categoryOf, IS_PREVIEW_DATA } from '../lib/data';
+import { CATEGORIES, categoryOf } from '../lib/data';
 import { SpotRow } from '../components/SpotCard';
 import Flee from '../components/Flee';
 import { allPosts } from '../lib/blog';
@@ -35,7 +35,6 @@ export default function Explore({ spots, onBoost, onClaim }) {
         </h1>
         <p className="text-[var(--ink-2)] mt-3 max-w-xl leading-relaxed">
           Browse brands by category, or chase the lists everyone's watching.
-          {IS_PREVIEW_DATA ? ' Preview data shown.' : ''}
         </p>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-8">

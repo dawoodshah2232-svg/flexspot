@@ -9,10 +9,11 @@
 // static content on load).
 // Runs in `postbuild`, AFTER the dist/404.html copy (404 stays the SPA shell).
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs';
+import { dirname, join, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { GEO_FAQS } from '../src/lib/geoFaqs.js';
+import { parseFrontmatter, renderMarkdown } from '../src/lib/blogParse.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(ROOT, 'dist');
@@ -202,6 +203,57 @@ const META = {
     ],
     faqKey: '/auction',
   },
+  '/about': {
+    title: 'About FlexSpot \u2014 the Internet\u2019s Live Spotlight | FlexSpot.LOL',
+    description:
+      'FlexSpot.LOL is a public leaderboard where brands, startups, creators and meme pages compete for attention from $1. Operated by Dawood Shah in Dubai, UAE.',
+    h1: 'The internet\u2019s live spotlight.',
+    lede: [
+      'FlexSpot.LOL is a public leaderboard where brands, startups, creators, and meme pages compete for attention. Anyone can claim a spot from just $1, boost it to climb the board, and the highest bidder takes the crown \u2014 live, in front of everyone.',
+      'Launched in September 2026, FlexSpot is built on one simple idea: attention is the currency of the internet, and the price of it should be public. Every rank on the board was paid for, and every payment is verified by a real human before it goes live.',
+      'FlexSpot is operated by Dawood Shah, based in Dubai, United Arab Emirates \u2014 an independent project building a fairer way for brands to buy attention.',
+    ],
+  },
+  '/contact': {
+    title: 'Contact FlexSpot \u2014 Questions, Feedback & Partnerships | FlexSpot.LOL',
+    description:
+      'Get in touch with the FlexSpot team: support@flexspot.lol. Questions, feedback, press, or partnership ideas \u2014 every message gets read.',
+    h1: 'Talk to the FlexSpot team.',
+    lede: [
+      'Questions, feedback, press, or partnership ideas \u2014 we\u2019d genuinely like to hear from you.',
+      'Email us any time at support@flexspot.lol \u2014 every message gets read.',
+    ],
+  },
+  '/privacy': {
+    title: 'Privacy Policy | FlexSpot.LOL',
+    description:
+      'How FlexSpot.LOL collects, uses, and protects your data. Plain-language privacy policy: what we store, what we never sell, and your rights.',
+    h1: 'Privacy policy.',
+    lede: [
+      'This page explains what data FlexSpot.LOL collects, how it is used, and the choices you have. We collect only what the product needs \u2014 spot claims, boost payments, and referral tracking \u2014 and we never sell personal data.',
+      'Full details, including cookies, analytics, and your rights, are in the complete policy on this page.',
+    ],
+  },
+  '/terms': {
+    title: 'Terms of Service | FlexSpot.LOL',
+    description:
+      'The rules of the FlexSpot.LOL spotlight: claims, boosts, payments, referrals, and acceptable use. Read before claiming a spot.',
+    h1: 'Terms of service.',
+    lede: [
+      'These terms govern your use of FlexSpot.LOL \u2014 claiming spots, boosting, referral commissions, and acceptable use.',
+      'The full terms on this page cover payments in USDT, the human verification step for every boost, and what paid spots do and don\u2019t guarantee.',
+    ],
+  },
+  '/disclaimers': {
+    title: 'Disclaimers \u2014 What a Paid Spot Does and Doesn\u2019t Guarantee | FlexSpot.LOL',
+    description:
+      'Honest disclaimers for FlexSpot.LOL: what paying for a leaderboard spot guarantees (placement) and what it doesn\u2019t (traffic, sales, rankings elsewhere).',
+    h1: 'Honest disclaimers.',
+    lede: [
+      'A paid FlexSpot spot buys placement on our leaderboard \u2014 nothing more. It does not guarantee traffic, clicks, sales, or search rankings.',
+      'Rankings reflect real paid boosts, verified by a human. This page spells out exactly what a paid spot does and doesn\u2019t guarantee.',
+    ],
+  },
 };
 
 // Internal links: crawlers walk these to discover and re-read pages.
@@ -243,6 +295,9 @@ function staticBody(path, meta) {
     )
     .join('\n');
   const ledeHtml = meta.lede.map((p) => `<p>${esc(p)}</p>`).join('\n');
+  const faqSection = faqs.length
+    ? `<h2>Questions, answered straight.</h2>\n${faqHtml}`
+    : '';
   const navHtml = NAV_LINKS.map(([href, label]) =>
     href === path
       ? `<span aria-current="page">${esc(label)}</span>`
@@ -255,8 +310,7 @@ function staticBody(path, meta) {
 <h1>${esc(meta.h1)}</h1>
 ${ledeHtml}
 <div class="pr-cta"><a href="/claim">Claim your spot from $1 →</a><a href="/how-it-works">How it works</a></div>
-<h2>Questions, answered straight.</h2>
-${faqHtml}
+${faqSection}
 <nav class="pr-nav pr-nav-bottom" aria-label="Site">${navHtml}</nav>
 </main>
 <footer class="pr-footer"><p>FlexSpot.LOL — the internet's live spotlight competition. Claim a public leaderboard spot from $1. Referrers earn 20% commission on every payment from their invites.</p></footer>
@@ -281,6 +335,15 @@ const PR_CSS = `<style>
 .pr-cta a{display:inline-block;background:#f59e0b;color:#111;font-weight:700;padding:10px 22px;border-radius:999px;text-decoration:none}
 .pr-cta a:last-child{background:#111;color:#fff}
 .pr-footer{margin-top:24px;font-size:13px;color:#888;border-top:1px solid #eee;padding-top:16px}
+.pr-byline{font-size:14px;color:#777;margin:4px 0 16px}
+.pr-lede{font-size:18px;color:#222}
+.pr-article img{max-width:100%;height:auto;border-radius:8px}
+.pr-article ul,.pr-article ol{margin:10px 0;padding-left:24px;color:#333}
+.pr-article li{margin:6px 0}
+.pr-article blockquote{border-left:3px solid #f59e0b;margin:16px 0;padding:4px 0 4px 16px;color:#444}
+.pr-related{margin:10px 0 0;padding-left:20px}
+.pr-related li{margin:8px 0}
+.pr-related a{color:#b45309;text-decoration:none}
 </style>`;
 
 function buildPage(template, path, meta) {
@@ -315,6 +378,116 @@ function buildPage(template, path, meta) {
   return html;
 }
 
+// ---- Blog post prerender ---------------------------------------------------
+// Every public (non-sample) post gets a static article page so crawlers that
+// don't execute JavaScript still see the full headline, byline and article
+// body. React boots over it for real visitors exactly like the route pages.
+function loadPosts() {
+  const dir = join(ROOT, 'src', 'content', 'blog');
+  const files = readdirSync(dir).filter((f) => f.endsWith('.md') && !/^readme\.md$/i.test(f));
+  const posts = [];
+  for (const f of files) {
+    const raw = readFileSync(join(dir, f), 'utf8');
+    const { data, body } = parseFrontmatter(raw);
+    if (data.sample === true) continue; // engine demos stay out of the index
+    const slug = basename(f, '.md');
+    const words = body.split(/\s+/).filter(Boolean).length;
+    posts.push({
+      slug,
+      title: data.title || slug,
+      description: data.description || '',
+      date: data.date || '',
+      author: data.author || 'FlexSpot Team',
+      category: data.category || 'Visibility Guides',
+      image: data.image || '/og-cover.png',
+      html: renderMarkdown(body),
+      readingTime: Math.max(1, Math.ceil(words / 200)),
+    });
+  }
+  posts.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+  return posts;
+}
+
+const fmtDate = (d) => {
+  const m = String(d || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return d || '';
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${months[Number(m[2]) - 1]} ${Number(m[3])}, ${m[1]}`;
+};
+
+function staticArticleBody(post, related) {
+  const navHtml = NAV_LINKS.map(([href, label]) =>
+    `<a href="${esc(href)}">${esc(label)}</a>`,
+  ).join(' · ');
+  const relHtml = related
+    .map((r) => `<li><a href="/blog/${esc(r.slug)}">${esc(r.title)}</a></li>`)
+    .join('\n');
+  return `<div class="pr-wrap">
+<header class="pr-header"><a class="pr-brand" href="/">👑 FlexSpot.LOL</a><span class="pr-tag">Bid for Attention — the live brand leaderboard</span></header>
+<main class="pr-main">
+<nav class="pr-nav" aria-label="Site"><a href="/">Home</a> · <a href="/blog">Blog</a></nav>
+<article>
+<h1>${esc(post.title)}</h1>
+<p class="pr-byline">By ${esc(post.author)} · ${esc(fmtDate(post.date))} · ${post.readingTime} min read · ${esc(post.category)}</p>
+${post.description ? `<p class="pr-lede"><strong>${esc(post.description)}</strong></p>` : ''}
+<div class="pr-article">${post.html}</div>
+</article>
+<div class="pr-cta"><a href="/claim">Claim your spot from $1 →</a><a href="/how-it-works">How it works</a></div>
+<h2>Keep reading</h2>
+<ul class="pr-related">${relHtml}</ul>
+<nav class="pr-nav pr-nav-bottom" aria-label="Site">${navHtml}</nav>
+</main>
+<footer class="pr-footer"><p>FlexSpot.LOL — the internet's live spotlight competition. Claim a public leaderboard spot from $1. Referrers earn 20% commission on every payment from their invites.</p></footer>
+</div>`;
+}
+
+function blogPostingJsonLd(post) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    description: post.description,
+    datePublished: post.date,
+    author: { '@type': 'Person', name: post.author },
+    image: `${SITE}${post.image.startsWith('/') ? post.image : `/${post.image}`}`,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE}/blog/${post.slug}` },
+    publisher: {
+      '@type': 'Organization',
+      name: 'FlexSpot.LOL',
+      logo: { '@type': 'ImageObject', url: `${SITE}/logo-crown-180.png` },
+    },
+  };
+}
+
+function buildArticlePage(template, post, related) {
+  const path = `/blog/${post.slug}`;
+  const title = `${post.title} | FlexSpot.LOL Blog`;
+  const img = `${SITE}${post.image.startsWith('/') ? post.image : `/${post.image}`}`;
+  let html = template;
+  html = html.replace(/<title>.*?<\/title>/s, `<title>${esc(title)}</title>`);
+  html = html.replace(
+    /<meta name="description" content=".*?" \/>/,
+    `<meta name="description" content="${esc(post.description)}" />`,
+  );
+  html = html.replace(
+    /<link rel="canonical" href=".*?" \/>/,
+    `<link rel="canonical" href="${SITE}${path}" />`,
+  );
+  const og = `<meta property="og:title" content="${esc(title)}" />
+<meta property="og:description" content="${esc(post.description)}" />
+<meta property="og:url" content="${SITE}${path}" />
+<meta property="og:type" content="article" />
+<meta property="og:image" content="${esc(img)}" />`;
+  html = html.replace('</head>', `${og}\n</head>`);
+  const jsonLd = `<script type="application/ld+json">${JSON.stringify(blogPostingJsonLd(post))}</script>`;
+  html = html.replace('</head>', `${PR_CSS}\n${jsonLd}\n</head>`);
+  html = html.replace(
+    /<div id="root"><\/div>/,
+    `<div id="root">${staticArticleBody(post, related)}</div>`,
+  );
+  return html;
+}
+
 function main() {
   if (!existsSync(join(DIST, 'index.html'))) {
     console.error('prerender-seo: dist/index.html not found — run after `vite build`.');
@@ -334,6 +507,21 @@ function main() {
     count++;
   }
   console.log(`prerender-seo: wrote ${count} static route pages (FAQ answers in initial HTML).`);
+  // Blog posts — full article body in the initial HTML for no-JS crawlers.
+  const posts = loadPosts();
+  let postCount = 0;
+  for (const post of posts) {
+    const related = [
+      ...posts.filter((p) => p.slug !== post.slug && p.category === post.category),
+      ...posts.filter((p) => p.slug !== post.slug && p.category !== post.category),
+    ].slice(0, 3);
+    const html = buildArticlePage(template, post, related);
+    const outPath = join(DIST, 'blog', post.slug, 'index.html');
+    mkdirSync(dirname(outPath), { recursive: true });
+    writeFileSync(outPath, html);
+    postCount++;
+  }
+  console.log(`prerender-seo: wrote ${postCount} static blog article pages.`);
 }
 
 main();

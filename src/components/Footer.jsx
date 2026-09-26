@@ -49,6 +49,7 @@ export default function Footer({ onClaim }) {
             <li><Link className="hover:text-[var(--ink)] transition-colors" to="/faq">FAQ</Link></li>
             <li><Link className="hover:text-[var(--ink)] transition-colors" to="/compare">⚔️ Compare Spots</Link></li>
             <li><Link className="hover:text-[var(--ink)] transition-colors" to="/calculator">🧮 Visibility Calculator</Link></li>
+            <li><Link className="hover:text-[var(--ink)] transition-colors" to="/auction">🔨 Spotlight Auction</Link></li>
             <li><button onClick={replayTour} className="hover:text-[var(--ink)] transition-colors">🧭 Take the tour</button></li>
           </ul>
         </div>

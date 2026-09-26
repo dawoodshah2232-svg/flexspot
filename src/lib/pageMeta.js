@@ -105,6 +105,8 @@ export const META = {
     title: 'Member Dashboard — Wallet, Referrals & My Spot | FlexSpot.LOL',
     description:
       'Your FlexSpot member dashboard: wallet balance and USDT withdrawals, referral earnings, and full control of your public spot.',
+    // Member-only page behind login — keep it out of the index.
+    robots: 'noindex, nofollow',
   },
   '/faq': {
     title: 'FAQ — Frequently Asked Questions | FlexSpot.LOL',

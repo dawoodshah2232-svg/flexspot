@@ -229,7 +229,7 @@ export default function SpotProfile({ spots, onClaim, onBoost, refresh }) {
               { l: 'Total buzz', v: money(displayAmount(spot.amount)), c: 'text-[var(--blaze)]' },
               { l: 'Views', v: compact(spot.views), c: 'text-snow' },
               { l: 'Outbound clicks', v: compact(spot.clicks), c: 'text-snow' },
-              { l: 'Claimed', v: timeAgo(spot.joinedAt), c: 'text-snow' },
+              { l: spot.unclaimed ? 'Listed' : 'Claimed', v: timeAgo(spot.joinedAt), c: 'text-snow' },
             ].map((s) => (
               <div key={s.l} className="bg-card border border-line/5 rounded-2xl p-4">
                 <div className={`font-display font-bold text-xl ${s.c}`}><CountUp to={parseFloat(String(s.v).replace(/[^0-9.]/g, '')) || 0} format={() => s.v} /></div>

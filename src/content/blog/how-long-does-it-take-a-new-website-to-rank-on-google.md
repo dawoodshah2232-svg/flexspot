@@ -21,6 +21,13 @@ image: "/blog/discover-new-site-rank.jpg"
 
 New website, zero traffic, and Google seems to be ignoring you. You're not penalized — you're in the sandbox. Here's the honest timeline and the exact playbook that gets new sites ranking.
 
+> **Key takeaways:**
+> - Honest timeline: weeks 1–4 indexing with almost no rankings, months 2–3 long-tail keywords start ranking, months 3–6 competitive keywords move (if you do the work), months 6–12 compound growth kicks in.
+> - Anyone promising page one in 30 days for a brand-new site is selling you something.
+> - The 3 levers that build maturity: publish consistently (one great article a week beats ten dumped in a day), build genuine backlinks (never buy packages), and drive external traffic.
+> - The Google sandbox is probation, not prison — and consistent work shortens it.
+
+
 ## The honest timeline
 
 - **Weeks 1–4:** Google discovers and indexes your pages. Almost no rankings. This is normal.

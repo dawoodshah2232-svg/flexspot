@@ -21,6 +21,13 @@ image: "/blog/discover-waste-ads.jpg"
 
 Small brands don't fail at Google Ads because their product is bad. They fail because Google Ads is an auction designed for the deepest pockets — and a $10/day budget walks into that auction like a kid with lunch money at a casino. Here's exactly where the money burns.
 
+> **Key takeaways:**
+> - Google Ads is an auction designed for the deepest pockets — a $10/day budget walks in like a kid with lunch money at a casino.
+> - The three money burns: bidding on curiosity instead of intent, broad match eating your budget on irrelevant queries, and no follow-up system (97% of first-time visitors don't convert).
+> - Winners on tiny budgets buy position and attention instead: $1 leaderboard spots, referral economics, and $1/day experiments with honest measurement.
+> - The 5-minute audit: if your search-terms report shows more curiosity queries than buying queries, pause the campaign today.
+
+
 ## Burn #1: You bid on curiosity, not intent
 
 Big brands bid on "buy running shoes size 10." Small brands bid on "running tips" — then wonder why 200 clicks produced zero sales. Broad, curious traffic is the most expensive kind because Google happily sells it to you at full price. Every click from someone who was never going to buy is money you set on fire.

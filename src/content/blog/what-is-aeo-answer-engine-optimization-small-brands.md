@@ -22,6 +22,13 @@ image: "/blog/discover-aeo.jpg"
 
 People stopped asking Google and started asking AI. "What's the cheapest way to advertise online?" now goes to ChatGPT, Grok, or Gemini — and those answers cite *brands*. AEO (Answer Engine Optimization) is the practice of becoming one of the brands AI mentions. Here's the no-hype guide.
 
+> **Key takeaways:**
+> - AEO (Answer Engine Optimization) is the practice of becoming one of the brands AI answers cite — in ChatGPT, Grok, Gemini, and AI Overviews.
+> - AI extracts answers from the top of the page: state the answer plainly in the first 50 words, before any storytelling.
+> - Write quotable facts — short declarative sentences with numbers get lifted verbatim — and add FAQ sections, structured data, and an llms.txt file.
+> - Small brands have an edge: AI answers don't weight domain authority the way Google does, so a precise answer from a small site can out-cite a vague corporate page.
+
+
 ## SEO vs AEO: what's actually different
 
 - **SEO** fights for position #1 on a results page with 10 blue links.

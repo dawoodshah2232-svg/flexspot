@@ -21,6 +21,13 @@ image: "/blog/discover-dead-banners.jpg"
 
 The average banner ad click-through rate has sat below 0.1% for years. Read that again: **fewer than one person in a thousand** clicks. We've all developed banner blindness — our brains literally filter ad rectangles out before we're consciously aware of them. Brands keep buying them out of habit. Here's what actually replaced them for small budgets.
 
+> **Key takeaways:**
+> - Average banner click-through has sat below 0.1% for years — fewer than one person in a thousand clicks; banner blindness is structural, not creative.
+> - Banners died for three reasons: they're wallpaper (static, repeated stimuli the brain filters out), they interrupt instead of inviting, and they're lonely — no drama, no movement, no reason to look twice.
+> - What replaced them: live leaderboards, boost mechanics, and referral leaderboards — formats that are alive.
+> - The math: a $5 banner buy rents ~2,000 impressions nobody remembers; a $5 boost buys a visible rank jump every board visitor sees.
+
+
 ## Why banners died
 
 Banners failed for three structural reasons, not creative ones:

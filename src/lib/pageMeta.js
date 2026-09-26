@@ -230,6 +230,9 @@ function blogPostMeta(post) {
         headline: post.title,
         description: post.description,
         datePublished: post.date,
+        // No post has been updated since publication (no `updated` frontmatter
+        // anywhere), so dateModified truthfully equals datePublished.
+        dateModified: post.date,
         author: { '@type': 'Person', name: post.author },
         image: img,
         mainEntityOfPage: { '@type': 'WebPage', '@id': url(path) },

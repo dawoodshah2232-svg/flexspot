@@ -21,6 +21,13 @@ image: "/blog/discover-dollar-a-day.jpg"
 
 Short answer: yes, you can advertise for $1 a day. Long answer: not on the platforms the gurus are selling you — and that's exactly why it works. Here's the honest breakdown of what a dollar a day buys, what it never will, and the 30-day routine that makes it real.
 
+> **Key takeaways:**
+> - Yes, $1/day works — but not on Google or Meta: one Google Ads click costs more than the whole day, and $1 of Meta reach buys ~50–100 impressions nobody remembers.
+> - $1 on FlexSpot buys a live spot on a public leaderboard — a position every visitor sees, not an impression that vanishes.
+> - The 30-day routine: claim the spot, share your referral link (20% instant commission on every referred payment), post rank screenshots in founder groups, boost $2–$3 once, then measure everything — total ~$30–$40 for the month.
+> - Position beats impressions: a visible rank jump is content you can screenshot and share.
+
+
 ## What $1/day will never do
 
 Let's kill the fantasy first. $1/day will not:

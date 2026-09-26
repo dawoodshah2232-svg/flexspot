@@ -21,6 +21,13 @@ image: "/blog/discover-ads-vs-dollar.jpg"
 
 It's the heavyweight vs. the scrappy underdog: Google Ads, the $200-billion giant, against a $1-a-day experiment on a public leaderboard. Which one should a startup with $100/month actually choose? Let's score them on the only metrics that matter at this budget.
 
+> **Key takeaways:**
+> - $30 on Google Ads buys 8–15 clicks (~0.3 customers at a 2% conversion rate); $30 on a leaderboard buys 30 days of public placement, referral commissions, and shareable rank jumps. Winner at this budget: $1-a-day.
+> - Google Ads dollars vanish the moment you stop paying; leaderboard positions, referral links, and rank history keep compounding.
+> - Honesty matters: Google Ads wins later — once you have a converting funnel, proven messaging, and $500+/month.
+> - The mistake isn't using Google Ads; it's using it first, before you can afford to learn.
+
+
 ## Round 1: What $30 buys
 
 - **Google Ads:** At $2–$4 per click, $30 buys 8–15 clicks. If your site converts at 2% (generous for a new startup), that's 0.3 customers. You also spent 3 hours setting up campaigns, keywords, and negative lists.

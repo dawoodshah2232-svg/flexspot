@@ -21,6 +21,13 @@ image: "/blog/discover-dubai-dollar.jpg"
 
 Dubai is one of the most expensive ad markets in the region — Google Ads CPCs for competitive keywords regularly cross AED 10–20. Most early startups here don't have AED 5,000/month for ads. They have hustle and about a dollar a day. This is the playbook that actually works on that budget.
 
+> **Key takeaways:**
+> - Dubai CPCs regularly cross AED 10–20; most early startups don't have AED 5,000/month for ads — this playbook runs on ~$7–$10/week and ~2 hours/week.
+> - The $1 anchor is a live leaderboard spot: the only dollar in Dubai marketing that buys a position instead of a prayer.
+> - Stack free layers around it: your referral link (20% instant commission on every referred payment), founder WhatsApp/Telegram groups (share rank jumps, not links), a fixed-up Google Business Profile, and community proof.
+> - Weekly routine: check your rank Monday, post movement screenshots Wednesday, boost $2–$3 Friday if a rival passed you, share your referral link with 5 happy customers Sunday.
+
+
 ## Day structure: the $1 anchor
 
 Your $1/day anchor is a **live leaderboard spot** on FlexSpot. One dollar claims your brand's position on a public, real-time ranking. Every visitor to the board sees you. When you boost, you visibly climb past rivals — and that movement is content you can screenshot and share. It's the only dollar in Dubai marketing that buys you a *position* instead of a prayer.

@@ -21,6 +21,13 @@ image: "/blog/discover-dollar-2026.jpg"
 
 Everyone says you can't advertise with $1. They're half right: one dollar won't buy you a single Google Ads click in most industries in 2026 — average CPCs sit between $2 and $5, and finance or legal keywords go far higher. But "advertising" is bigger than pay-per-click. Here's what a single dollar genuinely buys you right now, ranked from weakest to strongest.
 
+> **Key takeaways:**
+> - $1 buys 0 Google Ads clicks in competitive niches and ~50–100 Meta impressions that are shown, not clicked, and forgotten in a second.
+> - $1 on FlexSpot buys a live spot on a public leaderboard — a position every visitor sees — plus a referral link paying 20% instant commission on every referred payment (withdrawable in USDT from $20).
+> - Leaderboards turn advertising into a spectator sport: the spend itself becomes the show, and rank movement becomes content you can share.
+> - Don't take anyone's word for it — run the experiment: claim a $1 spot, write the sharpest 10-word tagline you can, and watch where you land.
+
+
 ## What $1 does NOT buy
 
 Let's be honest first. $1 buys you roughly:

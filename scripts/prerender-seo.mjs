@@ -448,6 +448,9 @@ function blogPostingJsonLd(post) {
     headline: post.title,
     description: post.description,
     datePublished: post.date,
+    // No post has been updated since publication (no `updated` frontmatter
+    // anywhere), so dateModified truthfully equals datePublished.
+    dateModified: post.date,
     author: { '@type': 'Person', name: post.author },
     image: `${SITE}${post.image.startsWith('/') ? post.image : `/${post.image}`}`,
     mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE}/blog/${post.slug}` },

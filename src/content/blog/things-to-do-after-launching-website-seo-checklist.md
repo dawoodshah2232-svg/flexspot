@@ -21,6 +21,13 @@ image: "/blog/discover-launch-checklist.jpg"
 
 "Bro, I made a website." Cool — now do the seven things that decide whether anyone ever finds it. Launching is step zero; this checklist is step one.
 
+> **Key takeaways:**
+> - Launching is step zero — these 7 moves decide whether Google ever finds your site.
+> - Write unique meta titles (under 60 characters) and descriptions (under 160) for every page; submit your sitemap in Google Search Console; open the sitemap and verify new pages actually appear.
+> - Pick one canonical site version (www vs non-www, http vs https) and redirect the rest — duplicate versions split your ranking power.
+> - Add the structured data that matters (Organization, Article/BlogPosting, FAQ), share where humans actually are, and set up measurement before you need it.
+
+
 ## 1. Write your meta titles and descriptions
 
 Every page needs a unique title (under 60 characters) and description (under 160). This is what Google shows in results — it's your free ad copy. Skip this and Google invents snippets from random page text. (We run a central meta map covering every route plus unique tags for each article, category, and spot page — audit yours the same way.)

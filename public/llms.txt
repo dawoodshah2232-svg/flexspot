@@ -84,8 +84,9 @@
   the public Top Referrers board.
 
 - Q: How do payments work?
-  A: Phase 1: pay manually in USDT (TRC-20, BEP-20, or Solana); the team verifies
-  within hours. Automatic payments are coming. Crypto payments are final.
+  A: Phase 1: pay manually in USDT on BSC (BEP-20), Solana, or Tron (TRC-20);
+  the team verifies within hours. Automatic payments are coming.
+  Crypto payments are final.
 
 - Q: Does a high rank mean FlexSpot endorses the brand?
   A: No. Spots are paid placements, not editorial endorsements.

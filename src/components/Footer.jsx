@@ -45,6 +45,7 @@ export default function Footer({ onClaim }) {
             <li><Link className="hover:text-[var(--ink)] transition-colors" to="/rewards">Rewards</Link></li>
             <li><Link className="hover:text-[var(--ink)] transition-colors" to="/top-referrers">Top Referrers</Link></li>
             <li><Link className="hover:text-[var(--ink)] transition-colors" to="/how-it-works">How It Works</Link></li>
+            <li><Link className="hover:text-[var(--ink)] transition-colors" to="/about">About</Link></li>
             <li><Link className="hover:text-[var(--ink)] transition-colors" to="/faq">FAQ</Link></li>
             <li><Link className="hover:text-[var(--ink)] transition-colors" to="/compare">⚔️ Compare Spots</Link></li>
             <li><Link className="hover:text-[var(--ink)] transition-colors" to="/calculator">🧮 Visibility Calculator</Link></li>
@@ -70,7 +71,7 @@ export default function Footer({ onClaim }) {
             <li><Link className="hover:text-[var(--ink)] transition-colors" to="/privacy">Privacy Policy</Link></li>
             <li><Link className="hover:text-[var(--ink)] transition-colors" to="/terms">Terms of Service</Link></li>
             <li><Link className="hover:text-[var(--ink)] transition-colors" to="/disclaimers">Disclaimers</Link></li>
-            <li><a className="hover:text-[var(--ink)] transition-colors" href="mailto:support@flexspot.lol">Contact</a></li>
+            <li><Link className="hover:text-[var(--ink)] transition-colors" to="/contact">Contact</Link></li>
           </ul>
         </div>
         <div>

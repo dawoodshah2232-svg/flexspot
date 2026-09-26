@@ -136,6 +136,16 @@ export const META = {
     description:
       'FlexSpot disclaimers: preview-mode data, rankings, payments, and general “as is” terms of the spotlight competition.',
   },
+  '/about': {
+    title: 'About FlexSpot — The Internet’s Live Spotlight | FlexSpot.LOL',
+    description:
+      'About FlexSpot.LOL: a public leaderboard where brands claim a spot from $1 and outbid rivals for attention. Transparent, human-verified, launched September 2026.',
+  },
+  '/contact': {
+    title: 'Contact FlexSpot — We Read Every Message | FlexSpot.LOL',
+    description:
+      'Contact FlexSpot: email support@flexspot.lol for help with your spot, payments, or referrals — or DM @flexspotlol on X.',
+  },
   '/terms': {
     title: 'Terms of Service | FlexSpot.LOL',
     description:

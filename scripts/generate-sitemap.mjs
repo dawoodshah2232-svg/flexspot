@@ -68,6 +68,8 @@ const ROUTE_META = {
   '/privacy':    ['monthly','0.3'],
   '/terms':      ['monthly','0.3'],
   '/disclaimers':['monthly','0.3'],
+  '/about':     ['monthly','0.4'],
+  '/contact':   ['monthly','0.4'],
 };
 
 const urls = new Map(); // path -> [lastmod, changefreq, priority]

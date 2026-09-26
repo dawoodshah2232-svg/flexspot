@@ -34,6 +34,8 @@ const FAQ = lazyRetry(() => import('./pages/FAQ'));
 const Privacy = lazyRetry(() => import('./pages/Privacy'));
 const Terms = lazyRetry(() => import('./pages/Terms'));
 const Disclaimers = lazyRetry(() => import('./pages/Disclaimers'));
+const About = lazyRetry(() => import('./pages/About'));
+const Contact = lazyRetry(() => import('./pages/Contact'));
 const SpotProfile = lazyRetry(() => import('./pages/SpotProfile'));
 const TopReferrersPage = lazyRetry(() => import('./pages/TopReferrersPage'));
 const DiscoveryPage = lazyRetry(() => import('./pages/DiscoveryPage'));
@@ -164,6 +166,8 @@ function Shell() {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/disclaimers" element={<Disclaimers />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/s/:slug" element={<SpotProfile spots={spots} onClaim={openClaim} onBoost={openBoost} refresh={load} />} />
           <Route path="/top-referrers" element={<TopReferrersPage />} />
           <Route path="/dashboard" element={<Dashboard spots={spots} onClaim={openClaim} />} />

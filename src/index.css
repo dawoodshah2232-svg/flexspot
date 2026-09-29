@@ -115,6 +115,20 @@ body {
 .btn-primary:active { transform: translateY(0) scale(0.98); }
 .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
+/* Visibility utilities must win over .btn-* display: this file's plain
+   (unlayered) CSS beats Tailwind's .hidden at equal specificity, so
+   .btn-primary's display:inline-flex was overriding `hidden` on mobile.
+   That wrongly showed the Boost pill below the sm breakpoint and squeezed
+   the brand-name column to zero width (invisible names on phones). */
+@media (max-width: 639.98px) {
+  .btn-primary.hidden,
+  .btn-gold.hidden,
+  .btn-dark.hidden,
+  .btn-ghost.hidden {
+    display: none;
+  }
+}
+
 .btn-dark {
   display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
   background: var(--ink); color: var(--bg);

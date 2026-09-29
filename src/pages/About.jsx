@@ -68,6 +68,14 @@ export default function About() {
               from you. Head to the <Link to="/contact" className="text-[var(--blaze)] hover:underline font-semibold">Contact page</Link> and
               reach out. We read every message.
             </p>
+            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+              <Link to="/claim" className="btn-primary px-8 py-3.5 text-sm text-center">
+                ⚡ Claim your spot — from $1
+              </Link>
+              <Link to="/how-it-works" className="btn-ghost px-8 py-3.5 text-sm text-center">
+                How it works
+              </Link>
+            </div>
           </Section>
         </div>
       </div>

@@ -181,8 +181,8 @@ export async function foundersList() {
 // ── Spot-name reservations ("reserve now, pay later") ────────────────────
 
 /** Hold a brand name for 24h (public, rate-limited). Never throws. */
-export async function reserveSpot({ brandName, email }) {
-  return post('/api/reserve', { action: 'reserve', brandName, email });
+export async function reserveSpot({ brandName, email, company_website }) {
+  return post('/api/reserve', { action: 'reserve', brandName, email, company_website });
 }
 
 /** Check whether a brand name / slug is free. Never throws. */

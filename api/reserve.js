@@ -77,6 +77,11 @@ export default async function handler(req, res) {
 
   // ── public: hold a name ──────────────────────────────────────────
   if (action === 'reserve') {
+    // Honeypot (see api/submissions.js): invisible `company_website` field.
+    // Bots fill it; fake-success so they can't tell they were caught.
+    if (String(body.company_website || '').trim()) {
+      return json(res, 200, { ok: true, id: 'rsv-quiet-' + Date.now().toString(36), status: 'held' });
+    }
     if (!(await claimRateOk(getIp(req)))) {
       return json(res, 429, { ok: false, error: 'too many requests, try again later' });
     }

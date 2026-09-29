@@ -22,11 +22,17 @@ export default async function handler(req, res) {
 
   // ── create (public) ──────────────────────────────────────────────
   if (req.method === 'POST') {
+    const b = parseBody(req);
+    if (!b) return json(res, 400, { ok: false, error: 'bad json' });
+    // Honeypot: the client renders an invisible `company_website` field that
+    // humans never fill. A non-empty value = bot. Return a fake success so
+    // the bot can't tell it was caught (and keeps wasting its own time).
+    if (String(b.company_website || '').trim()) {
+      return json(res, 200, { ok: true, id: 'sub-quiet-' + Date.now().toString(36), status: 'pending' });
+    }
     if (!(await claimRateOk(getIp(req)))) {
       return json(res, 429, { ok: false, error: 'too many submissions, try again later' });
     }
-    const b = parseBody(req);
-    if (!b) return json(res, 400, { ok: false, error: 'bad json' });
     // Free founding claims (brand claiming its pre-seeded founding spot)
     // carry amount 0 and no payment proof — everything else needs an amount.
     const foundingFree = b.foundingFree === true || b.foundingFree === 1 || b.foundingFree === 'true';

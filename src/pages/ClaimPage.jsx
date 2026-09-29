@@ -16,6 +16,7 @@ import { trackEvent } from '../lib/analytics';
 import { stagePendingClaim } from '../lib/member';
 import { notifyClaimSubmitted, saveSubmissionCentral, getReservation } from '../lib/emailClient';
 import { useFounders } from '../components/FounderBadge';
+import Honeypot from '../components/Honeypot';
 
 const AMOUNTS = [1, 5, 10, 25, 50, 100];
 
@@ -32,6 +33,7 @@ function FreeFoundingClaim({ spot }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
+  const [hp, setHp] = useState(''); // honeypot — bots fill it, humans can't see it
 
   const submit = async () => {
     setError('');
@@ -53,6 +55,7 @@ function FreeFoundingClaim({ spot }) {
         category: spot.category || 'startups',
         hasScreenshot: false,
         claimRef,
+        company_website: hp, // honeypot — server rejects non-empty
         note: role.trim() ? `Role: ${role.trim().slice(0, 120)}` : '',
       });
       if (!r.ok) throw new Error(r.error || 'Submission failed');
@@ -120,6 +123,7 @@ function FreeFoundingClaim({ spot }) {
               <span className="text-sm text-[var(--ink-2)] leading-relaxed">I work for <b className="text-[var(--ink)]">{spot.name}</b> (or I'm authorized by them) and I want to manage this FlexSpot listing.</span>
             </label>
             {error && <p className="text-sm font-semibold text-red-500">{error}</p>}
+            <Honeypot value={hp} onChange={setHp} />
             <button onClick={submit} disabled={busy} className="btn-gold w-full py-3.5 text-[15px] font-bold disabled:opacity-60">
               {busy ? 'Submitting…' : '⚡ Claim this spot FREE'}
             </button>
@@ -198,6 +202,7 @@ export default function ClaimPage({ spots, onSubmitted }) {
   });
   const [amount, setAmount] = useState(10);
   const [custom, setCustom] = useState('');
+  const [hp, setHp] = useState(''); // honeypot — bots fill it, humans can't see it
   const [network, setNetwork] = useState(USDT_NETWORKS[0].id);
   const [copied, setCopied] = useState(false);
   // Anti-phishing: on cloned copies the payment block is replaced by a warning.
@@ -384,6 +389,7 @@ export default function ClaimPage({ spots, onSubmitted }) {
           txId: txId.trim(),
           hasScreenshot: !!screenshot,
           claimRef,
+          company_website: hp, // honeypot — server rejects non-empty
         }).then((r) => { if (!r.ok) console.warn('[queue] central save failed', r.error); });
         notifyClaimSubmitted({
           buyerName: isBoost ? (contribName.trim() || 'Booster') : form.name.trim(),
@@ -624,6 +630,7 @@ export default function ClaimPage({ spots, onSubmitted }) {
             <button onClick={() => { setError(''); if (validStep1()) setStep(amountStep); }} className="btn-primary w-full py-3.5 text-[15px]">
               Continue → Choose amount
             </button>
+            <Honeypot value={hp} onChange={setHp} />
             <p className="text-center text-xs text-[var(--ink-3)]">No account needed. Takes under a minute.</p>
           </div>
         )}

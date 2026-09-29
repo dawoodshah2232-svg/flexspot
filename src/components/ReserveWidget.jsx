@@ -3,6 +3,7 @@
 // entry point into the funnel. Never shows fake state: availability comes
 // from /api/reserve, and the widget hides if the feed is unreachable.
 import { useEffect, useRef, useState } from 'react';
+import Honeypot from './Honeypot';
 import { Link } from 'react-router-dom';
 import { reserveSpot, checkNameAvailable } from '../lib/emailClient';
 
@@ -28,6 +29,7 @@ export default function ReserveWidget() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [held, setHeld] = useState(null); // {id, slug, brandName, expiresAt}
+  const [hp, setHp] = useState(''); // honeypot — bots fill it, humans can't see it
   const timer = useRef(null);
   const left = useCountdown(held?.expiresAt);
 
@@ -52,7 +54,7 @@ export default function ReserveWidget() {
     if (name.trim().length < 2) { setError('Enter your brand name first.'); return; }
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) { setError('Enter a valid email — your hold confirmation goes there.'); return; }
     setBusy(true);
-    const r = await reserveSpot({ brandName: name.trim(), email: email.trim() });
+    const r = await reserveSpot({ brandName: name.trim(), email: email.trim(), company_website: hp });
     setBusy(false);
     if (r.ok) setHeld(r);
     else setError(r.error || 'Could not hold that name — try again.');
@@ -103,6 +105,7 @@ export default function ReserveWidget() {
                   className="w-full rounded-xl border border-[var(--line)] bg-[var(--surface-2)] px-4 py-3 font-semibold outline-none focus:border-[var(--gold)]"
                 />
                 {error && <div className="text-sm font-semibold text-red-500 mt-3">{error}</div>}
+                <Honeypot value={hp} onChange={setHp} />
                 <button type="submit" disabled={busy} className="btn-gold w-full mt-4 py-3.5 font-extrabold disabled:opacity-60">
                   {busy ? 'Holding…' : 'Hold my name for 24h — free'}
                 </button>

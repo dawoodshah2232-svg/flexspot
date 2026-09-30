@@ -13,7 +13,7 @@ keywords:
 pillar: false
 related:
   - getting-started-with-flexspot
-  - how-spotflex-rankings-and-leaderboards-work
+  - how-flexspot-rankings-and-leaderboards-work
   - how-boosting-moves-you-up-the-leaderboard
 sample: false
 ---

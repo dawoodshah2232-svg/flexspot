@@ -1,12 +1,12 @@
 ---
-title: "How SpotFlex Rankings and Leaderboards Work"
-description: "How SpotFlex rankings work: spots are ordered by total verified boosts, so every dollar of buzz moves you up. Learn how the leaderboard, compare tool, and side boards function."
+title: "How FlexSpot Rankings and Leaderboards Work"
+description: "How FlexSpot rankings work: spots are ordered by total verified boosts, so every dollar of buzz moves you up. Learn how the leaderboard, compare tool, and side boards function."
 date: 2026-09-25
 author: "FlexSpot Team"
 category: "Getting Started"
 keywords:
-  - how spotflex rankings work
-  - spotflex leaderboard explained
+  - how flexspot rankings work
+  - flexspot leaderboard explained
   - product discovery ranking
   - how boosts work
 pillar: false
@@ -19,28 +19,28 @@ image: "/og-cover.png"
 ---
 
 > **Key takeaways:**
-> - Spots on SpotFlex are ranked by total verified boosts — simple, transparent, and public.
+> - Spots on FlexSpot are ranked by total verified boosts — simple, transparent, and public.
 > - Every dollar of buzz moves a spot up. Pass someone and you take their rank, live, in front of everyone.
 > - The compare tool lets you stack up to 3 spots side by side on rank, boosts, views, clicks, CTR, and 7-day momentum.
 > - Side boards (Most Shared, Community Favorite, Top Referrers) surface different kinds of momentum beyond raw spend.
 
-Most ranking systems are black boxes. A search engine shuffles results with an algorithm nobody can see, and a social feed decides who gets attention behind closed doors. SpotFlex takes the opposite approach: the leaderboard is a public scoreboard, the scoring rule is one sentence long, and every move happens where everyone can watch it.
+Most ranking systems are black boxes. A search engine shuffles results with an algorithm nobody can see, and a social feed decides who gets attention behind closed doors. FlexSpot takes the opposite approach: the leaderboard is a public scoreboard, the scoring rule is one sentence long, and every move happens where everyone can watch it.
 
 This guide explains exactly how rankings work, what moves a spot up or down, and how to read the board like a pro — whether you're holding a spot, backing one you love, or just exploring.
 
 ## The one rule that runs the board
 
-SpotFlex is a public spotlight competition. Brands, creators, startups, and communities claim public spots, and those spots compete for attention on a live leaderboard.
+FlexSpot is a public spotlight competition. Brands, creators, startups, and communities claim public spots, and those spots compete for attention on a live leaderboard.
 
 The ranking rule is simple and transparent: **spots are ordered by total verified boosts.** A boost is a paid contribution that adds to a spot's total. Every dollar of verified buzz moves the spot up the board. When your spot passes another spot, you take its rank — live, in front of everyone.
 
 There is no hidden engagement score, no mystery multiplier, no editorial thumb on the scale. If two spots disagree about who deserves to be on top, the leaderboard settles it with math anyone can audit: which total is bigger?
 
-This matters for a reason most platforms won't admit. On ad networks and social feeds, your money buys *impressions* — an opaque number in a dashboard. On SpotFlex, your contribution buys *position* — a visible rank that everyone browsing the board can see. Position is the product.
+This matters for a reason most platforms won't admit. On ad networks and social feeds, your money buys *impressions* — an opaque number in a dashboard. On FlexSpot, your contribution buys *position* — a visible rank that everyone browsing the board can see. Position is the product.
 
 ## How a spot gets onto the board
 
-Every spot starts with a claim. Claiming takes under a minute and requires no account: you enter your spot's details, choose a boost starting at $1, and complete payment. SpotFlex is currently in Phase 1, which means payments are completed manually and the team verifies them — usually within a few hours. Once verified, the boost counts toward the spot's total and the spot appears on the board.
+Every spot starts with a claim. Claiming takes under a minute and requires no account: you enter your spot's details, choose a boost starting at $1, and complete payment. FlexSpot is currently in Phase 1, which means payments are completed manually and the team verifies them — usually within a few hours. Once verified, the boost counts toward the spot's total and the spot appears on the board.
 
 Founding spots (numbers 1–100) can currently be claimed free while they're unclaimed, which means a founding brand can take its numbered spot onto the board without an initial spend — though it starts at the bottom of the table until boosts arrive.
 
@@ -79,7 +79,7 @@ Momentum is the most underrated column. A spot with rising 7-day momentum is bei
 
 ## The side boards: momentum beyond raw spend
 
-The main leaderboard is a pure boost-total race. But SpotFlex also runs side boards that surface different kinds of activity:
+The main leaderboard is a pure boost-total race. But FlexSpot also runs side boards that surface different kinds of activity:
 
 - **Most Shared** — the spots with the most referral clicks this week. This rewards distribution: whoever's link is traveling furthest across social apps and group chats.
 - **Community Favorite** — the most profile views in the last 7 days. Pure attention, no spend required. A well-crafted spot profile can win this on merit alone.

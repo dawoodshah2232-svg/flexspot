@@ -11,7 +11,7 @@ const BASE = (import.meta.env.BASE_URL || '/') ;
 export const DEFAULT_SETTINGS = {
   hero: {
     eyebrow: 'BRANDS COMPETE. THE INTERNET WINS.',
-    titleA: 'BIG BRAND VISIBILITY.',
+    titleA: 'BID FOR ATTENTION.',
     titleB: 'START FROM JUST $1.',
     subtitle:
       'A live leaderboard where brands pay for the spotlight. Claim a spot from $1 in USDT — the highest bidder takes the crown, and a real human checks every payment before it goes live.',

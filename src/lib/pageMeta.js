@@ -45,25 +45,25 @@ export const META = {
     faqs: GEO_FAQS['/leaderboard'],
     title: 'Trending Spots Right Now | FlexSpot.LOL',
     description:
-      "What's hot on FlexSpot: the spots gaining the most buzz this week. Jump on a rising star or reclaim the crown.",
+      'Trending on FlexSpot right now: the leaderboard spots getting the most boosts, buzz and attention today. See what the internet is backing.',
   },
   '/rising': {
     faqs: GEO_FAQS['/leaderboard'],
     title: 'Rising Stars — Fastest Climbers | FlexSpot.LOL',
     description:
-      'The fastest-climbing FlexSpot spots. These brands are gaining momentum — boost one before they hit #1.',
+      'The fastest-climbing FlexSpot spots right now. These brands are gaining serious momentum — watch them rise, or boost your own spot past them.',
   },
   '/winners': {
     faqs: GEO_FAQS['/leaderboard'],
     title: 'Winners — Hall of Fame | FlexSpot.LOL',
     description:
-      'The FlexSpot hall of fame: past and present champions who held the crown. This is what $1 of glory looks like.',
+      'The FlexSpot hall of fame: past and present champions who climbed to #1 and held the golden crown. See what it takes to win the spotlight.',
   },
   '/new': {
     faqs: GEO_FAQS['/leaderboard'],
     title: 'Newest Spots — Fresh Claims | FlexSpot.LOL',
     description:
-      'The freshest FlexSpot claims. Be the first to boost a brand-new spot and get in before the crowd.',
+      'The freshest FlexSpot claims, updated live. Be the first to boost a brand-new spot and help it climb the leaderboard from just $1.',
   },
   '/how-it-works': {
     faqs: GEO_FAQS['/how-it-works'],
@@ -87,19 +87,19 @@ export const META = {
     faqs: GEO_FAQS['/compare'],
     title: 'Spot vs Spot — Compare Brands Head-to-Head | FlexSpot.LOL',
     description:
-      'Compare any FlexSpot spots side by side: rank, boosts, views, clicks and momentum with live numbers. Settle who really rules the leaderboard.',
+      'Compare any two FlexSpot spots side by side: rank, verified boosts, views, clicks and links. Settle the debate with real numbers, not opinions.',
   },
   '/calculator': {
     faqs: GEO_FAQS['/calculator'],
-    title: 'Visibility Calculator — What Your Budget Buys | FlexSpot.LOL',
+    title: 'Visibility Calculator — Budget to Spotlight | FlexSpot.LOL',
     description:
-      'Estimate your FlexSpot spotlight: slide your budget and campaign length to project rank, profile views, clicks and cost per 1k views from live board data.',
+      'FlexSpot visibility calculator: slide your budget and campaign length to see exactly what spotlight your money buys. Start from just $1.',
   },
   '/top-referrers': {
     faqs: GEO_FAQS['/top-referrers'],
     title: 'Top Referrers — The People Behind the Traffic | FlexSpot.LOL',
     description:
-      'Meet FlexSpot’s top referrers: members who earn 20% instant commission on every payment from people who join through their link.',
+      'Meet FlexSpot’s top referrers: the members earning 20% instant commission on every payment made by people they invited. Join them.',
   },
   '/dashboard': {
     title: 'Member Dashboard — Wallet, Referrals & My Spot | FlexSpot.LOL',
@@ -111,7 +111,7 @@ export const META = {
   '/faq': {
     title: 'FAQ — Frequently Asked Questions | FlexSpot.LOL',
     description:
-      'Everything about FlexSpot: how ranking works, what you can promote, payments, referrals, and whether there are any fees.',
+      'FlexSpot FAQ: how the live ranking works, what you can promote, how USDT payments and the 20% referral commission work, and what it costs.',
     jsonLd: () => ({
       '@context': 'https://schema.org',
       '@type': 'FAQPage',
@@ -123,7 +123,7 @@ export const META = {
     }),
   },
   '/blog': {
-    title: 'The Spotlight Blog — Visibility Guides & Bidding Tactics | FlexSpot.LOL',
+    title: 'The Spotlight Blog — Visibility Guides | FlexSpot.LOL',
     description:
       'The FlexSpot blog: guides on brand visibility, bidding strategy, small-business marketing, viral growth, and winning the spotlight — from $1.',
     jsonLd: (path) => breadcrumb([{ name: 'Home', path: '/' }, { name: 'Blog', path }]),
@@ -131,27 +131,27 @@ export const META = {
   '/privacy': {
     title: 'Privacy Policy | FlexSpot.LOL',
     description:
-      'FlexSpot privacy policy: what data we collect, how we use it, and your rights. Short, plain-English, no surprises.',
+      'How FlexSpot.LOL collects, uses, and protects your data. Plain-language privacy policy: what we store, what we never sell, and your rights.',
   },
   '/disclaimers': {
     title: 'Disclaimers | FlexSpot.LOL',
     description:
-      'FlexSpot disclaimers: preview-mode data, rankings, payments, and general “as is” terms of the spotlight competition.',
+      'Honest disclaimers for FlexSpot.LOL: what paying for a leaderboard spot guarantees (placement) and what it doesn’t (traffic, sales, rankings elsewhere).',
   },
   '/about': {
-    title: 'About FlexSpot — The Internet’s Live Spotlight | FlexSpot.LOL',
+    title: 'About FlexSpot — The Live Internet Spotlight | FlexSpot.LOL',
     description:
       'About FlexSpot.LOL: a public leaderboard where brands claim a spot from $1 and outbid rivals for attention. Transparent, human-verified, launched September 2026.',
   },
   '/contact': {
     title: 'Contact FlexSpot — We Read Every Message | FlexSpot.LOL',
     description:
-      'Contact FlexSpot: email support@flexspot.lol for help with your spot, payments, or referrals — or DM @flexspotlol on X.',
+      'Get in touch with the FlexSpot team: support@flexspot.lol. Questions, feedback, press, or partnership ideas — every message gets read.',
   },
   '/terms': {
     title: 'Terms of Service | FlexSpot.LOL',
     description:
-      'FlexSpot terms of service: the rules of the spotlight competition — claiming, boosting, referrals, and acceptable use.',
+      'The rules of the FlexSpot.LOL spotlight: claims, boosts, payments, referrals, and acceptable use. Read before claiming a spot.',
   },
   '/admin': {
     title: 'Admin | FlexSpot.LOL',
@@ -178,22 +178,29 @@ function categoryMeta(cat) {
   const name = cat?.name || 'Category';
   const blurb = cat?.blurb || `Explore ${name} spots on FlexSpot.`;
   return {
-    title: `${name} Spots — ${cat?.icon || ''} Explore ${name} | FlexSpot.LOL`.replace('  ', ' ').trim(),
-    description: `${name} on FlexSpot: ${blurb} Claim a ${name.toLowerCase()} spot from $1 and climb the live leaderboard.`,
+    title: fitTitle(`${name} Spots — Explore ${name} | FlexSpot.LOL`),
+    description: fitDescription(`${name} on FlexSpot: ${blurb} Browse every ${name.toLowerCase()} spot on the live leaderboard, or claim your own from $1 and climb to the top.`),
     jsonLd: (path) => breadcrumb([{ name: 'Home', path: '/' }, { name: 'Explore', path: '/explore' }, { name, path }]),
   };
+}
+
+function spotDescription(spot) {
+  const head = `${spot.name} — ${spot.tagline || ''}.`;
+  const tail = ' Boost it from $1 on FlexSpot and push it toward the crown.';
+  const budget = 160 - head.length - 1 - tail.length;
+  let mid = spot.description || spot.tagline || '';
+  if (mid.length > budget) mid = `${mid.slice(0, Math.max(0, budget - 1)).trimEnd()}…`;
+  return `${head} ${mid}${tail}`;
 }
 
 function spotMeta(spot, path) {
   const name = spot?.name || 'Spot';
   const tagline = spot?.tagline || '';
   const desc = spot?.description || tagline;
-  const rank = spot?.rank;
-  const rankStr = rank ? ` Currently ranked #${rank} on the live leaderboard.` : '';
-  const title = tagline ? `${name} — ${tagline} | FlexSpot.LOL` : `${name} | FlexSpot.LOL`;
+  const title = fitTitle(tagline ? `${name} — ${tagline} | FlexSpot.LOL` : `${name} | FlexSpot.LOL`);
   return {
     title,
-    description: `${name}: ${desc}${rankStr} Boost it from $1 on FlexSpot and push it toward the crown.`.slice(0, 300),
+    description: spotDescription({ name, tagline, description: desc }),
     canonicalPath: `/s/${spot.slug}`,
     jsonLd: () => ({
       '@context': 'https://schema.org',
@@ -213,12 +220,19 @@ function spotMeta(spot, path) {
   };
 }
 
+function fitTitle(t, max = 60) {
+  return t.length <= max ? t : `${t.slice(0, max - 1).trimEnd()}…`;
+}
+function fitDescription(d, max = 160) {
+  return (d || '').length <= max ? d || '' : `${d.slice(0, max - 1).trimEnd()}…`;
+}
+
 function blogPostMeta(post) {
   const path = `/blog/${post.slug}`;
   const img = post.image ? url(post.image.startsWith('/') ? post.image : `/${post.image}`) : OG_IMAGE;
   return {
-    title: `${post.title} | FlexSpot.LOL Blog`,
-    description: post.description,
+    title: fitTitle(`${post.title} | FlexSpot.LOL Blog`),
+    description: fitDescription(post.description),
     canonicalPath: path,
     ogImage: img,
     // Sample posts are engine demos — keep them out of the index.

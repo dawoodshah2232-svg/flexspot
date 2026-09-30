@@ -14,7 +14,7 @@ pillar: false
 related:
   - getting-started-with-flexspot
   - product-hunt-alternatives-launch-platforms
-  - how-spotflex-rankings-and-leaderboards-work
+  - how-flexspot-rankings-and-leaderboards-work
 sample: false
 ---
 

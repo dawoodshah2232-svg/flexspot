@@ -13,6 +13,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 
 import { dirname, join, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { GEO_FAQS } from '../src/lib/geoFaqs.js';
+import { authorBio } from '../src/lib/authorBios.js';
 import { parseFrontmatter, renderMarkdown } from '../src/lib/blogParse.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -215,7 +216,7 @@ const META = {
     ],
   },
   '/contact': {
-    title: 'Contact FlexSpot \u2014 Questions & Partnerships | FlexSpot.LOL',
+    title: 'Contact FlexSpot — We Read Every Message | FlexSpot.LOL',
     description:
       'Get in touch with the FlexSpot team: support@flexspot.lol. Questions, feedback, press, or partnership ideas \u2014 every message gets read.',
     h1: 'Talk to the FlexSpot team.',
@@ -259,11 +260,27 @@ const META = {
 // Internal links: crawlers walk these to discover and re-read pages.
 // SEO length guards — titles stay within Google's ~60-char display limit,
 // meta descriptions inside the 120–160 sweet spot.
+//
+// Escape-aware: the served HTML contains the ESCAPED title/description, and
+// escaping turns "&" into "&amp;" (+4 chars each). Fitting the raw text let
+// 60-char titles ship as 64+ in the served HTML (found 2026-09-30: 9 pages
+// over budget). fitEscaped() shrinks the raw text until its escaped form
+// fits, truncating at a word boundary.
+function fitEscaped(t, max) {
+  const raw = String(t);
+  if (esc(raw).length <= max) return raw;
+  let cut = raw.length;
+  while (cut > 1 && esc(raw.slice(0, cut)).length > max - 1) cut -= 4;
+  let s = raw.slice(0, Math.max(1, cut));
+  const sp = s.lastIndexOf(' ');
+  if (sp > Math.floor(max * 0.55)) s = s.slice(0, sp);
+  return `${s.trimEnd()}…`;
+}
 function fitTitle(t, max = 60) {
-  return t.length <= max ? t : `${t.slice(0, max - 1).trimEnd()}…`;
+  return fitEscaped(t, max);
 }
 function fitDescription(d, max = 160) {
-  return d.length <= max ? d : `${d.slice(0, max - 1).trimEnd()}…`;
+  return fitEscaped(d, max);
 }
 
 const NAV_LINKS = [
@@ -440,6 +457,7 @@ function staticArticleBody(post, related) {
 <p class="pr-byline">By ${esc(post.author)} · ${esc(fmtDate(post.date))} · ${post.readingTime} min read · ${esc(post.category)}</p>
 ${post.description ? `<p class="pr-lede"><strong>${esc(post.description)}</strong></p>` : ''}
 <div class="pr-article">${post.html}</div>
+<div class="pr-author"><p><strong>About the author — ${esc(post.author)}</strong></p><p>${esc(authorBio(post.author))}</p></div>
 </article>
 <div class="pr-cta"><a href="/claim">Claim your spot from $1 →</a><a href="/how-it-works">How it works</a></div>
 <h2>Keep reading</h2>
@@ -460,7 +478,7 @@ function blogPostingJsonLd(post) {
     // No post has been updated since publication (no `updated` frontmatter
     // anywhere), so dateModified truthfully equals datePublished.
     dateModified: post.date,
-    author: { '@type': 'Person', name: post.author },
+    author: { '@type': 'Person', name: post.author, description: authorBio(post.author) },
     image: `${SITE}${post.image.startsWith('/') ? post.image : `/${post.image}`}`,
     mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE}/blog/${post.slug}` },
     publisher: {
@@ -627,12 +645,13 @@ function validateSeoLengths(pages) {
   for (const [path, meta, strict] of pages) {
     const title = strict ? meta.title : fitTitle(meta.title);
     const description = strict ? meta.description : fitDescription(meta.description);
-    if (title.length > 60) {
-      console.warn(`prerender-seo: WARNING title >60 chars (${title.length}) on ${path}: ${title}`);
+    // Measure the ESCAPED form — that is what ships in the served HTML.
+    if (esc(title).length > 60) {
+      console.warn(`prerender-seo: WARNING title >60 chars (${esc(title).length}) on ${path}: ${title}`);
       problems++;
     }
-    if (description.length < 120 || description.length > 160) {
-      console.warn(`prerender-seo: WARNING description ${description.length} chars on ${path} (want 120-160)`);
+    if (esc(description).length < 120 || esc(description).length > 160) {
+      console.warn(`prerender-seo: WARNING description ${esc(description).length} chars on ${path} (want 120-160)`);
       problems++;
     }
   }
@@ -693,6 +712,7 @@ function main() {
   // Blog posts — full article body in the initial HTML for no-JS crawlers.
   const posts = loadPosts();
   let postCount = 0;
+  const blogPages = [];
   for (const post of posts) {
     const related = [
       ...posts.filter((p) => p.slug !== post.slug && p.category === post.category),
@@ -703,8 +723,19 @@ function main() {
     mkdirSync(dirname(outPath), { recursive: true });
     writeFileSync(outPath, html);
     postCount++;
+    // Same length contract as every other page: the article title gets the
+    // " | FlexSpot.LOL Blog" suffix before fitting, exactly like the builder.
+    blogPages.push([`/blog/${post.slug}`, {
+      title: `${post.title} | FlexSpot.LOL Blog`,
+      description: post.description,
+    }, false]);
   }
   console.log(`prerender-seo: wrote ${postCount} static blog article pages.`);
+  const blogProblems = validateSeoLengths(blogPages);
+  if (blogProblems) {
+    console.error(`prerender-seo: FAILED — ${blogProblems} blog title/description length problem(s).`);
+    process.exit(1);
+  }
 }
 
 main();

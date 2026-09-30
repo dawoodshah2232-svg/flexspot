@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { allPosts, getPost, relatedPosts, formatBlogDate } from '../lib/blog';
+import { authorBio } from '../lib/authorBios';
 import { appBase, copyText } from '../lib/format';
 import BlogCard from '../components/BlogCard';
 
@@ -131,6 +132,15 @@ export default function BlogPost() {
               <div className="mt-3"><Toc headings={post.headings} /></div>
             </details>
             <div className="blog-prose" dangerouslySetInnerHTML={{ __html: post.html }} />
+            {/* Author bio */}
+            <div className="mt-10 card p-6 flex gap-4 items-start" itemScope itemType="https://schema.org/Person">
+              <span className="grid place-items-center w-12 h-12 rounded-2xl bg-gradient-to-br from-[#7C3AED] to-[#EC4899] text-white text-xl shrink-0" aria-hidden="true">👑</span>
+              <div>
+                <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[var(--ink-3)] mb-1">Written by</p>
+                <p className="font-display font-bold text-[var(--ink)]" itemProp="name">{post.author}</p>
+                <p className="text-sm text-[var(--ink-2)] leading-relaxed mt-1" itemProp="description">{authorBio(post.author)}</p>
+              </div>
+            </div>
             <div className="mt-12 pt-8 border-t border-[var(--line-soft)]">
               <p className="font-display font-bold text-lg text-[var(--ink)] mb-4">Share this article</p>
               <ShareRow post={post} />

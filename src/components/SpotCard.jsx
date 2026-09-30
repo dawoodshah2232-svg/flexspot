@@ -14,7 +14,7 @@ export function BrandAvatar({ spot, size = 44, ring = false }) {
       style={{ width: size, height: size, fontSize: spot.mark ? size * 0.52 : size * 0.38, background: `linear-gradient(135deg, ${g1}, ${g2})` }}
     >
       {spot.logo ? (
-        <img src={spot.logo} alt="" className="w-full h-full object-cover" />
+        <img src={spot.logo} alt={`${spot.name || 'Brand'} logo`} className="w-full h-full object-cover" />
       ) : spot.mark ? (
         <span aria-hidden="true" style={{ transform: 'translateY(-2%)' }}>{spot.mark}</span>
       ) : (

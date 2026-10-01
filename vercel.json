@@ -58,6 +58,10 @@
   ],
   "rewrites": [
     {
+      "source": "/sitemap-spots.xml",
+      "destination": "/api/spots-sitemap"
+    },
+    {
       "source": "/api/:path*",
       "destination": "/api/:path*"
     },

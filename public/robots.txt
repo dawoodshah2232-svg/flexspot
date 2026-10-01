@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://www.flexspot.lol/sitemap.xml
+Sitemap: https://www.flexspot.lol/sitemap-spots.xml

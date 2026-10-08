@@ -102,7 +102,7 @@ export const META = {
       'Meet FlexSpot’s top referrers: the members earning 20% instant commission on every payment made by people they invited. Join them.',
   },
   '/dashboard': {
-    title: 'Member Dashboard — Wallet, Referrals & My Spot | FlexSpot.LOL',
+    title: 'Member Dashboard — Wallet, Referrals & Spot | FlexSpot.LOL',
     description:
       'Your FlexSpot member dashboard: wallet balance and USDT withdrawals, referral earnings, and full control of your public spot.',
     // Member-only page behind login — keep it out of the index.
@@ -141,7 +141,7 @@ export const META = {
   '/about': {
     title: 'About FlexSpot — The Live Internet Spotlight | FlexSpot.LOL',
     description:
-      'About FlexSpot.LOL: a public leaderboard where brands claim a spot from $1 and outbid rivals for attention. Transparent, human-verified, launched September 2026.',
+      'About FlexSpot.LOL: a leaderboard where brands claim a spot from $1 and outbid rivals for attention. Transparent, human-verified, launched September 2026.',
   },
   '/contact': {
     title: 'Contact FlexSpot — We Read Every Message | FlexSpot.LOL',
@@ -171,6 +171,31 @@ function breadcrumb(items) {
       name: it.name,
       item: abs(it.path),
     })),
+  };
+}
+
+// Static pages that must NOT get an auto breadcrumb: home (it's the trail
+// root), and the login-walled/PIN-gated pages that stay out of the index.
+// '/blog' already ships its own BreadcrumbList, so it is skipped too.
+const NO_AUTO_BREADCRUMB = new Set(['/', '/admin', '/dashboard', '/blog']);
+
+// Attach a Home > Page BreadcrumbList to a static META entry's JSON-LD.
+// The crumb name is the page title minus the site suffix. Entries that
+// already return their own JSON-LD keep it — the breadcrumb is appended,
+// never replacing existing structured data.
+function withBreadcrumb(entry, path) {
+  if (NO_AUTO_BREADCRUMB.has(path)) return entry;
+  const name = String(entry.title).split(' | FlexSpot.LOL')[0];
+  const bc = () => breadcrumb([{ name: 'Home', path: '/' }, { name, path }]);
+  const prev = entry.jsonLd;
+  return {
+    ...entry,
+    jsonLd: prev
+      ? (p) => {
+          const r = prev(p);
+          return (Array.isArray(r) ? r : [r]).concat(bc());
+        }
+      : bc,
   };
 }
 
@@ -271,7 +296,7 @@ function blogPostMeta(post) {
 // (data.js `categoryMeta` fits: (slug) => category object)
 export function metaForPath(pathname, { spots = [], categoryOf } = {}) {
   const path = pathname.split('?')[0].replace(/\/+$/, '') || '/';
-  if (META[path]) return { ...META[path], path };
+  if (META[path]) return { ...withBreadcrumb(META[path], path), path };
 
   // Blog article pages must resolve before the generic /:slug spot lookup.
   const blogMatch = path.match(/^\/blog\/([^/]+)$/);

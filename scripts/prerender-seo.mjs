@@ -385,11 +385,20 @@ function buildPage(template, path, meta, extraJsonLd = []) {
     /<link rel="canonical" href=".*?" \/>/,
     `<link rel="canonical" href="${SITE}${path === '/' ? '/' : path}" />`,
   );
-  // OG tags for scrapers.
+  // OG + Twitter tags for scrapers.
+  const pageUrl = `${SITE}${path === '/' ? '/' : path}`;
+  const ogImage = `${SITE}/og-cover.png`;
   const og = `<meta property="og:title" content="${esc(fitTitle(meta.title))}" />
 <meta property="og:description" content="${esc(fitDescription(meta.description))}" />
-<meta property="og:url" content="${SITE}${path === '/' ? '/' : path}" />
-<meta property="og:type" content="website" />`;
+<meta property="og:url" content="${pageUrl}" />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="${ogImage}" />
+<meta property="og:image:width" content="2192" />
+<meta property="og:image:height" content="1152" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="${esc(fitTitle(meta.title))}" />
+<meta name="twitter:description" content="${esc(fitDescription(meta.description))}" />
+<meta name="twitter:image" content="${ogImage}" />`;
   html = html.replace('</head>', `${og}\n</head>`);
   // Structured data in the initial HTML (not JS-injected).
   const jsonLd = [faqJsonLd(faqs), ...extraJsonLd]
@@ -494,6 +503,11 @@ function buildArticlePage(template, post, related) {
   const title = fitTitle(`${post.title} | FlexSpot.LOL Blog`);
   const description = fitDescription(post.description);
   const img = `${SITE}${post.image.startsWith('/') ? post.image : `/${post.image}`}`;
+  // og-cover.png is the only article image with known dimensions (2192x1152);
+  // declaring dims for the discover-* jpgs would be a guess, so omit there.
+  const ogDims = /\/og-cover\.png$/.test(img)
+    ? '\n<meta property="og:image:width" content="2192" />\n<meta property="og:image:height" content="1152" />'
+    : '';
   let html = template;
   html = html.replace(/<title>.*?<\/title>/s, `<title>${esc(title)}</title>`);
   html = html.replace(
@@ -508,9 +522,22 @@ function buildArticlePage(template, post, related) {
 <meta property="og:description" content="${esc(description)}" />
 <meta property="og:url" content="${SITE}${path}" />
 <meta property="og:type" content="article" />
-<meta property="og:image" content="${esc(img)}" />`;
+<meta property="og:image" content="${esc(img)}" />${ogDims}
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="${esc(title)}" />
+<meta name="twitter:description" content="${esc(description)}" />
+<meta name="twitter:image" content="${esc(img)}" />`;
   html = html.replace('</head>', `${og}\n</head>`);
-  const jsonLd = `<script type="application/ld+json">${JSON.stringify(blogPostingJsonLd(post))}</script>`;
+  const jsonLd = [
+    `<script type="application/ld+json">${JSON.stringify(blogPostingJsonLd(post))}</script>`,
+    `<script type="application/ld+json">${JSON.stringify(
+      breadcrumbJsonLd([
+        { name: 'Home', path: '/' },
+        { name: 'Blog', path: '/blog' },
+        { name: post.title, path },
+      ]),
+    )}</script>`,
+  ].join('\n');
   html = html.replace('</head>', `${PR_CSS}\n${jsonLd}\n</head>`);
   html = html.replace(
     /<div id="root"><\/div>/,
@@ -671,7 +698,18 @@ function main() {
   const allPages = [];
   for (const [path, meta] of Object.entries(META)) {
     allPages.push([path, meta, true]);
-    const html = buildPage(template, path, meta);
+    // Every inner route page ships a Home > Page breadcrumb so the static
+    // HTML has the same structured-data coverage as the client-side meta map.
+    const crumbs =
+      path === '/'
+        ? []
+        : [
+            breadcrumbJsonLd([
+              { name: 'Home', path: '/' },
+              { name: meta.title.split(' | FlexSpot.LOL')[0], path },
+            ]),
+          ];
+    const html = buildPage(template, path, meta, crumbs);
     const outPath =
       path === '/' ? join(DIST, 'index.html') : join(DIST, path.slice(1), 'index.html');
     mkdirSync(dirname(outPath), { recursive: true });

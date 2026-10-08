@@ -14,6 +14,17 @@ Updated 2026-10-08. Source: git log on `main` (latest: `20b0e50` "blog: election
 - **Reliability:** route-level code splitting with `lazyRetry` (stale-chunk auto-reload), `ErrorBoundary` reload card, throwing localStorage writes for claim submissions.
 - **Crons:** `/api/cron/weekly-digest` (Mon 09:00 UTC), `/api/cron/reserve-sweep` (daily 08:00 UTC).
 - **AI context docs:** `docs/` (PRD/ARCHITECTURE/RULES/DESIGN/TASKS/MEMORY) added 2026-10-08 — read before writing code; keep TASKS/MEMORY current.
+- **20-fix SEO sweep (2026-10-08):** full audit then fixes, all verified with a production build + prerender:
+  - Crawlability: sitemap.xml valid (174 URLs, no dupes, noindexed routes excluded, all blog files exist); fixed `generate-sitemap.mjs` which rewrote robots.txt on Vercel builds WITHOUT the `/sitemap-spots.xml` line (it would have dropped the live spots sitemap from robots); robots.txt has both sitemaps.
+  - Canonicals: fixed `vite.config.js` fallback default `https://flexspot.lol` → `https://www.flexspot.lol` (bare domain disagreed with every canonical/OG/JSON-LD URL on the site); %VITE_SITE_URL% placeholders always resolved.
+  - On-page: all 23 static titles unique and ≤60 chars (trimmed /dashboard 61→58); all descriptions in 120–160 (trimmed /about 161→154); every public page renders exactly one H1 (ClaimPage's 6 H1s are mutually-exclusive form states — verified); alt text on every meaningful `<img>` (decorative ones correctly `alt=""`); fixed logo-preview `alt=""` on ClaimPage → "Logo preview".
+  - Schema: BreadcrumbList JSON-LD now on EVERY inner page — client-side via `pageMeta.js` `withBreadcrumb()` (appends, never replaces existing FAQ/BlogPosting data) and in the prerendered static HTML for routes + blog articles (which previously had none).
+  - OG: prerendered route/article pages now ship og:image (+2192×1152 dims for og-cover), Twitter summary_large_image tags, canonical — no longer reliant on JS for scrapers.
+  - Performance: `public/hero-king.jpg` (189KB) → `hero-king.webp` (103KB, 960w); Google Fonts now non-blocking (preload + media-print swap, display=swap kept).
+  - Mobile/a11y: `overflow-x: clip` + 16px input floor + `.touch-44`/`min-h-[44px]` already in place; added `:focus-visible` 3px outline site-wide. Viewport, manifest icons, noscript nav all verified.
+  - Trust: zero `http://` (non-schema.org) asset/link references in src/public/blog; GSC verification file live; owner GSC-UI actions (sitemap submit, request indexing) filed as TASKS.md TODOs.
+  - Growth: backlink strategy note in TASKS.md (earn via content/directories only — never buy/spam); no rankings/traffic promises made.
+  - Left as-is (verified compliant already): 22 blog frontmatter descriptions >160 chars — the build pipeline clips served meta to ≤160 (prerender build-guard fails the build otherwise), so output is correct; not rewritten to avoid churn.
 
 ## In progress
 - AdSense review — "Getting ready"; nothing to do until Google decides.

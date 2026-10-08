@@ -5,6 +5,13 @@ Sequenced tasks derived from repo state + recent git log. Small steps; unknowns 
 ## In progress
 - [ ] AdSense approval — account shows "Getting ready"; verification snippet + CSP allowlist already live (`18b27e8`, `a286368`). NEXT: wait for Google's decision; do not re-submit.
 - [ ] Verify production env vars on Vercel: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_ADMIN_PIN` (admin functions degrade without them — `IS_LIVE` flag in `src/lib/store.js`). TODO: confirm with owner before touching envs.
+- [ ] Google Search Console (owner actions in the GSC UI — repo side is done: verification file `public/google2e9a100400119f3a.html` live, sitemap + spots-sitemap referenced in robots.txt): submit `https://www.flexspot.lol/sitemap.xml` and `/sitemap-spots.xml` under Sitemaps, then "Request indexing" on the homepage + a few key pages (/leaderboard, /claim, /blog). Never ask the owner to do repo-side work for this.
+
+## Backlink strategy (content-earned only — never buy, never spam)
+- Earn links by publishing link-worthy assets on the blog (original data from the live leaderboard, "state of brand attention" roundups, the visibility calculator as an embeddable tool).
+- Pitch the leaderboard itself to startup directories/communities where a public ranking is genuinely useful; no link farms, no paid placements, no comment spam.
+- Monitor new referring domains; disavow only if a clear spam attack appears (owner decision).
+- Never promise rankings, traffic, or AdSense approval from any of this.
 
 ## Next
 - [ ] Confirm boost pricing / payment provider details (currently TODO — do not invent).

@@ -60,7 +60,7 @@ function LiveStatsPill({ realViewers, brandCount }) {
 }
 
 /* ---------------- Hero right visual: the Champion's Stage ---------------- */
-const HERO_KING = `${import.meta.env.BASE_URL}hero-king.jpg`;
+const HERO_KING = `${import.meta.env.BASE_URL}hero-king.webp`;
 
 function ChampionStage({ leader, onClaim }) {
   const { settings } = useSiteSettings();

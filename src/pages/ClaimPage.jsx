@@ -577,7 +577,7 @@ export default function ClaimPage({ spots, onSubmitted }) {
             <div>
               <label className="label">Logo / profile picture <span className="font-normal text-[var(--ink-3)]">(optional — makes you stand out)</span></label>
               <div className="flex items-center gap-3">
-                {form.logo && <img src={form.logo} alt="" className="w-14 h-14 rounded-2xl object-cover border border-[var(--line)]" />}
+                {form.logo && <img src={form.logo} alt="Logo preview" className="w-14 h-14 rounded-2xl object-cover border border-[var(--line)]" />}
                 <label className="btn-ghost px-5 py-2.5 text-sm cursor-pointer">
                   {form.logo ? 'Change picture' : 'Upload picture'}
                   <input type="file" accept="image/*" className="hidden" onChange={handleImage((v) => set('logo', v), 5120)} />

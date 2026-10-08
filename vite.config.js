@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react';
 // production domain so bare `npm run build` (no env) still works — index.html
 // carries %VITE_SITE_URL% placeholders that otherwise crash the build
 // ("URI malformed") when the env var is absent.
-const SITE_URL = (process.env.VITE_SITE_URL || 'https://flexspot.lol').replace(/\/+$/, '');
+const SITE_URL = (process.env.VITE_SITE_URL || 'https://www.flexspot.lol').replace(/\/+$/, '');
 
 export default defineConfig({
   plugins: [

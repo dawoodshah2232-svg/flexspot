@@ -18,7 +18,7 @@ export const DEFAULT_SETTINGS = {
     ctaPrimary: 'Start From $1 →',
     ctaSecondary: 'How It Works',
     // Champion stage image (the big photo on the right of the hero)
-    heroImage: `${BASE}hero-king.jpg`,
+    heroImage: `${BASE}hero-king.webp`,
     heroImageAlt: 'The FlexSpot frog king defending his golden throne',
   },
   dancer: {

@@ -121,8 +121,8 @@ writeFileSync(
 
 writeFileSync(
   join(root, 'public', 'robots.txt'),
-  `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`
+  `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\nSitemap: ${SITE_URL}/sitemap-spots.xml\n`
 );
 
 console.log(`[sitemap] ${urls.size} URLs -> public/sitemap.xml (${SITE_URL})`);
-console.log(`[sitemap] robots.txt -> Sitemap: ${SITE_URL}/sitemap.xml`);
+console.log(`[sitemap] robots.txt -> Sitemap: ${SITE_URL}/sitemap.xml + /sitemap-spots.xml`);

@@ -608,3 +608,16 @@ img { max-width: 100%; }
 }
 /* minimum touch target for small icon buttons */
 .touch-44 { min-width: 44px; min-height: 44px; }
+
+/* ============ Keyboard focus visibility (a11y) ============ */
+/* Visible focus ring on every interactive element — keyboard and switch
+   users must always see where they are. Mouse clicks keep the clean look
+   (:focus-visible only fires for keyboard/programmatic focus). */
+:focus-visible {
+  outline: 3px solid var(--blaze);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+@media (prefers-reduced-motion: reduce) {
+  :focus-visible { transition: none; }
+}
